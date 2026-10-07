@@ -1,0 +1,54 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# build outputs
+.next/
+out/
+build/
+dist/
+
+# env & secrets — NEVER commit
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# db (local dev)
+prisma/dev.db
+prisma/dev.db-journal
+*.db
+*.sqlite
+
+# gmail tokens / credentials
+oauth-tokens.json
+token*.json
+credentials*.json
+client_secret*.json
+
+# testing
+coverage/
+.vitest/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# os / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# prisma generated (kept out of git, generated on install/build)
+prisma/*.db
+
+# misc
+*.tsbuildinfo
+next-env.d.ts
