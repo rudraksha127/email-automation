@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mail Automation Dashboard</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Font Awesome Icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Styles for Specific Visual Nuances -->
+<style data-purpose="custom-layout">
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #1e293b;
+    }
+    /* Donut chart gradient segment styling */
+    .donut-chart {
+      background: conic-gradient(
+        #3b82f6 0% 38%,
+        #10b981 38% 63%,
+        #f59e0b 63% 79%,
+        #8b5cf6 79% 90%,
+        #94a3b8 90% 100%
+      );
+      border-radius: 50%;
+    }
+  </style>
+<meta content="web_dashboard" name="shell-type"/></head>
+<body class="bg-[#f8fafc] text-slate-800 antialiased min-h-screen flex flex-col">
+<!-- BEGIN: TopHeader -->
+<header class="bg-white border-b border-slate-200 sticky top-0 z-30 px-6 py-2.5 flex items-center justify-between shadow-xs">
+<!-- Left: App Brand & Workspace Selector -->
+<div class="flex items-center space-x-6">
+<div class="flex items-center space-x-3 cursor-pointer">
+<div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+<i class="fa-solid fa-envelope-open-text text-lg"></i>
+</div>
+<div>
+<h1 class="text-base font-bold tracking-tight text-slate-900 leading-none">Mail Automation</h1>
+<p class="text-[11px] text-slate-400 font-medium mt-0.5">Smart Email Routing Platform</p>
+</div>
+</div>
+<!-- Workspace Switcher Pill -->
+<div class="hidden md:flex items-center space-x-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 rounded-xl px-3 py-1.5 transition-colors cursor-pointer">
+<i class="fa-solid fa-building-columns text-slate-500 text-xs"></i>
+<span class="text-xs font-semibold text-slate-700">IT Department</span>
+<i class="fa-solid fa-chevron-down text-[10px] text-slate-400 ml-0.5"></i>
+<span class="ml-1 px-2 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60 rounded-full">
+          Active Workspace
+        </span>
+</div>
+</div>
+<!-- Center: Search Bar -->
+<div class="flex-1 max-w-xl mx-8">
+<div class="relative w-full">
+<span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+<i class="fa-solid fa-magnifying-glass text-xs"></i>
+</span>
+<input class="w-full pl-9 pr-4 py-1.5 text-xs bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 rounded-xl placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" placeholder="Search mails, batches, or settings..." type="text"/>
+</div>
+</div>
+<!-- Right: Notifications & User Profile -->
+<div class="flex items-center space-x-4">
+<button class="relative p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors" title="Notifications">
+<i class="fa-regular fa-bell text-base"></i>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
+</button>
+<div class="h-6 w-[1px] bg-slate-200"></div>
+<!-- User Profile Dropdown Toggle -->
+<div class="flex items-center space-x-3 cursor-pointer pl-1 group">
+<div class="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-semibold text-xs tracking-wider shadow-sm">
+          R
+        </div>
+<div class="text-left hidden sm:block">
+<p class="text-xs font-bold text-slate-800 leading-tight group-hover:text-blue-600 transition-colors">Rudraksh Udiya</p>
+<p class="text-[10px] text-slate-400 font-medium">Administrator</p>
+</div>
+<i class="fa-solid fa-chevron-down text-[10px] text-slate-400 group-hover:text-slate-600 transition-colors"></i>
+</div>
+</div>
+</header>
+<!-- END: TopHeader -->
+<!-- BEGIN: MainContainer -->
+<div class="flex flex-1 overflow-hidden">
+<!-- BEGIN: LeftSidebar -->
+<aside class="w-60 bg-white border-r border-slate-200 flex flex-col justify-between p-4 shrink-0 overflow-y-auto">
+<div>
+<!-- Main Navigation Links -->
+<nav class="space-y-1">
+<a class="flex items-center space-x-3 px-3 py-2 rounded-xl bg-blue-600 text-white font-medium text-xs shadow-md shadow-blue-500/20" href="#">
+<i class="fa-solid fa-house w-4 text-center"></i>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center justify-between px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 font-medium text-xs transition-colors" href="#">
+<div class="flex items-center space-x-3">
+<i class="fa-regular fa-envelope w-4 text-center text-slate-400"></i>
+<span>Mails</span>
+</div>
+<span class="px-2 py-0.5 text-[10px] font-semibold bg-blue-50 text-blue-600 rounded-full">12</span>
+</a>
+<a class="flex items-center justify-between px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 font-medium text-xs transition-colors" href="#">
+<div class="flex items-center space-x-3">
+<i class="fa-regular fa-file-lines w-4 text-center text-slate-400"></i>
+<span>Review</span>
+</div>
+<span class="px-2 py-0.5 text-[10px] font-semibold bg-rose-100 text-rose-600 rounded-full">3</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 font-medium text-xs transition-colors" href="#">
+<i class="fa-solid fa-users-rectangle w-4 text-center text-slate-400"></i>
+<span>Batches / Groups</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 font-medium text-xs transition-colors" href="#">
+<i class="fa-regular fa-address-book w-4 text-center text-slate-400"></i>
+<span>Recipients</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 font-medium text-xs transition-colors" href="#">
+<i class="fa-solid fa-sliders w-4 text-center text-slate-400"></i>
+<span>Rules</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 font-medium text-xs transition-colors" href="#">
+<i class="fa-brands fa-google w-4 text-center text-slate-400"></i>
+<span>Gmail Connection</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 font-medium text-xs transition-colors" href="#">
+<i class="fa-solid fa-gear w-4 text-center text-slate-400"></i>
+<span>Settings</span>
+</a>
+</nav>
+<!-- Organization Section -->
+<div class="mt-8">
+<p class="px-3 text-[11px] font-bold text-slate-400 tracking-wider">Organization</p>
+<div class="mt-2 space-y-1">
+<a class="flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 font-medium text-xs transition-colors" href="#">
+<i class="fa-solid fa-user-group w-4 text-center text-slate-400"></i>
+<span>Members</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 font-medium text-xs transition-colors" href="#">
+<i class="fa-solid fa-wrench w-4 text-center text-slate-400"></i>
+<span>Workspace Settings</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 font-medium text-xs transition-colors" href="#">
+<i class="fa-solid fa-clock-rotate-left w-4 text-center text-slate-400"></i>
+<span>Audit Logs</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Sidebar Bottom: Plan Details & Platform Info -->
+<div class="pt-6 space-y-4">
+<!-- Subscription Progress Card -->
+<div class="p-3.5 bg-slate-50/80 rounded-2xl border border-slate-200/80">
+<div class="flex items-center justify-between mb-2">
+<div>
+<h4 class="text-xs font-bold text-slate-800">Free Plan</h4>
+<p class="text-[11px] text-slate-400">500 mails/month</p>
+</div>
+<button class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-semibold rounded-lg shadow-sm transition-colors">
+              Upgrade
+            </button>
+</div>
+<!-- Progress Bar -->
+<div class="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+<div class="bg-blue-600 h-1.5 rounded-full w-[24%]"></div>
+</div>
+<p class="text-[10px] font-medium text-slate-500 mt-2">120 / 500 used</p>
+</div>
+<!-- Footer Meta -->
+<div class="px-1 text-[11px] text-slate-400 leading-relaxed">
+<p class="font-semibold text-slate-600">Mail Automation v1.0</p>
+<p class="text-[10px] text-slate-400 mt-0.5">A generic email automation platform for departments and organizations.</p>
+</div>
+</div>
+</aside>
+<!-- END: LeftSidebar -->
+<!-- BEGIN: MiddleAndRightWrapper -->
+<main class="flex-1 overflow-y-auto p-6 flex flex-col lg:flex-row gap-6"><div class="flex flex-col w-full">
+<!-- Interactive script to update App Shell sidebar active link for Gmail Connection -->
+<script>
+    (function syncSidebar() {
+      const aside = document.querySelector('aside');
+      if (!aside) return;
+      const navLinks = aside.querySelectorAll('nav a');
+      navLinks.forEach((link) => {
+        const text = link.textContent.trim();
+        if (text.includes('Dashboard')) {
+          link.className = 'flex items-center space-x-3 px-3 py-2 rounded-xl text-secondary hover:bg-surface-container font-body-md text-label-md transition-colors';
+          const icon = link.querySelector('i');
+          if (icon) icon.className = 'fa-solid fa-house w-4 text-center text-outline';
+        }
+        if (text.includes('Gmail Connection')) {
+          link.className = 'flex items-center space-x-3 px-3 py-2 rounded-xl bg-primary text-on-primary font-label-md text-label-md shadow-md';
+          const icon = link.querySelector('i');
+          if (icon) icon.className = 'fa-brands fa-google w-4 text-center text-on-primary';
+        }
+      });
+    })();
+  </script>
+<!-- Top Context Header & Actions -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6">
+<div class="space-y-1">
+<nav class="flex items-center gap-2 font-label-sm text-label-sm text-secondary tracking-wider uppercase">
+<span>Mail Automation</span>
+<span class="text-outline-variant">/</span>
+<span>Integrations</span>
+<span class="text-outline-variant">/</span>
+<span class="text-on-surface font-headline-sm text-label-sm">Gmail Connection</span>
+</nav>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Gmail Connection &amp; Synchronization</h1>
+<p class="font-body-md text-body-md text-secondary max-w-2xl">
+        Manage OAuth authorization, inbox sync schedules, label watchers, and webhook push notifications for automated routing.
+      </p>
+</div>
+<!-- Top Action Buttons -->
+<div class="flex items-center gap-3 shrink-0">
+<button class="flex items-center gap-2 px-4 py-2.5 rounded-full bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-all shadow-sm" id="btn-test-connection">
+<span class="material-symbols-outlined text-[16px]">network_check</span>
+<span>Test Connection</span>
+</button>
+<button class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-on-primary font-label-md text-label-md shadow-md hover:bg-surface-tint transition-all" id="btn-sync-now">
+<span class="material-symbols-outlined text-[16px] animate-spin" id="sync-spinner" style="display:none;">sync</span>
+<span class="material-symbols-outlined text-[16px]" id="sync-icon">sync</span>
+<span>Sync Now</span>
+<span class="font-label-sm text-label-sm text-on-primary/70 ml-1 hidden sm:inline">(2m ago)</span>
+</button>
+</div>
+</div>
+<!-- Main Grid: 8-col Main Content vs 4-col Security & Diagnostics Sidebar -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
+<!-- Primary Management Column (Col 1-8) -->
+<div class="lg:col-span-8 space-y-6">
+<!-- 1. Active Account Status Banner / Card -->
+<section class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm relative overflow-hidden">
+<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-6">
+<div class="flex items-start gap-4">
+<!-- Google Workspace Avatar Stack -->
+<div class="relative shrink-0">
+<div class="w-14 h-14 rounded-2xl bg-surface-container-low flex items-center justify-center text-primary shadow-sm">
+<i class="fa-brands fa-google text-2xl text-on-surface"></i>
+</div>
+<span class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-surface-container-lowest flex items-center justify-center shadow-xs">
+<span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+</span>
+</div>
+<div>
+<div class="flex items-center gap-2.5 flex-wrap">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Acropolis IT Mailbot (Official)</h2>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  Connected &amp; Healthy
+                </span>
+</div>
+<p class="font-body-md text-body-md text-secondary mt-0.5">rudraksha240036@acropolis.in</p>
+<p class="font-label-sm text-label-sm text-outline mt-1 flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]">domain</span>
+                @acropolis.in (Google Workspace Verified)
+              </p>
+</div>
+</div>
+<!-- Account Header Actions -->
+<div class="flex items-center gap-2 self-start sm:self-auto">
+<button class="px-3.5 py-2 rounded-full bg-error-container text-on-error-container hover:bg-error/20 font-label-md text-label-md transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px]">link_off</span>
+<span>Disconnect</span>
+</button>
+<button class="px-4 py-2 rounded-full bg-primary text-on-primary font-label-md text-label-md shadow-sm hover:bg-surface-tint transition-all flex items-center gap-1.5">
+<i class="fa-brands fa-google text-xs"></i>
+<span>Re-authenticate</span>
+</button>
+</div>
+</div>
+<!-- Token Validity & Granted Scopes Sub-panel -->
+<div class="bg-surface-container-low rounded-xl p-4 space-y-3">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between text-label-sm gap-2">
+<div class="flex items-center gap-2 text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-primary">verified_user</span>
+<span class="font-headline-sm text-label-sm font-semibold">OAuth 2.0 Token Valid</span>
+<span class="text-secondary">(Auto-refreshes in 42 days • Offline Access Enabled)</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline">Client ID: 849204...apps.googleusercontent.com</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-secondary uppercase tracking-wider mb-1.5">Authorized API Scopes</p>
+<div class="flex flex-wrap gap-1.5">
+<span class="px-2.5 py-1 rounded-md bg-surface-container-lowest text-on-surface font-label-sm text-label-sm shadow-xs font-mono">
+                https://mail.google.com/
+              </span>
+<span class="px-2.5 py-1 rounded-md bg-surface-container-lowest text-on-surface font-label-sm text-label-sm shadow-xs font-mono">
+                gmail.readonly
+              </span>
+<span class="px-2.5 py-1 rounded-md bg-surface-container-lowest text-on-surface font-label-sm text-label-sm shadow-xs font-mono">
+                gmail.send
+              </span>
+<span class="px-2.5 py-1 rounded-md bg-surface-container-lowest text-on-surface font-label-sm text-label-sm shadow-xs font-mono">
+                gmail.modify
+              </span>
+</div>
+</div>
+</div>
+</section>
+<!-- 2. Health, Quota & API Usage Metrics (4 Cards) -->
+<section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Metric 1: Quota -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between text-secondary">
+<span class="font-label-sm text-label-sm tracking-wider uppercase">Daily API Quota</span>
+<span class="material-symbols-outlined text-[18px]">data_usage</span>
+</div>
+<div class="my-2">
+<div class="font-headline-md text-headline-md text-on-surface font-semibold">4,120 <span class="font-body-sm text-body-sm text-outline font-normal">/ 25k</span></div>
+<div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden mt-1.5">
+<div class="bg-emerald-600 h-1.5 rounded-full" style="width: 16.5%;"></div>
+</div>
+</div>
+<p class="font-label-sm text-label-sm text-secondary">16.5% quota consumed</p>
+</div>
+<!-- Metric 2: Synced Mails -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between text-secondary">
+<span class="font-label-sm text-label-sm tracking-wider uppercase">Synced Today</span>
+<span class="material-symbols-outlined text-[18px]">mark_email_read</span>
+</div>
+<div class="my-2">
+<div class="font-headline-md text-headline-md text-on-surface font-semibold">128 Mails</div>
+<div class="flex items-center gap-1 font-label-sm text-label-sm text-emerald-700 mt-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span>+14% vs yesterday</span>
+</div>
+</div>
+<p class="font-label-sm text-label-sm text-secondary">Peak: 11:30 AM</p>
+</div>
+<!-- Metric 3: Webhook Latency -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between text-secondary">
+<span class="font-label-sm text-label-sm tracking-wider uppercase">Push Latency</span>
+<span class="material-symbols-outlined text-[18px]">bolt</span>
+</div>
+<div class="my-2">
+<div class="font-headline-md text-headline-md text-on-surface font-semibold">1.2s</div>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-label-sm bg-surface-container text-on-surface mt-1">
+              Pub/Sub Active
+            </span>
+</div>
+<p class="font-label-sm text-label-sm text-secondary">Real-time Cloud stream</p>
+</div>
+<!-- Metric 4: Error Rate -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between text-secondary">
+<span class="font-label-sm text-label-sm tracking-wider uppercase">Sync Error Rate</span>
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+</div>
+<div class="my-2">
+<div class="font-headline-md text-headline-md text-on-surface font-semibold">0.00%</div>
+<div class="flex items-center gap-1 font-label-sm text-label-sm text-emerald-700 mt-1">
+<span class="material-symbols-outlined text-[14px]">format_image_left</span>
+<span>All systems 100%</span>
+</div>
+</div>
+<p class="font-label-sm text-label-sm text-secondary">Zero dropped messages</p>
+</div>
+</section>
+<!-- 3. Sync & Polling Configuration Card -->
+<section class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm space-y-6">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Synchronization &amp; Safety Rules</h3>
+<p class="font-body-sm text-body-sm text-secondary">Configure ingestion latency, watched labels, and safety behaviors upon dispatch.</p>
+</div>
+<span class="material-symbols-outlined text-outline">tune</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Left: Sync Triggers & Polling Frequency -->
+<div class="space-y-4">
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-1.5">Ingestion Trigger Mechanism</label>
+<div class="grid grid-cols-2 gap-2">
+<button class="px-3 py-2 rounded-xl bg-primary text-on-primary font-label-sm text-label-sm flex items-center justify-between shadow-xs" type="button">
+<span>Google Cloud Pub/Sub</span>
+<span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+</button>
+<button class="px-3 py-2 rounded-xl bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors text-left" type="button">
+                  1 Minute Polling
+                </button>
+<button class="px-3 py-2 rounded-xl bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors text-left" type="button">
+                  5 Minute Polling
+                </button>
+<button class="px-3 py-2 rounded-xl bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors text-left" type="button">
+                  Manual Webhook Only
+                </button>
+</div>
+</div>
+<!-- Inbound Mail Filtering & Label Watchers -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-1.5">Watch Folders &amp; Gmail Labels</label>
+<p class="font-body-sm text-body-sm text-secondary mb-2">Automator will listen and stream items bearing these tags:</p>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 rounded-full bg-surface-container text-on-surface font-label-md text-label-md flex items-center gap-1.5 shadow-xs">
+<span class="material-symbols-outlined text-[14px]">inbox</span>
+                  INBOX
+                  <span class="material-symbols-outlined text-[13px] text-outline cursor-pointer hover:text-on-surface">close</span>
+</span>
+<span class="px-3 py-1 rounded-full bg-surface-container text-on-surface font-label-md text-label-md flex items-center gap-1.5 shadow-xs">
+<span class="material-symbols-outlined text-[14px]">star</span>
+                  Starred
+                  <span class="material-symbols-outlined text-[13px] text-outline cursor-pointer hover:text-on-surface">close</span>
+</span>
+<span class="px-3 py-1 rounded-full bg-primary text-on-primary font-label-md text-label-md flex items-center gap-1.5 shadow-xs">
+<span class="material-symbols-outlined text-[14px]">label</span>
+                  Placement-Alerts
+                  <span class="material-symbols-outlined text-[13px] text-on-primary/80 cursor-pointer hover:text-on-primary">close</span>
+</span>
+<span class="px-3 py-1 rounded-full bg-surface-container text-on-surface font-label-md text-label-md flex items-center gap-1.5 shadow-xs">
+<span class="material-symbols-outlined text-[14px]">label</span>
+                  Department-Notices
+                  <span class="material-symbols-outlined text-[13px] text-outline cursor-pointer hover:text-on-surface">close</span>
+</span>
+<button class="px-3 py-1 rounded-full bg-surface-container-low text-secondary font-label-md text-label-md hover:bg-surface-container transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">add</span>
+<span>Add Label</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Right: Auto-Forwarding Safety Rules & Toggles -->
+<div class="space-y-3.5 bg-surface-container-low p-4 rounded-xl">
+<span class="font-label-sm text-label-sm tracking-wider uppercase text-secondary block">Post-Routing Safety Actions</span>
+<!-- Toggle 1 -->
+<label class="flex items-center justify-between cursor-pointer select-none">
+<div>
+<p class="font-label-md text-label-md text-on-surface">Auto-mark processed emails as read</p>
+<p class="font-body-sm text-body-sm text-secondary">Prevents visual noise in department inbox</p>
+</div>
+<input checked="" class="w-4 h-4 text-primary rounded bg-surface focus:ring-0 cursor-pointer" type="checkbox"/>
+</label>
+<!-- Toggle 2 -->
+<label class="flex items-center justify-between cursor-pointer select-none">
+<div>
+<p class="font-label-md text-label-md text-on-surface">Apply Gmail label 'Processed-By-Bot'</p>
+<p class="font-body-sm text-body-sm text-secondary">Applies an explicit origin audit tag</p>
+</div>
+<input checked="" class="w-4 h-4 text-primary rounded bg-surface focus:ring-0 cursor-pointer" type="checkbox"/>
+</label>
+<!-- Toggle 3 -->
+<label class="flex items-center justify-between cursor-pointer select-none">
+<div>
+<p class="font-label-md text-label-md text-on-surface">Skip Spam &amp; Trash Folders</p>
+<p class="font-body-sm text-body-sm text-secondary">Ignore potential phishing or junk mailings</p>
+</div>
+<input checked="" class="w-4 h-4 text-primary rounded bg-surface focus:ring-0 cursor-pointer" type="checkbox"/>
+</label>
+<!-- Toggle 4 -->
+<label class="flex items-center justify-between cursor-pointer select-none">
+<div>
+<p class="font-label-md text-label-md text-on-surface">Archive original email after batch dispatch</p>
+<p class="font-body-sm text-body-sm text-secondary">Move message out of active inbox into All Mail</p>
+</div>
+<input class="w-4 h-4 text-primary rounded bg-surface focus:ring-0 cursor-pointer" type="checkbox"/>
+</label>
+</div>
+</div>
+</section>
+<!-- 4. Live Event Log & Webhook Activity Ledger -->
+<section class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm space-y-4">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Live Event Log &amp; Webhook Ledger</h3>
+<p class="font-body-sm text-body-sm text-secondary">Real-time incoming Gmail pushes and API request transactions.</p>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded-full bg-surface-container text-on-surface hover:bg-surface-container-high font-label-sm text-label-sm flex items-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-[15px]">download</span>
+<span>Download Logs</span>
+</button>
+<button class="px-3 py-1.5 rounded-full bg-surface-container-low text-secondary hover:text-error font-label-sm text-label-sm flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[15px]">delete_sweep</span>
+<span>Clear</span>
+</button>
+</div>
+</div>
+<!-- Ledger Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left font-body-sm text-body-sm">
+<thead class="bg-surface-container-low text-secondary font-label-sm text-label-sm uppercase tracking-wider">
+<tr>
+<th class="py-2.5 px-3 rounded-l-lg">Event Type</th>
+<th class="py-2.5 px-3">Subject / Resource</th>
+<th class="py-2.5 px-3">Response</th>
+<th class="py-2.5 px-3">Latency</th>
+<th class="py-2.5 px-3 rounded-r-lg text-right">Timestamp</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-low">
+<tr class="hover:bg-surface/50 transition-colors">
+<td class="py-3 px-3">
+<span class="inline-flex items-center gap-1.5 font-label-sm text-label-sm px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                    Webhook Push
+                  </span>
+</td>
+<td class="py-3 px-3 font-label-md text-on-surface">
+<span class="truncate block max-w-xs">TCS CodeVita 14 Registrations Open</span>
+<span class="text-[11px] text-outline font-mono">msg_id: 18ecc934a1b02</span>
+</td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded bg-surface-container font-mono text-[11px] text-on-surface">200 OK</span>
+</td>
+<td class="py-3 px-3 text-secondary font-mono text-label-sm">140ms</td>
+<td class="py-3 px-3 text-right text-secondary">2 min ago</td>
+</tr>
+<tr class="hover:bg-surface/50 transition-colors">
+<td class="py-3 px-3">
+<span class="inline-flex items-center gap-1.5 font-label-sm text-label-sm px-2 py-0.5 rounded-md bg-surface-container text-on-surface font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+                    History List
+                  </span>
+</td>
+<td class="py-3 px-3 font-label-md text-on-surface">
+<span class="truncate block max-w-xs">Sync delta check: History ID 8839210</span>
+<span class="text-[11px] text-outline font-mono">hist_cursor: sync_ok</span>
+</td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded bg-surface-container font-mono text-[11px] text-on-surface">200 OK</span>
+</td>
+<td class="py-3 px-3 text-secondary font-mono text-label-sm">95ms</td>
+<td class="py-3 px-3 text-right text-secondary">15 min ago</td>
+</tr>
+<tr class="hover:bg-surface/50 transition-colors">
+<td class="py-3 px-3">
+<span class="inline-flex items-center gap-1.5 font-label-sm text-label-sm px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                    Message Get
+                  </span>
+</td>
+<td class="py-3 px-3 font-label-md text-on-surface">
+<span class="truncate block max-w-xs">Placement Drive Information - Infosys Springboard</span>
+<span class="text-[11px] text-outline font-mono">msg_id: 18ecc880f0119</span>
+</td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded bg-surface-container font-mono text-[11px] text-on-surface">200 OK</span>
+</td>
+<td class="py-3 px-3 text-secondary font-mono text-label-sm">180ms</td>
+<td class="py-3 px-3 text-right text-secondary">42 min ago</td>
+</tr>
+<tr class="hover:bg-surface/50 transition-colors">
+<td class="py-3 px-3">
+<span class="inline-flex items-center gap-1.5 font-label-sm text-label-sm px-2 py-0.5 rounded-md bg-blue-50 text-blue-800 font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+                    Token Refresh
+                  </span>
+</td>
+<td class="py-3 px-3 font-label-md text-on-surface">
+<span class="truncate block max-w-xs">OAuth Token exchange &amp; secret verification</span>
+<span class="text-[11px] text-outline font-mono">g_auth_v2: rotated</span>
+</td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded bg-surface-container font-mono text-[11px] text-on-surface">200 OK</span>
+</td>
+<td class="py-3 px-3 text-secondary font-mono text-label-sm">310ms</td>
+<td class="py-3 px-3 text-right text-secondary">3 hours ago</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+<!-- Right Sidebar Panel: Diagnostics, Security & Admin Notes (Col 9-12) -->
+<div class="lg:col-span-4 space-y-6">
+<!-- 1. Connection Security & Audit Checklist -->
+<section class="bg-surface-container-lowest rounded-2xl p-5 shadow-sm space-y-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">shield_lock</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Security &amp; Encryption</h3>
+</div>
+<ul class="space-y-3 font-body-sm text-body-sm">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-emerald-600 text-[18px] shrink-0 mt-0.5">check_circle</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Google SSO Enforced</p>
+<p class="text-secondary text-[12px]">Workspace identity federation authenticated via SAML 2.0.</p>
+</div>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-emerald-600 text-[18px] shrink-0 mt-0.5">check_circle</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface">TLS 1.3 In-Flight Transport</p>
+<p class="text-secondary text-[12px]">All incoming Webhook deliveries encrypted via end-to-end TLS.</p>
+</div>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-emerald-600 text-[18px] shrink-0 mt-0.5">check_circle</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Encrypted At Rest (AES-256)</p>
+<p class="text-secondary text-[12px]">OAuth tokens stored in encrypted Key Management Vault.</p>
+</div>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-emerald-600 text-[18px] shrink-0 mt-0.5">check_circle</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Restricted Mailbox Scopes</p>
+<p class="text-secondary text-[12px]">Limited to IT Department mailbox boundaries strictly.</p>
+</div>
+</li>
+</ul>
+</section>
+<!-- 2. Diagnostic & Troubleshooting Tools -->
+<section class="bg-surface-container-lowest rounded-2xl p-5 shadow-sm space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">build_circle</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Diagnostic Tools</h3>
+</div>
+<span class="font-label-sm text-label-sm text-secondary">v2.4</span>
+</div>
+<div class="space-y-2.5">
+<button class="w-full flex items-center justify-between p-3 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors text-left group" id="btn-ping-pubsub">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary group-hover:text-primary text-[18px]">cell_tower</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Ping Pub/Sub Topic</p>
+<p class="font-label-sm text-label-sm text-secondary">Send synthetic echo pulse</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-[16px] text-outline group-hover:text-on-surface">chevron_right</span>
+</button>
+<button class="w-full flex items-center justify-between p-3 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors text-left group" id="btn-test-dispatch">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary group-hover:text-primary text-[18px]">forward_to_inbox</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Dispatch Test Email</p>
+<p class="font-label-sm text-label-sm text-secondary">Verify outgoing routing loop</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-[16px] text-outline group-hover:text-on-surface">chevron_right</span>
+</button>
+<button class="w-full flex items-center justify-between p-3 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors text-left group" id="btn-flush-cache">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary group-hover:text-primary text-[18px]">cleaning_services</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Flush Ingestion Cache</p>
+<p class="font-label-sm text-label-sm text-secondary">Reset cursor state &amp; pointers</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-[16px] text-outline group-hover:text-on-surface">chevron_right</span>
+</button>
+</div>
+<div class="hidden p-3 rounded-xl bg-surface-container text-on-surface font-label-sm text-label-sm flex items-center gap-2" id="diag-feedback">
+<span class="material-symbols-outlined text-emerald-600 text-[16px]">check</span>
+<span id="diag-feedback-text">Test completed successfully.</span>
+</div>
+</section>
+<!-- 3. Workspace Admin Notice Card -->
+<section class="bg-surface-container-low rounded-2xl p-5 shadow-xs relative overflow-hidden">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">info</span>
+<div class="space-y-1.5">
+<h4 class="font-headline-sm text-label-md text-on-surface">Workspace Routing Notice</h4>
+<p class="font-body-sm text-body-sm text-secondary leading-relaxed">
+              Gmail routing rules applied here automatically dictate incoming email processing across all 
+              <strong>IT Department</strong> batches, rules, and student notice streams.
+            </p>
+<div class="pt-2">
+<a class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary hover:underline" href="#">
+<span>View Workspace Policy</span>
+<span class="material-symbols-outlined text-[13px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+<!-- Interactive JavaScript for micro-interactions -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const syncBtn = document.getElementById('btn-sync-now');
+      const syncIcon = document.getElementById('sync-icon');
+      const syncSpinner = document.getElementById('sync-spinner');
+      const testBtn = document.getElementById('btn-test-connection');
+      const diagFeedback = document.getElementById('diag-feedback');
+      const diagFeedbackText = document.getElementById('diag-feedback-text');
+
+      if (syncBtn) {
+        syncBtn.addEventListener('click', () => {
+          if (syncSpinner && syncIcon) {
+            syncIcon.style.display = 'none';
+            syncSpinner.style.display = 'inline-block';
+            setTimeout(() => {
+              syncSpinner.style.display = 'none';
+              syncIcon.style.display = 'inline-block';
+              showFeedback('Gmail Sync completed! 4 new messages checked.');
+            }, 1200);
+          }
+        });
+      }
+
+      if (testBtn) {
+        testBtn.addEventListener('click', () => {
+          showFeedback('OAuth connection tested: Google API response code 200 OK.');
+        });
+      }
+
+      ['btn-ping-pubsub', 'btn-test-dispatch', 'btn-flush-cache'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('click', () => {
+            const label = el.querySelector('p')?.innerText || 'Action';
+            showFeedback(`${label} triggered successfully.`);
+          });
+        }
+      });
+
+      function showFeedback(msg) {
+        if (!diagFeedback || !diagFeedbackText) return;
+        diagFeedbackText.innerText = msg;
+        diagFeedback.classList.remove('hidden');
+        setTimeout(() => {
+          diagFeedback.classList.add('hidden');
+        }, 4000);
+      }
+    });
+  </script>
+</div></main>
+<!-- END: MiddleAndRightWrapper -->
+</div>
+<!-- END: MainContainer -->
+</body></html>

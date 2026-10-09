@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mail Automation Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "inverse-primary": "#c8c6c5",
+            "on-tertiary-fixed": "#1b1c19",
+            "secondary-fixed": "#e4e2de",
+            "inverse-on-surface": "#f1f1ef",
+            "on-error": "#ffffff",
+            "surface-bright": "#faf9f7",
+            "on-tertiary-container": "#848480",
+            "tertiary-fixed": "#e4e2dd",
+            "tertiary-fixed-dim": "#c8c6c2",
+            "on-secondary": "#ffffff",
+            "outline": "#747878",
+            "surface-tint": "#5f5e5e",
+            "tertiary": "#000000",
+            "on-secondary-container": "#636360",
+            "on-error-container": "#93000a",
+            "error": "#ba1a1a",
+            "on-tertiary": "#ffffff",
+            "surface-container-highest": "#e3e2e0",
+            "background": "#faf9f7",
+            "surface-variant": "#e3e2e0",
+            "surface-container-lowest": "#ffffff",
+            "on-surface-variant": "#444748",
+            "surface-container-low": "#f4f3f1",
+            "on-secondary-fixed": "#1b1c1a",
+            "on-primary-container": "#858383",
+            "on-primary": "#ffffff",
+            "surface-dim": "#dadad8",
+            "surface-container": "#efeeec",
+            "error-container": "#ffdad6",
+            "outline-variant": "#c4c7c7",
+            "on-surface": "#1a1c1b",
+            "on-primary-fixed": "#1c1b1b",
+            "primary": "#000000",
+            "on-background": "#1a1c1b",
+            "secondary-container": "#e1dfdc",
+            "on-secondary-fixed-variant": "#464744",
+            "surface": "#faf9f7",
+            "tertiary-container": "#1b1c19",
+            "secondary": "#5e5e5c",
+            "primary-container": "#1c1b1b",
+            "primary-fixed": "#e5e2e1",
+            "inverse-surface": "#2f3130",
+            "primary-fixed-dim": "#c8c6c5",
+            "surface-container-high": "#e9e8e6",
+            "on-tertiary-fixed-variant": "#474743",
+            "on-primary-fixed-variant": "#474646",
+            "secondary-fixed-dim": "#c7c6c3"
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          spacing: {
+            "space-xl": "2.5rem",
+            "margin": "1rem",
+            "space-2xl": "3.5rem",
+            "space-lg": "1.5rem",
+            "space-md": "1rem",
+            "space-xs": "0.25rem",
+            "margin-desktop": "3rem",
+            "space-sm": "0.5rem",
+            "gutter": "1.25rem",
+            "gutter-desktop": "1.75rem",
+            "margin-tablet": "2rem"
+          },
+          fontFamily: {
+            "display-hero": ["Newsreader"],
+            "display-hero-mobile": ["Newsreader"],
+            "title-editorial": ["Newsreader"],
+            "label-md": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "body-md": ["Plus Jakarta Sans"],
+            "headline-lg": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "headline-lg-mobile": ["Plus Jakarta Sans"],
+            "body-sm": ["Plus Jakarta Sans"]
+          },
+          fontSize: {
+            "display-hero": ["56px", { lineHeight: "64px", letterSpacing: "-0.02em", fontWeight: "400" }],
+            "display-hero-mobile": ["36px", { lineHeight: "44px", letterSpacing: "-0.02em", fontWeight: "400" }],
+            "title-editorial": ["24px", { lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "400" }],
+            "label-md": ["13px", { lineHeight: "18px", letterSpacing: "0.01em", fontWeight: "500" }],
+            "label-sm": ["11px", { lineHeight: "16px", letterSpacing: "0.02em", fontWeight: "600" }],
+            "headline-sm": ["18px", { lineHeight: "24px", letterSpacing: "0em", fontWeight: "600" }],
+            "headline-md": ["22px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "body-md": ["14px", { lineHeight: "22px", letterSpacing: "0em", fontWeight: "400" }],
+            "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "body-lg": ["16px", { lineHeight: "26px", letterSpacing: "0em", fontWeight: "400" }],
+            "headline-lg-mobile": ["24px", { lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "body-sm": ["12px", { lineHeight: "18px", letterSpacing: "0.01em", fontWeight: "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    @layer base {
+      html {
+        color: #1a1c1b;
+        background-color: #faf9f7;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+    }
+  </style>
+<meta content="web_dashboard" name="shell-type"/>
+</head>
+<body class="bg-background text-on-surface antialiased min-h-screen">
+<!-- BEGIN: TopHeader -->
+<header class="bg-surface-container-lowest/90 backdrop-blur-md sticky top-0 z-30 shadow-xs">
+<div class="h-16 px-space-lg flex items-center justify-between">
+<!-- Left: App Brand & Workspace Selector -->
+<div class="flex items-center gap-space-lg">
+<div class="flex items-center gap-space-sm cursor-pointer">
+<div class="w-9 h-9 rounded-xl bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">mark_email_unread</span>
+</div>
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface leading-none block">Mail Automation</span>
+<span class="font-label-sm text-label-sm text-secondary block mt-0.5">Smart Email Routing Platform</span>
+</div>
+</div>
+<!-- Workspace Switcher Pill -->
+<div class="hidden md:flex items-center gap-space-xs bg-surface-container-low px-space-md py-1.5 rounded-full cursor-pointer hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[16px] text-secondary">domain</span>
+<span class="font-label-md text-label-md text-on-surface">IT Department</span>
+<span class="material-symbols-outlined text-[14px] text-secondary">expand_more</span>
+<span class="ml-1 px-2 py-0.5 font-label-sm text-label-sm bg-surface-container-highest text-on-surface rounded-full">
+            Active Workspace
+          </span>
+</div>
+</div>
+<!-- Center: Search Bar -->
+<div class="flex-1 max-w-md mx-space-lg hidden sm:block">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[18px] text-secondary">search</span>
+<input class="w-full pl-10 pr-space-md py-2 font-body-md text-body-md bg-surface-container-low focus:bg-surface-container-lowest rounded-full placeholder-secondary border-none focus:ring-1 focus:ring-primary transition-all outline-none" placeholder="Search mails, batches, or settings..." type="text"/>
+</div>
+</div>
+<!-- Right: Notifications & User Profile -->
+<div class="flex items-center gap-space-md">
+<button class="relative p-2 text-secondary hover:text-on-surface rounded-full hover:bg-surface-container transition-colors" title="Notifications">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-2 right-2 w-1.5 h-1.5 bg-error rounded-full"></span>
+</button>
+<div class="h-5 w-[1px] bg-outline-variant"></div>
+<!-- User Profile Dropdown Toggle -->
+<div class="flex items-center gap-space-sm cursor-pointer group">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-label-md text-label-md">
+            R
+          </div>
+<div class="text-left hidden lg:block">
+<p class="font-label-md text-label-md text-on-surface leading-tight">Rudraksh Udiya</p>
+<p class="font-label-sm text-label-sm text-secondary">Administrator</p>
+</div>
+<span class="material-symbols-outlined text-[16px] text-secondary group-hover:text-on-surface transition-colors">expand_more</span>
+</div>
+</div>
+</div>
+</header>
+<!-- END: TopHeader -->
+<!-- BEGIN: LeftSidebar -->
+<aside class="fixed top-16 left-0 bottom-0 w-64 bg-surface-container-lowest flex flex-col justify-between p-space-md z-20 overflow-y-auto shadow-xs">
+<div>
+<!-- Main Navigation Links -->
+<nav class="space-y-1" data-active-classes="bg-primary text-on-primary font-semibold shadow-xs">
+<a class="flex items-center justify-between px-space-md py-2.5 rounded-full text-secondary hover:bg-surface-container-low hover:text-on-surface font-label-md text-label-md transition-colors" data-path="dashboard" href="#">
+<span>Dashboard</span>
+</a>
+<a class="flex items-center justify-between px-space-md py-2.5 rounded-full text-secondary hover:bg-surface-container-low hover:text-on-surface font-label-md text-label-md transition-colors" data-path="mails" href="#">
+<span>Mails</span>
+<span class="px-2 py-0.5 font-label-sm text-label-sm bg-surface-container text-secondary rounded-full">12</span>
+</a>
+<a class="flex items-center justify-between px-space-md py-2.5 rounded-full text-secondary hover:bg-surface-container-low hover:text-on-surface font-label-md text-label-md transition-colors" data-path="review" href="#">
+<span>Review</span>
+<span class="px-2 py-0.5 font-label-sm text-label-sm bg-error-container text-on-error-container rounded-full">3</span>
+</a>
+<a aria-current="page" class="flex items-center justify-between px-space-md py-2.5 rounded-full transition-colors bg-primary text-on-primary font-semibold shadow-xs" data-path="batches-groups" href="#">
+<span>Batches / Groups</span>
+</a>
+<a class="flex items-center justify-between px-space-md py-2.5 rounded-full text-secondary hover:bg-surface-container-low hover:text-on-surface font-label-md text-label-md transition-colors" data-path="recipients" href="#">
+<span>Recipients</span>
+</a>
+<a class="flex items-center justify-between px-space-md py-2.5 rounded-full text-secondary hover:bg-surface-container-low hover:text-on-surface font-label-md text-label-md transition-colors" data-path="rules" href="#">
+<span>Rules</span>
+</a>
+<a class="flex items-center justify-between px-space-md py-2.5 rounded-full text-secondary hover:bg-surface-container-low hover:text-on-surface font-label-md text-label-md transition-colors" data-path="gmail-connection" href="#">
+<span>Gmail Connection</span>
+</a>
+<a class="flex items-center justify-between px-space-md py-2.5 rounded-full text-secondary hover:bg-surface-container-low hover:text-on-surface font-label-md text-label-md transition-colors" data-path="settings" href="#">
+<span>Settings</span>
+</a>
+</nav>
+<!-- Organization Section -->
+<div class="mt-space-xl">
+<p class="px-space-md font-label-sm text-label-sm text-secondary uppercase tracking-wider">Organization</p>
+<nav class="mt-space-xs space-y-1" data-active-classes="bg-primary text-on-primary font-semibold shadow-xs">
+<a class="flex items-center justify-between px-space-md py-2 rounded-full text-secondary hover:bg-surface-container-low hover:text-on-surface font-label-md text-label-md transition-colors" data-path="members" href="#">
+<span>Members</span>
+</a>
+<a class="flex items-center justify-between px-space-md py-2 rounded-full text-secondary hover:bg-surface-container-low hover:text-on-surface font-label-md text-label-md transition-colors" data-path="workspace-settings" href="#">
+<span>Workspace Settings</span>
+</a>
+<a class="flex items-center justify-between px-space-md py-2 rounded-full text-secondary hover:bg-surface-container-low hover:text-on-surface font-label-md text-label-md transition-colors" data-path="audit-logs" href="#">
+<span>Audit Logs</span>
+</a>
+</nav>
+</div>
+</div>
+<!-- Sidebar Bottom: Plan Details & Platform Info -->
+<div class="pt-space-md space-y-space-sm">
+<!-- Subscription Progress Card -->
+<div class="p-3.5 bg-surface-container-low rounded-xl">
+<div class="flex items-center justify-between mb-2">
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">Free Plan</h4>
+<p class="font-label-sm text-label-sm text-secondary">500 mails/month</p>
+</div>
+<button class="px-2.5 py-1 bg-primary text-on-primary font-label-sm text-label-sm rounded-full shadow-xs hover:bg-primary-container transition-colors">
+            Upgrade
+          </button>
+</div>
+<div class="w-full bg-surface-container-highest rounded-full h-1.5 overflow-hidden">
+<div class="bg-primary h-1.5 rounded-full w-[24%]"></div>
+</div>
+<p class="font-label-sm text-label-sm text-secondary mt-1.5">120 / 500 used</p>
+</div>
+<div class="px-1 font-label-sm text-label-sm text-secondary leading-relaxed">
+<p class="font-semibold text-on-surface">Mail Automation v1.0</p>
+<p class="text-[11px] text-secondary mt-0.5">Smart routing platform for workspace teams.</p>
+</div>
+</div>
+</aside>
+<!-- END: LeftSidebar -->
+<!-- BEGIN: MainContent -->
+<main class="pl-64 pt-16 min-h-screen bg-background">
+<div class="flex flex-col w-full">
+<div class="p-space-lg space-y-space-lg max-w-[1520px] mx-auto w-full">
+<!-- Top Bar: Header and Primary Actions -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Batches &amp; Student Groups</span>
+<span class="px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-surface-container-highest text-secondary">Term 2026-27</span>
+</div>
+<p class="font-body-md text-body-md text-secondary mt-1">Manage academic cohorts, routing rules, email lists, and automated distribution targets.</p>
+</div>
+<div class="flex items-center gap-space-sm self-start md:self-auto">
+<button class="inline-flex items-center gap-2 px-4 py-2 bg-surface-container-lowest text-on-surface font-label-md text-label-md rounded-full shadow-xs hover:bg-surface-container-low transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px] text-secondary">upload_file</span>
+<span>Import CSV</span>
+</button>
+<button class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-on-primary font-label-md text-label-md rounded-full shadow-sm hover:bg-primary-container transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span>Create New Batch</span>
+</button>
+</div>
+</div>
+<!-- KPI Metric Summary Row (4 Stat Cards) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-xs flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-secondary">Active Batches</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">groups</span>
+</div>
+</div>
+<div class="mt-3 flex items-baseline justify-between">
+<div>
+<span class="font-headline-lg text-headline-lg text-on-surface">5</span>
+<span class="font-label-sm text-label-sm text-secondary ml-1">Cohorts</span>
+</div>
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface">
+<span class="material-symbols-outlined text-[12px] text-primary">trending_up</span>
+            +1 this term
+          </span>
+</div>
+<div class="mt-3 text-label-sm font-label-sm text-secondary truncate">
+          IT 2nd, 3rd, 4th Yr • DS 2nd • CodeClub
+        </div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-xs flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-secondary">Total Recipients</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">badge</span>
+</div>
+</div>
+<div class="mt-3 flex items-baseline justify-between">
+<div>
+<span class="font-headline-lg text-headline-lg text-on-surface">111</span>
+<span class="font-label-sm text-label-sm text-secondary ml-1">Students</span>
+</div>
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container text-on-surface">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+            100% Validated
+          </span>
+</div>
+<div class="mt-3 text-label-sm font-label-sm text-secondary truncate">
+          Verified with Institute LDAP / ERP Sync
+        </div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-xs flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-secondary">Routed Emails Today</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">forward_to_inbox</span>
+</div>
+</div>
+<div class="mt-3 flex items-baseline justify-between">
+<div>
+<span class="font-headline-lg text-headline-lg text-on-surface">36</span>
+<span class="font-label-sm text-label-sm text-secondary ml-1">Forwarded</span>
+</div>
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container text-on-surface">
+            98.2% Auto-routed
+          </span>
+</div>
+<div class="mt-3 text-label-sm font-label-sm text-secondary truncate">
+          Peak dispatch: 11:20 AM (Placement notice)
+        </div>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-xs flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-secondary">Routing Rules Linked</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">alt_route</span>
+</div>
+</div>
+<div class="mt-3 flex items-baseline justify-between">
+<div>
+<span class="font-headline-lg text-headline-lg text-on-surface">14</span>
+<span class="font-label-sm text-label-sm text-secondary ml-1">Active Rules</span>
+</div>
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface">
+            0 Conflicts
+          </span>
+</div>
+<div class="mt-3 text-label-sm font-label-sm text-secondary truncate">
+          Regex &amp; AI semantic subject classification
+        </div>
+</div>
+</div>
+<!-- Main Workspace Section: Left 65% Batches List + Right 35% Inspector -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- MAIN WORKSTATION COLUMN (Left: 7-8 Cols out of 12) -->
+<div class="lg:col-span-8 flex flex-col gap-space-md">
+<!-- Controls, Filter & Search Panel -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="relative flex-1 min-w-[240px]">
+<span class="material-symbols-outlined absolute inset-y-0 left-3 flex items-center pointer-events-none text-[18px] text-secondary">search</span>
+<input class="w-full pl-9 pr-3 py-2 bg-surface-container-low text-on-surface placeholder-secondary rounded-full font-body-md text-body-md outline-none focus:bg-surface-container-lowest shadow-xs transition-colors" placeholder="Search by batch name, year, keyword, or coordinator..." type="text"/>
+</div>
+<div class="flex items-center flex-wrap gap-space-xs">
+<!-- Filter: Dept -->
+<div class="flex items-center bg-surface-container-low px-3 py-1.5 rounded-full text-label-md font-label-md text-on-surface cursor-pointer hover:bg-surface-container transition-colors">
+<span class="text-secondary text-[12px] mr-1.5">Dept:</span>
+<span>All Fields</span>
+<span class="material-symbols-outlined text-[16px] text-secondary ml-1">expand_more</span>
+</div>
+<!-- Filter: Year -->
+<div class="flex items-center bg-surface-container-low px-3 py-1.5 rounded-full text-label-md font-label-md text-on-surface cursor-pointer hover:bg-surface-container transition-colors">
+<span class="text-secondary text-[12px] mr-1.5">Term:</span>
+<span>2024-2027</span>
+<span class="material-symbols-outlined text-[16px] text-secondary ml-1">expand_more</span>
+</div>
+<!-- Filter: Status -->
+<div class="flex items-center bg-surface-container-low px-3 py-1.5 rounded-full text-label-md font-label-md text-on-surface cursor-pointer hover:bg-surface-container transition-colors">
+<span class="text-secondary text-[12px] mr-1.5">Status:</span>
+<span>Active</span>
+<span class="material-symbols-outlined text-[16px] text-secondary ml-1">expand_more</span>
+</div>
+<!-- View Switcher -->
+<div class="flex items-center bg-surface-container-low p-1 rounded-full ml-auto md:ml-0">
+<button class="p-1.5 rounded-full bg-surface-container-lowest text-on-surface shadow-xs" title="Grid View">
+<span class="material-symbols-outlined text-[16px] block">grid_view</span>
+</button>
+<button class="p-1.5 rounded-full text-secondary hover:text-on-surface" title="List View">
+<span class="material-symbols-outlined text-[16px] block">format_list_bulleted</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Cohort Batches Grid -->
+<div class="space-y-space-md">
+<!-- BATCH CARD 1: IT 2nd Year -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-xs hover:shadow-md transition-shadow group">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-sm">
+<div class="flex items-start gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low text-primary flex items-center justify-center shrink-0 mt-0.5">
+<span class="font-headline-sm text-headline-sm font-semibold">2Y</span>
+</div>
+<div>
+<div class="flex items-center gap-2 flex-wrap">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">IT 2nd Year (Batch 2024)</h3>
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container text-on-surface">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                      Active
+                    </span>
+</div>
+<div class="flex items-center gap-2 text-label-sm font-label-sm text-secondary mt-0.5">
+<span>Core IT • 3rd Semester</span>
+<span>•</span>
+<span class="text-on-surface">it-2024@acropolis.in</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 self-end sm:self-center">
+<button class="px-3 py-1.5 rounded-full font-label-sm text-label-sm bg-surface-container-low hover:bg-surface-container text-on-surface transition-colors" type="button">
+                  View Recipients
+                </button>
+<button class="px-3 py-1.5 rounded-full font-label-sm text-label-sm bg-surface-container-low hover:bg-surface-container text-on-surface transition-colors" type="button">
+                  Edit Rules
+                </button>
+<button class="p-1.5 text-secondary hover:text-on-surface rounded-full hover:bg-surface-container-low" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Card Body / Stats & Rules Chips -->
+<div class="mt-3 pt-3 bg-surface-container-low/50 rounded-xl p-3 flex flex-col md:flex-row md:items-center justify-between gap-3">
+<div class="flex items-center gap-space-md text-label-md font-label-md">
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-secondary">person_search</span>
+<span class="font-semibold">42</span> Students
+                </div>
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-secondary">mark_email_read</span>
+<span class="font-semibold">18</span> Mails this week
+                </div>
+</div>
+<!-- Keyword Trigger Strip -->
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="text-label-sm font-label-sm text-secondary">Triggers:</span>
+<span class="px-2 py-0.5 rounded-md font-label-sm text-label-sm bg-surface-container-lowest text-on-surface shadow-xs">2nd Year</span>
+<span class="px-2 py-0.5 rounded-md font-label-sm text-label-sm bg-surface-container-lowest text-on-surface shadow-xs">Internship 2026</span>
+<span class="px-2 py-0.5 rounded-md font-label-sm text-label-sm bg-surface-container-lowest text-on-surface shadow-xs">DSA</span>
+<span class="px-2 py-0.5 rounded-md font-label-sm text-label-sm bg-surface-container-lowest text-on-surface shadow-xs">+2 more</span>
+</div>
+</div>
+<div class="mt-2.5 flex items-center justify-between text-label-sm font-label-sm text-secondary px-1">
+<span>Faculty Rep: <strong class="text-on-surface font-medium">Prof. P. Sharma (Incharge)</strong></span>
+<span>Last dispatched: 1 hour ago</span>
+</div>
+</div>
+<!-- BATCH CARD 2: IT 3rd Year (Active Inspector Target) -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm relative overflow-hidden group">
+<div class="absolute top-0 left-0 right-0 h-1 bg-primary"></div>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-sm">
+<div class="flex items-start gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+<span class="font-headline-sm text-headline-sm font-semibold">3Y</span>
+</div>
+<div>
+<div class="flex items-center gap-2 flex-wrap">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">IT 3rd Year (Batch 2025)</h3>
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-primary text-on-primary">
+                      Selected
+                    </span>
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container text-on-surface">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                      Active
+                    </span>
+</div>
+<div class="flex items-center gap-2 text-label-sm font-label-sm text-secondary mt-0.5">
+<span>Core IT • 5th Semester</span>
+<span>•</span>
+<span class="text-on-surface font-medium">it-2025@acropolis.in</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 self-end sm:self-center">
+<button class="px-3 py-1.5 rounded-full font-label-sm text-label-sm bg-primary text-on-primary hover:bg-primary-container transition-colors" type="button">
+                  View Recipients
+                </button>
+<button class="px-3 py-1.5 rounded-full font-label-sm text-label-sm bg-surface-container-low hover:bg-surface-container text-on-surface transition-colors" type="button">
+                  Edit Rules
+                </button>
+<button class="p-1.5 text-secondary hover:text-on-surface rounded-full hover:bg-surface-container-low" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Card Body / Stats & Rules Chips -->
+<div class="mt-3 pt-3 bg-surface-container-low/60 rounded-xl p-3 flex flex-col md:flex-row md:items-center justify-between gap-3">
+<div class="flex items-center gap-space-md text-label-md font-label-md">
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-secondary">person_search</span>
+<span class="font-semibold">28</span> Students
+                </div>
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-secondary">mark_email_read</span>
+<span class="font-semibold">24</span> Mails this week
+                </div>
+</div>
+<!-- Keyword Trigger Strip -->
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="text-label-sm font-label-sm text-secondary">Triggers:</span>
+<span class="px-2 py-0.5 rounded-md font-label-sm text-label-sm bg-surface-container-lowest text-on-surface shadow-xs">3rd Year</span>
+<span class="px-2 py-0.5 rounded-md font-label-sm text-label-sm bg-surface-container-lowest text-on-surface shadow-xs">Campus Hiring</span>
+<span class="px-2 py-0.5 rounded-md font-label-sm text-label-sm bg-surface-container-lowest text-on-surface shadow-xs">TCS CodeVita</span>
+<span class="px-2 py-0.5 rounded-md font-label-sm text-label-sm bg-surface-container-lowest text-on-surface shadow-xs">Cloud</span>
+</div>
+</div>
+<div class="mt-2.5 flex items-center justify-between text-label-sm font-label-sm text-secondary px-1">
+<span>Faculty Rep: <strong class="text-on-surface font-medium">Dr. R. Verma (Faculty Incharge)</strong></span>
+<span class="text-on-surface font-medium">Inspecting in right panel</span>
+</div>
+</div>
+<!-- BATCH CARD 3: IT 4th Year -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-xs hover:shadow-md transition-shadow group">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-sm">
+<div class="flex items-start gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low text-primary flex items-center justify-center shrink-0 mt-0.5">
+<span class="font-headline-sm text-headline-sm font-semibold">4Y</span>
+</div>
+<div>
+<div class="flex items-center gap-2 flex-wrap">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">IT 4th Year (Batch 2026)</h3>
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container text-on-surface">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                      Active
+                    </span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-highest text-secondary">High Priority</span>
+</div>
+<div class="flex items-center gap-2 text-label-sm font-label-sm text-secondary mt-0.5">
+<span>Final Year • Placement Cell</span>
+<span>•</span>
+<span class="text-on-surface">it-2026@acropolis.in</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 self-end sm:self-center">
+<button class="px-3 py-1.5 rounded-full font-label-sm text-label-sm bg-surface-container-low hover:bg-surface-container text-on-surface transition-colors" type="button">
+                  View Recipients
+                </button>
+<button class="px-3 py-1.5 rounded-full font-label-sm text-label-sm bg-surface-container-low hover:bg-surface-container text-on-surface transition-colors" type="button">
+                  Edit Rules
+                </button>
+<button class="p-1.5 text-secondary hover:text-on-surface rounded-full hover:bg-surface-container-low" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</div>
+<div class="mt-3 pt-3 bg-surface-container-low/50 rounded-xl p-3 flex flex-col md:flex-row md:items-center justify-between gap-3">
+<div class="flex items-center gap-space-md text-label-md font-label-md">
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-secondary">person_search</span>
+<span class="font-semibold">18</span> Students
+                </div>
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-secondary">mark_email_read</span>
+<span class="font-semibold">31</span> Mails this week
+                </div>
+</div>
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="text-label-sm font-label-sm text-secondary">Triggers:</span>
+<span class="px-2 py-0.5 rounded-md font-label-sm text-label-sm bg-surface-container-lowest text-on-surface shadow-xs">Placement Drive</span>
+<span class="px-2 py-0.5 rounded-md font-label-sm text-label-sm bg-surface-container-lowest text-on-surface shadow-xs">Offer Letter</span>
+<span class="px-2 py-0.5 rounded-md font-label-sm text-label-sm bg-surface-container-lowest text-on-surface shadow-xs">Drive 2026</span>
+</div>
+</div>
+<div class="mt-2.5 flex items-center justify-between text-label-sm font-label-sm text-secondary px-1">
+<span>Coordinator: <strong class="text-on-surface font-medium">Mr. Aman Mishra (Placement Coord.)</strong></span>
+<span>Last dispatched: 15 min ago</span>
+</div>
+</div>
+<!-- BATCH CARD 4: DS 2nd Year -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-xs hover:shadow-md transition-shadow group">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-sm">
+<div class="flex items-start gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low text-primary flex items-center justify-center shrink-0 mt-0.5">
+<span class="font-headline-sm text-headline-sm font-semibold">DS</span>
+</div>
+<div>
+<div class="flex items-center gap-2 flex-wrap">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">DS 2nd Year (Data Science)</h3>
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container text-on-surface">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                      Active
+                    </span>
+</div>
+<div class="flex items-center gap-2 text-label-sm font-label-sm text-secondary mt-0.5">
+<span>Data Science Specialization</span>
+<span>•</span>
+<span class="text-on-surface">ds-2025@acropolis.in</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 self-end sm:self-center">
+<button class="px-3 py-1.5 rounded-full font-label-sm text-label-sm bg-surface-container-low hover:bg-surface-container text-on-surface transition-colors" type="button">
+                  View Recipients
+                </button>
+<button class="px-3 py-1.5 rounded-full font-label-sm text-label-sm bg-surface-container-low hover:bg-surface-container text-on-surface transition-colors" type="button">
+                  Edit Rules
+                </button>
+<button class="p-1.5 text-secondary hover:text-on-surface rounded-full hover:bg-surface-container-low" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</div>
+<div class="mt-3 pt-3 bg-surface-container-low/50 rounded-xl p-3 flex flex-col md:flex-row md:items-center justify-between gap-3">
+<div class="flex items-center gap-space-md text-label-md font-label-md">
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-secondary">person_search</span>
+<span class="font-semibold">12</span> Students
+                </div>
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-secondary">mark_email_read</span>
+<span class="font-semibold">9</span> Mails this week
+                </div>
+</div>
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="text-label-sm font-label-sm text-secondary">Triggers:</span>
+<span class="px-2 py-0.5 rounded-md font-label-sm text-label-sm bg-surface-container-lowest text-on-surface shadow-xs">Data Science</span>
+<span class="px-2 py-0.5 rounded-md font-label-sm text-label-sm bg-surface-container-lowest text-on-surface shadow-xs">AI/ML</span>
+<span class="px-2 py-0.5 rounded-md font-label-sm text-label-sm bg-surface-container-lowest text-on-surface shadow-xs">Python</span>
+</div>
+</div>
+<div class="mt-2.5 flex items-center justify-between text-label-sm font-label-sm text-secondary px-1">
+<span>Representative: <strong class="text-on-surface font-medium">Priya Kumar (Class Coord.)</strong></span>
+<span>Last dispatched: 2 hours ago</span>
+</div>
+</div>
+<!-- BATCH CARD 5: Special Interest Group -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-xs hover:shadow-md transition-shadow group">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-sm">
+<div class="flex items-start gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low text-primary flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[20px]">code_blocks</span>
+</div>
+<div>
+<div class="flex items-center gap-2 flex-wrap">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Competitive Coding Group</h3>
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container text-on-surface">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                      Active
+                    </span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-highest text-secondary">Cross-Batch</span>
+</div>
+<div class="flex items-center gap-2 text-label-sm font-label-sm text-secondary mt-0.5">
+<span>Hackathons &amp; Contests</span>
+<span>•</span>
+<span class="text-on-surface">cp-guild@acropolis.in</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 self-end sm:self-center">
+<button class="px-3 py-1.5 rounded-full font-label-sm text-label-sm bg-surface-container-low hover:bg-surface-container text-on-surface transition-colors" type="button">
+                  View Recipients
+                </button>
+<button class="px-3 py-1.5 rounded-full font-label-sm text-label-sm bg-surface-container-low hover:bg-surface-container text-on-surface transition-colors" type="button">
+                  Edit Rules
+                </button>
+<button class="p-1.5 text-secondary hover:text-on-surface rounded-full hover:bg-surface-container-low" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</div>
+<div class="mt-3 pt-3 bg-surface-container-low/50 rounded-xl p-3 flex flex-col md:flex-row md:items-center justify-between gap-3">
+<div class="flex items-center gap-space-md text-label-md font-label-md">
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-secondary">person_search</span>
+<span class="font-semibold">11</span> Selected coders
+                </div>
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-secondary">mark_email_read</span>
+<span class="font-semibold">6</span> Mails this week
+                </div>
+</div>
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="text-label-sm font-label-sm text-secondary">Triggers:</span>
+<span class="px-2 py-0.5 rounded-md font-label-sm text-label-sm bg-surface-container-lowest text-on-surface shadow-xs">Hackathon</span>
+<span class="px-2 py-0.5 rounded-md font-label-sm text-label-sm bg-surface-container-lowest text-on-surface shadow-xs">ICPC</span>
+<span class="px-2 py-0.5 rounded-md font-label-sm text-label-sm bg-surface-container-lowest text-on-surface shadow-xs">Smart India</span>
+<span class="px-2 py-0.5 rounded-md font-label-sm text-label-sm bg-surface-container-lowest text-on-surface shadow-xs">CodeChef</span>
+</div>
+</div>
+<div class="mt-2.5 flex items-center justify-between text-label-sm font-label-sm text-secondary px-1">
+<span>Lead Mentor: <strong class="text-on-surface font-medium">Prof. A. Kapoor</strong></span>
+<span>Last dispatched: 3 hours ago</span>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT SIDE: QUICK BATCH INSPECTOR (Right: 4 Cols out of 12) -->
+<div class="lg:col-span-4 flex flex-col gap-space-md sticky top-20">
+<!-- Inspector Detail Card -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-xs space-y-space-md">
+<!-- Inspector Header -->
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Inspection View</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mt-0.5">IT 3rd Year (Batch 2025)</h4>
+<div class="flex items-center gap-2 mt-1.5">
+<span class="px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-surface-container-high text-on-surface font-medium">
+                  28 Active Recipients
+                </span>
+<span class="px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-surface-container text-on-surface">
+                  Auto-Forward On
+                </span>
+</div>
+</div>
+<button class="p-1 rounded-full text-secondary hover:text-on-surface hover:bg-surface-container-low transition-colors" title="Close Panel">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Configuration & Rules Breakdown -->
+<div class="space-y-space-sm pt-2">
+<h5 class="font-label-md text-label-md font-semibold text-on-surface">Distribution Config</h5>
+<div class="p-3 bg-surface-container-low rounded-xl space-y-2.5">
+<div>
+<p class="font-label-sm text-label-sm text-secondary">Target Email Alias</p>
+<div class="flex items-center justify-between mt-0.5">
+<code class="font-label-md text-label-md font-mono text-on-surface bg-surface-container-lowest px-2 py-0.5 rounded">it-2025@acropolis.in</code>
+<button class="text-secondary hover:text-on-surface text-[14px]" title="Copy alias">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+</button>
+</div>
+</div>
+<div class="pt-1">
+<p class="font-label-sm text-label-sm text-secondary">Subject Pattern Matching</p>
+<div class="p-2 bg-surface-container-lowest rounded-md text-[12px] font-mono text-on-surface overflow-x-auto mt-0.5 leading-snug">
+                  [Placement|Internship|Hiring|TCS|Infosys]
+                </div>
+</div>
+<!-- Switches / Toggles -->
+<div class="pt-1 space-y-2">
+<div class="flex items-center justify-between">
+<div class="text-label-sm font-label-sm text-on-surface">
+<p class="leading-tight font-medium">CC Department Mail</p>
+<p class="text-secondary text-[11px]">it@acropolis.in</p>
+</div>
+<!-- Simulated Active Toggle -->
+<div class="w-9 h-5 bg-primary rounded-full relative cursor-pointer p-0.5">
+<div class="w-4 h-4 bg-on-primary rounded-full ml-auto shadow-xs"></div>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<div class="text-label-sm font-label-sm text-on-surface">
+<p class="leading-tight font-medium">Require Human Review</p>
+<p class="text-secondary text-[11px]">If confidence &lt; 90%</p>
+</div>
+<!-- Simulated Active Toggle -->
+<div class="w-9 h-5 bg-primary rounded-full relative cursor-pointer p-0.5">
+<div class="w-4 h-4 bg-on-primary rounded-full ml-auto shadow-xs"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Recent Mails Dispatched to this Batch -->
+<div class="space-y-space-sm pt-1">
+<div class="flex items-center justify-between">
+<h5 class="font-label-md text-label-md font-semibold text-on-surface">Recent Dispatches</h5>
+<a class="text-label-sm font-label-sm text-primary hover:underline" href="#">View Log</a>
+</div>
+<div class="space-y-2">
+<div class="p-2.5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors">
+<div class="flex items-start justify-between gap-2">
+<p class="font-label-md text-label-md text-on-surface font-medium leading-tight line-clamp-1">
+                    TCS CodeVita 14 Registrations Open
+                  </p>
+<span class="shrink-0 px-2 py-0.5 text-[10px] font-label-sm rounded-full bg-surface-container-highest text-on-surface">
+                    Forwarded
+                  </span>
+</div>
+<div class="flex items-center justify-between mt-1 text-[11px] text-secondary font-label-sm">
+<span>Sender: company@tcs.com</span>
+<span>2 min ago</span>
+</div>
+</div>
+<div class="p-2.5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors">
+<div class="flex items-start justify-between gap-2">
+<p class="font-label-md text-label-md text-on-surface font-medium leading-tight line-clamp-1">
+                    Tech Talk: Cloud Architecture Session
+                  </p>
+<span class="shrink-0 px-2 py-0.5 text-[10px] font-label-sm rounded-full bg-surface-container-highest text-on-surface">
+                    Forwarded
+                  </span>
+</div>
+<div class="flex items-center justify-between mt-1 text-[11px] text-secondary font-label-sm">
+<span>Sender: speaker@aws.org</span>
+<span>08:40 AM</span>
+</div>
+</div>
+<div class="p-2.5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors">
+<div class="flex items-start justify-between gap-2">
+<p class="font-label-md text-label-md text-on-surface font-medium leading-tight line-clamp-1">
+                    Campus Hiring 2025 Guidelines
+                  </p>
+<span class="shrink-0 px-2 py-0.5 text-[10px] font-label-sm rounded-full bg-surface-container-highest text-on-surface">
+                    Forwarded
+                  </span>
+</div>
+<div class="flex items-center justify-between mt-1 text-[11px] text-secondary font-label-sm">
+<span>Sender: placement@acropolis.in</span>
+<span>Yesterday</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Inspector Actions -->
+<div class="pt-2 flex flex-col gap-2">
+<button class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md rounded-full transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">send</span>
+<span>Send Test Email to Batch</span>
+</button>
+<button class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-surface-container-lowest hover:bg-surface-container-low text-on-surface font-label-md text-label-md rounded-full shadow-xs transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">sync</span>
+<span>Sync Student Roster from ERP</span>
+</button>
+</div>
+</div>
+<!-- System Sync & Health Status Box -->
+<div class="p-space-md bg-surface-container-lowest rounded-2xl shadow-xs space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">Batch Automation Engine</span>
+</div>
+<span class="font-label-sm text-label-sm text-secondary">Healthy</span>
+</div>
+<p class="font-body-sm text-body-sm text-secondary leading-relaxed">
+            All rule triggers are synced with the incoming Gmail IMAP webhook listener. New student admissions will automatically bind to section aliases.
+          </p>
+<div class="flex items-center justify-between pt-1 font-label-sm text-label-sm text-secondary">
+<span>Next automatic roster sync:</span>
+<span class="text-on-surface font-medium">Tonight, 00:00</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- END: MainContent -->
+</body></html>

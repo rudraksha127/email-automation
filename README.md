@@ -25,7 +25,7 @@ Implemented incrementally, one phase at a time (each phase is fully tested befor
   created idempotently on boot; a Supabase PostgreSQL migration is planned for
   multi-instance production
 - **Email:** Gmail API (OAuth 2.0) — credentials never in frontend code
-- **Tests:** Vitest (unit + API integration), 69 tests
+- **Tests:** Vitest (unit + API integration), 106 tests
 
 ## Quickstart (local development)
 
@@ -58,6 +58,14 @@ and a dev admin seeded with a generated password printed to the console.
 
 Real secrets never belong in git — `.env*`, `data/`, and token files are
 gitignored and verified by the CI secret scan.
+
+## Design references
+
+Approved Google Stitch layouts (17 screens: `code.html` + `screen.png` each)
+are preserved in
+[`docs/design-references/stitch_faculty_student_count_app/`](docs/design-references/stitch_faculty_student_count_app/)
+and are the source of truth for UI fidelity. Browser-verification scripts
+(viewport/functional/PWA sweeps) live in [`scripts/`](scripts/).
 
 ## Status
 
