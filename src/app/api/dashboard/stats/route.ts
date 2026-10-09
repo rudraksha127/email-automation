@@ -1,11 +1,11 @@
-import { err, json, requireAdmin } from "@/lib/auth";
+import { err, json, requireOrg } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import type { DashboardStats } from "@/types";
 
-/** GET /api/dashboard/stats — all numbers derived from the real database (no mock data). */
+/** GET /api/dashboard/stats — numbers derived from THIS workspace's records. */
 export async function GET(): Promise<Response> {
-  const admin = await requireAdmin();
-  if (!admin) return err("Unauthorized", 401);
+  const auth = await requireOrg();
+  if (!auth.ok) return err(auth.message, auth.status);
   const d = getDb();
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
@@ -17,13 +17,13 @@ export async function GET(): Promise<Response> {
   };
 
   const stats: DashboardStats = {
-    newMails: one("SELECT COUNT(*) AS c FROM mails WHERE status='pending'"),
+    newMails: one("SELECT COUNT(*) AS c FROM mails WHERE org_id=? AND status='pending'", auth.orgId),
     forwardedToday: one(
-      "SELECT COUNT(*) AS c FROM mails WHERE status='forwarded' AND forwarded_at >= ?",
-      startIso
+      "SELECT COUNT(*) AS c FROM mails WHERE org_id=? AND status='forwarded' AND forwarded_at >= ?",
+      auth.orgId, startIso
     ),
-    needsReview: one("SELECT COUNT(*) AS c FROM mails WHERE status='needs_review'"),
-    totalBatches: one("SELECT COUNT(*) AS c FROM batches"),
+    needsReview: one("SELECT COUNT(*) AS c FROM mails WHERE org_id=? AND status='needs_review'", auth.orgId),
+    totalBatches: one("SELECT COUNT(*) AS c FROM batches WHERE org_id=?", auth.orgId),
   };
   return json(stats);
 }

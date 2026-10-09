@@ -56,12 +56,37 @@ export interface AdminUser {
 }
 
 export interface AppSettings {
-  /** IT Department CC — added to every forwarded mail. Editable in Settings. */
+  /** Workspace display name — editable by workspace admins. */
+  organizationName: string;
+  /** Incoming sender allowlist enforced before any automatic forwarding. */
+  allowedSenders: string[];
+  /** CC address — added to every forwarded mail. Editable in Settings. */
   ccEmail: string;
   autoForwarding: boolean;
   gmailConnected: boolean;
   gmailAccount: string | null;
   lastSyncedAt: string | null;
+}
+
+/** A workspace (organization) the current user belongs to. */
+export interface Workspace {
+  orgId: string;
+  name: string;
+  role: "admin" | "member";
+}
+
+/** Configurable forwarding rule — evaluated deterministically server-side. */
+export interface ForwardingRule {
+  id: string;
+  name: string;
+  priority: number;
+  active: boolean;
+  senderPattern: string | null;
+  subjectKeywords: string[];
+  bodyKeywords: string[];
+  targetBatchId: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface DashboardStats {

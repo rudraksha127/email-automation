@@ -126,7 +126,7 @@ export default function BatchesPage() {
           action={<Button onClick={openAdd}>Add Batch</Button>}
         />
       ) : (
-        <div className="space-y-3.5">
+        <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2">
           {(batches.data ?? []).map((batch) => (
             <article
               key={batch.id}

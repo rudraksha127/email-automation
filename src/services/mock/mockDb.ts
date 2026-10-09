@@ -33,6 +33,8 @@ export const mockRecipients: Record<string, Recipient[]> = Object.fromEntries(
 export const mockMails: Mail[] = [];
 
 export const mockSettings: AppSettings = {
+  organizationName: "Demo Workspace",
+  allowedSenders: ["sender.a@fixture.test", "sender.b@fixture.test"],
   ccEmail: process.env.PILOT_CC_EMAIL ?? "",
   autoForwarding: true,
   gmailConnected: false,

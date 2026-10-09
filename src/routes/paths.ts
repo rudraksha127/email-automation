@@ -1,6 +1,8 @@
 /** Central route definitions — no hardcoded hrefs scattered through the UI. */
 export const paths = {
   login: "/login",
+  register: "/register",
+  workspace: "/workspace",
   dashboard: "/dashboard",
   mails: "/mails",
   mailDetails: (id: string) => `/mails/${id}`,

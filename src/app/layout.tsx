@@ -1,10 +1,19 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/hooks/AuthContext";
 import { AuthGuard, GuestGuard } from "@/routes/guards";
 import { LoadingState } from "@/components/ui/EmptyState";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
+
+/** Desktop Stitch reference font (mobile falls back to the system stack). */
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+  fallback: ["-apple-system", "Segoe UI", "Roboto", "Helvetica", "Arial", "sans-serif"],
+});
 
 export const metadata: Metadata = {
   title: {
@@ -35,7 +44,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className={`h-full antialiased ${inter.variable}`}>
       <body className="min-h-full bg-slate-50 text-slate-800">
         <ServiceWorkerRegister />
         <AuthProvider>

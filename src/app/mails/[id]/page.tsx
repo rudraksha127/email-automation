@@ -35,6 +35,11 @@ export default function MailDetailsPage({ params }: { params: Promise<{ id: stri
   const [retrying, setRetrying] = useState(false);
   const [retryError, setRetryError] = useState<string | null>(null);
 
+  // "Not relevant" flow: confirm, call the existing reject endpoint, reload.
+  const [confirmReject, setConfirmReject] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
+  const [rejectError, setRejectError] = useState<string | null>(null);
+
   const selectedBatch = useMemo(
     () => (batches.data ?? []).find((b) => b.id === selectedBatchId) ?? null,
     [batches.data, selectedBatchId]
@@ -69,6 +74,23 @@ export default function MailDetailsPage({ params }: { params: Promise<{ id: stri
       setRetryError(err instanceof Error ? err.message : "Retry failed. Please try again.");
     } finally {
       setRetrying(false);
+    }
+  }
+
+  async function handleMarkNotRelevant() {
+    if (!data) return;
+    setRejecting(true);
+    setRejectError(null);
+    try {
+      await mailsService.markNotRelevant(data.id);
+      setConfirmReject(false);
+      mail.reload();
+    } catch (err) {
+      setRejectError(
+        err instanceof Error ? err.message : "Unable to update this mail."
+      );
+    } finally {
+      setRejecting(false);
     }
   }
 
@@ -199,9 +221,21 @@ export default function MailDetailsPage({ params }: { params: Promise<{ id: stri
         {/* Actions */}
         <footer className="flex gap-2.5 border-t border-slate-100 px-5 py-4">
           {isAmbiguous ? (
-            <Button onClick={() => setSelectingBatch(true)} fullWidth>
-              Select Batch &amp; Forward
-            </Button>
+            <>
+              <Button onClick={() => setSelectingBatch(true)} fullWidth>
+                Select Batch &amp; Forward
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setRejectError(null);
+                  setConfirmReject(true);
+                }}
+                fullWidth
+              >
+                Not Relevant
+              </Button>
+            </>
           ) : null}
           {isFailed ? (
             <Button onClick={handleRetry} loading={retrying} fullWidth>
@@ -294,6 +328,46 @@ export default function MailDetailsPage({ params }: { params: Promise<{ id: stri
             </p>
           ) : null}
         </div>
+      </Modal>
+
+      {/* Not-relevant confirmation */}
+      <Modal
+        open={confirmReject}
+        onClose={() => {
+          setConfirmReject(false);
+          setRejectError(null);
+        }}
+        title="Mark as Not Relevant"
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              fullWidth
+              onClick={() => {
+                setConfirmReject(false);
+                setRejectError(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button fullWidth loading={rejecting} onClick={handleMarkNotRelevant}>
+              Mark Not Relevant
+            </Button>
+          </>
+        }
+      >
+        <p className="text-xs leading-relaxed text-slate-500">
+          This mail will be taken out of the review queue and kept in history as not relevant. You
+          can still retry forwarding it later.
+        </p>
+        {rejectError ? (
+          <p
+            role="alert"
+            className="mt-2 rounded-xl bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700"
+          >
+            {rejectError}
+          </p>
+        ) : null}
       </Modal>
 
       {/* Success feedback */}

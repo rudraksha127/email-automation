@@ -1,9 +1,12 @@
-import { exchangeCode, fetchAccountEmail, saveTokens, consumeState, gmailConfig } from "@/lib/gmail";
+import { exchangeCode, fetchAccountEmail, saveTokens, consumeState } from "@/lib/gmail";
+import { audit } from "@/lib/db";
 
 /**
  * GET /api/gmail/callback — OAuth redirect target (server-side only).
- * Validates state, exchanges the code, verifies the connected account IS the pilot
- * target mailbox, then persists tokens server-side. Never returns tokens to the client.
+ * The organization is derived EXCLUSIVELY from the one-time server-side state
+ * record; no tenant identifier from the browser is ever trusted here.
+ * Validates state, exchanges the code server-side, verifies which mailbox
+ * authorized us, then persists encrypted tokens. Never returns tokens.
  */
 export async function GET(req: Request): Promise<Response> {
   const url = new URL(req.url);
@@ -15,20 +18,18 @@ export async function GET(req: Request): Promise<Response> {
 
   if (oauthError) return fail(`Gmail authorization was denied (${oauthError}).`);
   if (!code || !state) return fail("Missing OAuth response parameters.");
-  if (!consumeState(state)) return fail("Invalid or expired OAuth state. Please try connecting again.");
+
+  const orgId = consumeState(state);
+  if (!orgId) return fail("Invalid or expired OAuth state. Please try connecting again.");
 
   try {
     const tokens = await exchangeCode(code);
     const account = await fetchAccountEmail(tokens.access_token);
-    const cfg = gmailConfig();
-    if (account !== cfg.target.toLowerCase()) {
-      // Never silently bind a different mailbox than the pilot target.
-      return fail(`Connected account ${account} does not match the target mailbox ${cfg.target}.`);
-    }
     if (!tokens.refresh_token) {
       return fail("Google did not return a refresh token. Please reconnect with prompt=consent.");
     }
-    saveTokens(account, tokens.access_token, tokens.refresh_token, tokens.expires_in ?? 3600);
+    saveTokens(orgId, account, tokens.access_token, tokens.refresh_token, tokens.expires_in ?? 3600);
+    audit(orgId, account, "gmail.oauth_callback", `connected ${account}`);
     return Response.redirect(new URL("/settings?gmailConnected=1", url.origin), 302);
   } catch (e) {
     const safe = e instanceof Error ? e.message.slice(0, 200) : "OAuth connection failed";

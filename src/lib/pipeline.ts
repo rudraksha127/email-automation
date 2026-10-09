@@ -1,6 +1,5 @@
-import { getDb, nowIso, uid } from "./db";
-import { detectBatch } from "./batchDetection";
-import { isAllowedSender, normalizeEmail } from "./pilotConfig";
+import { getDb, getSetting, nowIso, uid } from "./db";
+import { detectTarget, type DetectionGroup, type DetectionRule } from "./ruleEngine";
 import { getValidAccessToken } from "./gmail";
 import { fetchWithRetry } from "./retry";
 
@@ -19,19 +18,52 @@ export interface IngestInput {
     gmailAttachmentId?: string | null;
   }>;
 }
+
 export function extractEmail(raw: string): string {
   if (!raw) return "";
   const angle = raw.match(/<([^>]+)>/);
-  if (angle) return normalizeEmail(angle[1]);
+  if (angle) return normalize(angle[1]);
   const addr = raw.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-  if (addr) return normalizeEmail(addr[0]);
-  return normalizeEmail(raw);
+  if (addr) return normalize(addr[0]);
+  return normalize(raw);
 }
-function getSetting(key: string, fb = ""): string {
-  const row = getDb().prepare("SELECT value FROM settings WHERE key=?").get(key) as
-    | { value: string } | undefined;
-  return row?.value ?? fb;
+
+function normalize(email: string): string {
+  return email.trim().toLowerCase();
 }
+
+/** Server-side sender allowlist check — empty allowlist = fail closed. */
+export function isAllowedSender(orgId: string, sender: string): boolean {
+  const email = normalize(sender);
+  if (!email) return false;
+  const row = getDb().prepare(
+    "SELECT 1 FROM sender_rules WHERE org_id=? AND sender_email=? AND active=1"
+  ).get(orgId, email);
+  return Boolean(row);
+}
+
+function loadGroups(orgId: string): DetectionGroup[] {
+  const rows = getDb().prepare(
+    "SELECT id, name FROM batches WHERE org_id=?"
+  ).all(orgId) as Array<{ id: string; name: string }>;
+  return rows;
+}
+
+function loadRules(orgId: string): DetectionRule[] {
+  const rows = getDb().prepare(
+    "SELECT * FROM forwarding_rules WHERE org_id=? AND active=1"
+  ).all(orgId) as Array<Record<string, unknown>>;
+  return rows.map((r) => ({
+    id: String(r.id),
+    targetBatchId: String(r.target_batch_id ?? ""),
+    priority: Number(r.priority ?? 0),
+    active: Number(r.active ?? 1) === 1,
+    senderPattern: (r.sender_pattern as string | null) || null,
+    subjectKeywords: String(r.subject_keywords ?? "").split(",").map((s) => s.trim()).filter(Boolean),
+    bodyKeywords: String(r.body_keywords ?? "").split(",").map((s) => s.trim()).filter(Boolean),
+  }));
+}
+
 export function mailToApi(row: Record<string, unknown>): Record<string, unknown> {
   return {
     id: row.id, gmailMessageId: row.gmail_message_id ?? null,
@@ -73,31 +105,50 @@ function loadFullAttachments(mailId: string): StoredAttachment[] {
     dataB64: (r.data_b64 as string | null) ?? null,
   }));
 }
+
 export function getMailRow(id: string): Record<string, unknown> | undefined {
   return getDb().prepare("SELECT * FROM mails WHERE id=?").get(id) as Record<string, unknown> | undefined;
 }
-export function getMailByGmail(gmailId: string): Record<string, unknown> | undefined {
-  return getDb().prepare("SELECT * FROM mails WHERE gmail_message_id=?").get(gmailId) as Record<string, unknown> | undefined;
+
+/** Tenant-checked fetch — returns undefined unless the row belongs to orgId. */
+export function getOrgMailRow(orgId: string, id: string): Record<string, unknown> | undefined {
+  const row = getMailRow(id);
+  if (!row || String(row.org_id) !== orgId) return undefined;
+  return row;
 }
-function batchName(id: string): string | null {
-  const r = getDb().prepare("SELECT name FROM batches WHERE id=?").get(id) as { name: string } | undefined;
+
+export function getMailByGmail(orgId: string, gmailId: string): Record<string, unknown> | undefined {
+  return getDb().prepare(
+    "SELECT * FROM mails WHERE org_id=? AND gmail_message_id=?"
+  ).get(orgId, gmailId) as Record<string, unknown> | undefined;
+}
+
+function batchName(orgId: string, id: string): string | null {
+  const r = getDb().prepare(
+    "SELECT name FROM batches WHERE id=? AND org_id=?"
+  ).get(id, orgId) as { name: string } | undefined;
   return r?.name ?? null;
 }
-function recipientsOf(batchId: string): Array<{ email: string }> {
-  const rows = getDb().prepare("SELECT email FROM recipients WHERE batch_id=? ORDER BY email ASC").all(batchId) as Array<Record<string, unknown>>;
+
+function recipientsOf(orgId: string, batchId: string): Array<{ email: string }> {
+  const rows = getDb().prepare(
+    "SELECT email FROM recipients WHERE batch_id=? AND org_id=? ORDER BY email ASC"
+  ).all(batchId, orgId) as Array<Record<string, unknown>>;
   return rows.map((r) => ({ email: String(r.email) }));
 }
+
 /**
- * True only if a delivery was RESERVED or SENT for this gmail id.
- * Rows in 'failed' state do NOT count — they must remain retryable.
+ * True only if a delivery was RESERVED or SENT for this gmail id WITHIN THE
+ * ORGANIZATION. Rows in 'failed' state do NOT count — they stay retryable.
  */
-export function alreadyDelivered(gmailMessageId: string): boolean {
+export function alreadyDelivered(orgId: string, gmailMessageId: string): boolean {
   return Boolean(
     getDb().prepare(
-      "SELECT id FROM forward_logs WHERE gmail_message_id=? AND status IN ('pending','sent','sent_manual')"
-    ).get(gmailMessageId)
+      "SELECT id FROM forward_logs WHERE org_id=? AND gmail_message_id=? AND status IN ('pending','sent','sent_manual')"
+    ).get(orgId, gmailMessageId)
   );
 }
+
 function setMail(id: string, patch: Record<string, unknown>): void {
   const keys = Object.keys(patch);
   if (keys.length === 0) return;
@@ -105,18 +156,17 @@ function setMail(id: string, patch: Record<string, unknown>): void {
     .run(...keys.map((k) => patch[k] as unknown), nowIso(), id);
 }
 
-/** Send via Gmail API (MIME). Text body + optional attachments. Returns provider id. */
-export async function sendViaGmail(opts: {
+/** Send via Gmail API (MIME) using the ORGANIZATION's connection. */
+export async function sendViaGmail(orgId: string, opts: {
   to: string[]; cc?: string | null; subject: string; body: string;
   attachments?: Array<{ filename: string; mimeType: string; dataB64: string }>;
 }): Promise<string> {
-  const token = await getValidAccessToken();
+  const token = await getValidAccessToken(orgId);
   const b64url = (s: string): string =>
     Buffer.from(s, "utf8").toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 
   let raw: string;
   if (opts.attachments && opts.attachments.length > 0) {
-    // multipart/mixed: preserve original body AND attachments (spec §11).
     const boundary = `pilot-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
     const parts: string[] = [
       `To: ${opts.to.join(", ")}`,
@@ -146,7 +196,7 @@ export async function sendViaGmail(opts: {
   } else {
     raw = b64url(
       [`To: ${opts.to.join(", ")}`, ...(opts.cc ? [`Cc: ${opts.cc}`] : []),
-        `Subject: ${opts.subject}`, "Content-Type: text/plain; charset=UTF-8", "",
+        `Subject: ${opts.subject}`, `Content-Type: text/plain; charset=UTF-8`, "",
         opts.body].join("\r\n")
     );
   }
@@ -164,31 +214,37 @@ export async function sendViaGmail(opts: {
 }
 
 /**
- * Delivery guard: reserves the gmail message id in forward_logs BEFORE the network
- * call. UNIQUE(gmail_message_id) + status check makes double-send impossible even
- * under concurrent attempts or process crashes between send and log write.
- * Returns false when another attempt already owns the delivery.
+ * Delivery guard: reserves the gmail message id (per organization) in
+ * forward_logs BEFORE the network call. UNIQUE(org_id, gmail_message_id) +
+ * status check makes double-send impossible even under concurrent attempts or
+ * process crashes between send and log write. Returns false when another
+ * attempt already owns the delivery.
  */
-function reserveDelivery(gmailId: string, mailId: string, batchId: string, cc: string): boolean {
+function reserveDelivery(orgId: string, gmailId: string, mailId: string, batchId: string, cc: string): boolean {
   const d = getDb();
   try {
     d.prepare(
-      "INSERT INTO forward_logs(gmail_message_id,mail_id,batch_id,recipient_count,cc_email,provider,status,created_at) VALUES(?,?,?,?,?,?, 'pending', ?)"
-    ).run(gmailId, mailId, batchId, 0, cc, "gmail", nowIso());
+      `INSERT INTO forward_logs(org_id,gmail_message_id,mail_id,batch_id,recipient_count,cc_email,provider,status,created_at)
+       VALUES(?,?,?,?,?,?, 'gmail', 'pending', ?)`
+    ).run(orgId, gmailId, mailId, batchId, 0, cc, nowIso());
     return true;
   } catch {
-    // UNIQUE conflict: delivery already reserved/sent — allow re-open only from 'failed'.
-    const row = d.prepare("SELECT status, created_at FROM forward_logs WHERE gmail_message_id=?").get(gmailId) as
-      | { status: string; created_at: string } | undefined;
+    const row = d.prepare(
+      "SELECT status, created_at FROM forward_logs WHERE org_id=? AND gmail_message_id=?"
+    ).get(orgId, gmailId) as { status: string; created_at: string } | undefined;
     if (row?.status === "failed") {
-      d.prepare("UPDATE forward_logs SET status='pending', mail_id=?, batch_id=?, error=NULL WHERE gmail_message_id=? AND status='failed'").run(mailId, batchId, gmailId);
+      d.prepare(
+        "UPDATE forward_logs SET status='pending', mail_id=?, batch_id=?, error=NULL WHERE org_id=? AND gmail_message_id=? AND status='failed'"
+      ).run(mailId, batchId, orgId, gmailId);
       return true;
     }
     // Stale 'pending' = a previous attempt crashed before/while sending.
-    // Reclaim after 5 minutes so forwarding isn't permanently blocked; the
-    // double-send window this opens is only the crash-between-send-and-finalize gap.
+    // Reclaim after 5 minutes; the remaining double-send window is only the
+    // crash-between-send-and-finalize gap (documented limitation).
     if (row?.status === "pending" && Date.now() - new Date(row.created_at).getTime() > 5 * 60_000) {
-      d.prepare("UPDATE forward_logs SET status='pending', created_at=? WHERE gmail_message_id=? AND status='pending'").run(nowIso(), gmailId);
+      d.prepare(
+        "UPDATE forward_logs SET status='pending', created_at=? WHERE org_id=? AND gmail_message_id=? AND status='pending'"
+      ).run(nowIso(), orgId, gmailId);
       return true;
     }
     return false;
@@ -199,36 +255,46 @@ function reserveDelivery(gmailId: string, mailId: string, batchId: string, cc: s
 export async function deliverStoredMail(
   row: Record<string, unknown>, batchId: string, manual = false
 ): Promise<Record<string, unknown>> {
+  const orgId = String(row.org_id);
   const gmailId = row.gmail_message_id as string | null;
   const mailId = String(row.id);
-  if (gmailId && alreadyDelivered(gmailId)) {
+
+  if (gmailId && alreadyDelivered(orgId, gmailId)) {
     if (row.status !== "forwarded") {
-      setMail(mailId, { status: "forwarded", batch_id: batchId, batch_name: batchName(batchId), failure_reason: null });
+      setMail(mailId, { status: "forwarded", batch_id: batchId, batch_name: batchName(orgId, batchId), failure_reason: null });
     }
     return getMailRow(mailId)!;
   }
-  const cc = getSetting("ccEmail", "");
+
+  // Tenant check: the target batch must belong to the mail's organization.
+  const batch = getDb().prepare("SELECT org_id FROM batches WHERE id=?").get(batchId) as
+    | { org_id: string } | undefined;
+  if (!batch || batch.org_id !== orgId) {
+    setMail(mailId, { status: "needs_review", failure_reason: "Selected group does not belong to this workspace." });
+    return getMailRow(mailId)!;
+  }
+
+  const cc = getSetting(orgId, "ccEmail", "");
   if (!cc) {
-    setMail(mailId, { status: "failed", batch_id: batchId, batch_name: batchName(batchId), failure_reason: "IT Company CC is not configured — forwarding disabled until configured." });
+    setMail(mailId, { status: "failed", batch_id: batchId, batch_name: batchName(orgId, batchId), failure_reason: "CC is not configured — forwarding disabled until configured." });
     return getMailRow(mailId)!;
   }
-  const to = recipientsOf(batchId);
+  const to = recipientsOf(orgId, batchId);
   if (to.length === 0) {
-    setMail(mailId, { status: "needs_review", batch_id: batchId, batch_name: batchName(batchId), failure_reason: "Target batch has no recipients." });
+    setMail(mailId, { status: "needs_review", batch_id: batchId, batch_name: batchName(orgId, batchId), failure_reason: "Target group has no recipients." });
     return getMailRow(mailId)!;
   }
-  // Reserve first (DB-level idempotency), then send, then finalize the log row.
-  if (gmailId && !reserveDelivery(gmailId, mailId, batchId, cc)) {
+  if (gmailId && !reserveDelivery(orgId, gmailId, mailId, batchId, cc)) {
     return getMailRow(mailId)!;
   }
-  // Load stored attachment bytes (fetch from Gmail on demand if not cached).
+
   const storedAtts = loadFullAttachments(mailId);
   const attachPayload: Array<{ filename: string; mimeType: string; dataB64: string }> = [];
   for (const a of storedAtts) {
     let data = a.dataB64;
     if (!data && gmailId && a.gmailAttachmentId) {
       try {
-        const token = await getValidAccessToken();
+        const token = await getValidAccessToken(orgId);
         const res = await fetchWithRetry(
           `https://gmail.googleapis.com/gmail/v1/users/me/messages/${gmailId}/attachments/${a.gmailAttachmentId}`,
           { headers: { Authorization: `Bearer ${token}` } },
@@ -249,40 +315,45 @@ export async function deliverStoredMail(
   const finalizeLog = (status: "sent" | "sent_manual" | "failed", error?: string): void => {
     if (!gmailId) return;
     getDb().prepare(
-      "UPDATE forward_logs SET status=?, recipient_count=?, error=?, created_at=? WHERE gmail_message_id=?"
-    ).run(status, to.length, error ?? null, nowIso(), gmailId);
+      "UPDATE forward_logs SET status=?, recipient_count=?, error=?, created_at=? WHERE org_id=? AND gmail_message_id=?"
+    ).run(status, to.length, error ?? null, nowIso(), orgId, gmailId);
   };
   try {
-    await sendViaGmail({
+    await sendViaGmail(orgId, {
       to: to.map((r) => r.email), cc,
       subject: String(row.subject ?? "").startsWith("Fwd:") ? String(row.subject) : `Fwd: ${String(row.subject ?? "")}`,
       body:
-        `Forwarded from ${String(row.sender ?? "")}\nOriginal subject: ${String(row.subject ?? "")}\nDetected batch: ${batchName(batchId) ?? batchId}\n\n${String(row.body_text ?? "")}` +
+        `Forwarded from ${String(row.sender ?? "")}\nOriginal subject: ${String(row.subject ?? "")}\nDetected group: ${batchName(orgId, batchId) ?? batchId}\n\n${String(row.body_text ?? "")}` +
         (missingAtts > 0 ? `\n\n[Note: ${missingAtts} attachment(s) could not be retrieved from Gmail and were omitted.]` : ""),
       attachments: attachPayload.length > 0 ? attachPayload : undefined,
     });
     const now = nowIso();
-    setMail(mailId, { status: "forwarded", batch_id: batchId, batch_name: batchName(batchId), recipient_count: to.length, cc_email: cc, forwarded_at: now, failure_reason: null });
+    setMail(mailId, { status: "forwarded", batch_id: batchId, batch_name: batchName(orgId, batchId), recipient_count: to.length, cc_email: cc, forwarded_at: now, failure_reason: null });
     finalizeLog(manual ? "sent_manual" : "sent");
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Forwarding failed";
     const safe = msg.replace(/Bearer\s+[A-Za-z0-9\-._~+/=]+/g, "Bearer [redacted]").slice(0, 500);
-    setMail(mailId, { status: "failed", batch_id: batchId, batch_name: batchName(batchId), failure_reason: safe });
+    setMail(mailId, { status: "failed", batch_id: batchId, batch_name: batchName(orgId, batchId), failure_reason: safe });
     finalizeLog("failed", safe);
   }
   return getMailRow(mailId)!;
 }
 
-/** Main ingest: dedupe → allowlist → detect → (auto) forward. */
-export async function ingestMessage(input: IngestInput): Promise<{ mail: Record<string, unknown>; action: string }> {
+/** Main ingest: dedupe -> allowlist -> rules/detect -> (auto) forward. */
+export async function ingestMessage(
+  orgId: string, input: IngestInput
+): Promise<{ mail: Record<string, unknown>; action: string }> {
   const now = nowIso();
   const senderEmail = extractEmail(input.sender);
-  const dupe = getMailByGmail(input.gmailMessageId);
+  const dupe = getMailByGmail(orgId, input.gmailMessageId);
   if (dupe) return { mail: mailToApi(dupe), action: "duplicate_ignored" };
+
   const id = uid("mail");
   getDb().prepare(
-    "INSERT INTO mails(id,gmail_message_id,sender,sender_name,subject,body_text,received_at,status,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?)"
-  ).run(id, input.gmailMessageId, senderEmail, input.senderName ?? null, input.subject ?? "", input.body ?? "", input.receivedAt ?? now, "pending", now, now);
+    `INSERT INTO mails(id,org_id,gmail_message_id,sender,sender_name,subject,body_text,received_at,status,created_at,updated_at)
+     VALUES(?,?,?,?,?,?,?,?,?,?,?)`
+  ).run(id, orgId, input.gmailMessageId, senderEmail, input.senderName ?? null, input.subject ?? "",
+    input.body ?? "", input.receivedAt ?? now, "pending", now, now);
   if (input.attachments && input.attachments.length > 0) {
     const ins = getDb().prepare(
       "INSERT INTO mail_attachments(id,mail_id,filename,mime,size_bytes,gmail_attachment_id) VALUES(?,?,?,?,?,?)"
@@ -291,24 +362,36 @@ export async function ingestMessage(input: IngestInput): Promise<{ mail: Record<
       ins.run(uid("att"), id, a.filename, a.mimeType, a.sizeBytes, a.gmailAttachmentId ?? null);
     }
   }
-  if (!isAllowedSender(senderEmail)) {
+
+  if (!isAllowedSender(orgId, senderEmail)) {
     setMail(id, { status: "needs_review", failure_reason: `Unauthorized sender (${senderEmail}) — held for review, not forwarded.` });
     return { mail: mailToApi(getMailRow(id)!), action: "unauthorized_held" };
   }
-  const det = detectBatch(input.subject ?? "", input.body ?? "");
+
+  const det = detectTarget({
+    groups: loadGroups(orgId),
+    rules: loadRules(orgId),
+    sender: senderEmail,
+    subject: input.subject ?? "",
+    body: input.body ?? "",
+  });
+
   if (det.kind === "none") {
-    setMail(id, { status: "needs_review", failure_reason: "No supported batch (2027/2028) detected in subject or body." });
+    setMail(id, { status: "needs_review", failure_reason: "No configured group detected in subject or body." });
     return { mail: mailToApi(getMailRow(id)!), action: "needs_review" };
   }
   if (det.kind === "ambiguous") {
-    setMail(id, { status: "needs_review", failure_reason: `Ambiguous batches detected (${det.years.join(", ")}) — held for review, not auto-forwarded.` });
+    setMail(id, { status: "needs_review", failure_reason: `${det.reason} — held for review, not auto-forwarded.` });
     return { mail: mailToApi(getMailRow(id)!), action: "needs_review" };
   }
-  setMail(id, { batch_id: det.batchId, batch_name: batchName(det.batchId) });
-  if (getSetting("autoForwarding", "1") !== "1") {
+
+  setMail(id, { batch_id: det.batchId, batch_name: batchName(orgId, det.batchId) });
+
+  if (getSetting(orgId, "autoForwarding", "1") !== "1") {
     setMail(id, { status: "pending", failure_reason: "Auto-forwarding is disabled — awaiting manual action." });
     return { mail: mailToApi(getMailRow(id)!), action: "pending_manual" };
   }
+
   const delivered = await deliverStoredMail(getMailRow(id)!, det.batchId);
   const status = String(delivered.status);
   return { mail: mailToApi(delivered), action: status === "forwarded" ? "forwarded" : status };

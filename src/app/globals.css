@@ -13,9 +13,10 @@
   --color-brand-700: #1d4ed8;
   --color-brand-800: #1e40af;
 
-  --font-sans:
-    -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
-    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* Desktop Stitch references specify Inter; mobile approved design keeps
+     the native system stack as fallback for identical rendering offline. */
+  --font-sans: var(--font-inter, -apple-system), -apple-system, BlinkMacSystemFont,
+    "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 @layer base {

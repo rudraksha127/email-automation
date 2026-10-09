@@ -1,6 +1,8 @@
 /**
- * Gmail inbox sync — polls target mailbox for new messages and ingests them.
- * Dedupe via gmail_message_id. Safe to run concurrently (UNIQUE guards).
+ * Gmail inbox sync — polls ONE organization's connected mailbox for new
+ * messages and ingests them into that organization's pipeline.
+ * Dedupe via (org_id, gmail_message_id). Safe to run sequentially across
+ * orgs (single poller, in-flight guard in instrumentation).
  */
 import { getTokens, getValidAccessToken } from "./gmail";
 import { getDb, nowIso } from "./db";
@@ -82,7 +84,7 @@ function extractBody(payload: Record<string, unknown>): {
   return { text, attachments };
 }
 
-export async function syncGmailInbox(limit = 25): Promise<{
+export async function syncGmailInbox(orgId: string, limit = 25): Promise<{
   checked: number;
   ingested: number;
   forwarded: number;
@@ -90,9 +92,9 @@ export async function syncGmailInbox(limit = 25): Promise<{
   errors: string[];
 }> {
   const out = { checked: 0, ingested: 0, forwarded: 0, needsReview: 0, errors: [] as string[] };
-  const tok = getTokens();
-  if (!tok?.access_token) throw new Error("Gmail not connected");
-  const token = await getValidAccessToken();
+  const tok = getTokens(orgId);
+  if (!tok?.access_token) throw new Error("Gmail not connected for this workspace");
+  const token = await getValidAccessToken(orgId);
   const q = encodeURIComponent(`newer_than:30d`);
   const listRes = await fetchWithRetry(
     `https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${q}&maxResults=${limit}`,
@@ -107,12 +109,12 @@ export async function syncGmailInbox(limit = 25): Promise<{
   const list = (await listRes.json()) as { messages?: Array<{ id: string }> };
   const ids = (list.messages ?? []).map((m) => m.id);
 
-  // Persist history cursor to avoid re-listing entire history on growth.
+  // Already-ingested ids for THIS organization (tenant-scoped dedupe).
   const seen = new Set(
     (
       getDb()
-        .prepare("SELECT gmail_message_id AS id FROM mails WHERE gmail_message_id IS NOT NULL")
-        .all() as Array<{ id: string }>
+        .prepare("SELECT gmail_message_id AS id FROM mails WHERE org_id=? AND gmail_message_id IS NOT NULL")
+        .all(orgId) as Array<{ id: string }>
     ).map((r) => r.id)
   );
 
@@ -134,13 +136,13 @@ export async function syncGmailInbox(limit = 25): Promise<{
       const { text, attachments } = extractBody((full.payload ?? {}) as Record<string, unknown>);
       const from = header(headers, "From");
       const subject = header(headers, "Subject");
-      const nameMatch = from.match(/^"?([^"<]+)"?\s*<.+>$/);
+      const nameMatch = from.match(/^\"?([^\"<]+)\"?\s*<.+>$/);
       const senderName = nameMatch ? nameMatch[1].trim() : null;
       const receivedAt = full.internalDate
         ? new Date(Number(full.internalDate)).toISOString()
         : nowIso();
 
-      const { action } = await ingestMessage({
+      const { action } = await ingestMessage(orgId, {
         gmailMessageId: full.id,
         sender: from || "unknown",
         senderName,
@@ -160,11 +162,9 @@ export async function syncGmailInbox(limit = 25): Promise<{
   }
 
   try {
-    getDb()
-      .prepare(
-        "INSERT INTO settings(key,value) VALUES('lastSyncedAt',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value"
-      )
-      .run(nowIso());
+    getDb().prepare(
+      "INSERT INTO settings(org_id,key,value) VALUES(?,?,?) ON CONFLICT(org_id,key) DO UPDATE SET value=excluded.value"
+    ).run(orgId, "lastSyncedAt", nowIso());
   } catch {
     /* noop */
   }

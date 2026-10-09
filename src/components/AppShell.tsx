@@ -20,33 +20,62 @@ const NAV_ITEMS = [
   { href: paths.settings, label: "Settings", icon: SettingsIcon },
 ] as const;
 
-/** Top brand bar shared by all authenticated screens. */
+/** Top brand bar shared by all authenticated screens (incl. workspace switcher). */
 export function AppHeader() {
-  const { user } = useAuth();
+  const { user, orgs, orgId, switchWorkspace } = useAuth();
   const initial = (user?.email?.[0] ?? "A").toUpperCase();
 
+  function handleSwitch(nextOrgId: string) {
+    if (nextOrgId === paths.workspace) {
+      window.location.assign(paths.workspace);
+      return;
+    }
+    if (!nextOrgId || nextOrgId === orgId) return;
+    void switchWorkspace(nextOrgId).then(() => {
+      // Full navigation so every screen refetches the new workspace's data.
+      window.location.assign(paths.dashboard);
+    });
+  }
+
   return (
-    <header className="shrink-0 border-b border-slate-100 bg-white px-5 py-3">
-      <div className="flex items-center justify-between">
-        <Link href={paths.dashboard} className="flex items-center space-x-2.5">
+    <header className="sticky top-0 z-30 shrink-0 border-b border-slate-200 bg-white px-5 py-3 shadow-xs lg:px-6 lg:py-2.5">
+      <div className="flex items-center justify-between gap-3">
+        <Link href={paths.dashboard} className="flex min-w-0 items-center space-x-2.5">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-white shadow-sm shadow-brand-600/20">
             <GraduationCapIcon className="h-5 w-5" />
           </span>
-          <span>
-            <span className="block text-xs font-bold uppercase tracking-tight text-slate-900">
+          <span className="min-w-0">
+            <span className="block truncate text-xs font-bold uppercase tracking-tight text-slate-900">
               IT Department
             </span>
-            <span className="block text-[11px] font-medium leading-tight text-slate-400">
+            <span className="block truncate text-[11px] font-medium leading-tight text-slate-400">
               Mail Automation
             </span>
           </span>
         </Link>
-        <span
-          aria-hidden="true"
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-700 text-xs font-bold text-white shadow-sm shadow-brand-700/20"
-        >
-          {initial}
-        </span>
+        <div className="flex shrink-0 items-center gap-2">
+          {orgs.length > 0 ? (
+            <select
+              aria-label="Active workspace"
+              value={orgId ?? ""}
+              onChange={(e) => handleSwitch(e.target.value)}
+              className="max-w-[132px] truncate rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-[11px] font-semibold text-slate-700 focus:border-brand-500 focus:outline-none sm:max-w-[180px]"
+            >
+              {orgs.map((o) => (
+                <option key={o.orgId} value={o.orgId}>
+                  {o.name}
+                </option>
+              ))}
+              <option value={paths.workspace}>＋ Create workspace…</option>
+            </select>
+          ) : null}
+          <span
+            aria-hidden="true"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-700 text-xs font-bold text-white shadow-sm shadow-brand-700/20"
+          >
+            {initial}
+          </span>
+        </div>
       </div>
     </header>
   );
@@ -95,10 +124,10 @@ export function AppNav() {
         </ul>
       </nav>
 
-      {/* Desktop: left sidebar rail */}
+      {/* Desktop: left sidebar rail (w-60 per Stitch web reference) */}
       <nav
         aria-label="Primary"
-        className="fixed inset-y-0 left-0 z-30 hidden w-56 flex-col border-r border-slate-100 bg-white px-4 py-5 lg:flex"
+        className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-slate-200 bg-white px-4 py-5 lg:flex"
       >
         <Link href={paths.dashboard} className="mb-8 flex items-center space-x-2.5 px-2">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-white">

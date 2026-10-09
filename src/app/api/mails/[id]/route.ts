@@ -1,13 +1,14 @@
-import { err, json, requireAdmin } from "@/lib/auth";
-import { getMailRow, mailToApi } from "@/lib/pipeline";
+import { err, json, requireOrg } from "@/lib/auth";
+import { getOrgMailRow, mailToApi } from "@/lib/pipeline";
 
 interface Params { params: Promise<{ id: string }> }
 
 export async function GET(_req: Request, { params }: Params): Promise<Response> {
-  const admin = await requireAdmin();
-  if (!admin) return err("Unauthorized", 401);
+  const auth = await requireOrg();
+  if (!auth.ok) return err(auth.message, auth.status);
   const { id } = await params;
-  const row = getMailRow(id);
+  // Cross-tenant ids behave exactly like nonexistent ids (404).
+  const row = getOrgMailRow(auth.orgId, id);
   if (!row) return err("Mail not found", 404);
   return json(mailToApi(row));
 }

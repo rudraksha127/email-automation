@@ -8,21 +8,26 @@ import { useAuth } from "@/hooks/AuthContext";
 import { LoadingState } from "@/components/ui/EmptyState";
 
 /**
- * Blocks unauthenticated access to protected routes.
- * Renders a loading shell while the stored session is being restored,
- * then redirects to /login when no session exists.
+ * Blocks unauthenticated access to protected routes and enforces workspace
+ * selection: signed-in users without an active workspace are sent to the
+ * workspace picker (they cannot see any data before a workspace is chosen).
  */
 export function AuthGuard({ children }: { children: ReactNode }) {
-  const { user, initializing } = useAuth();
+  const { user, initializing, orgId } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const isProtected = PROTECTED_SET.has(pathname);
 
   useEffect(() => {
-    if (!initializing && !user && isProtected) {
+    if (initializing) return;
+    if (!user && isProtected) {
       router.replace(paths.login);
+      return;
     }
-  }, [initializing, user, isProtected, router]);
+    if (user && !orgId && pathname !== paths.workspace) {
+      router.replace(paths.workspace);
+    }
+  }, [initializing, user, orgId, isProtected, pathname, router]);
 
   if (!isProtected) return <>{children}</>;
 
@@ -30,22 +35,27 @@ export function AuthGuard({ children }: { children: ReactNode }) {
 
   if (!user) return <LoadingState label="Redirecting to login…" />;
 
+  // On the picker itself: render immediately (no workspace needed to choose).
+  if (pathname === paths.workspace) return <>{children}</>;
+
+  if (!orgId) return <LoadingState label="Selecting workspace…" />;
+
   return <>{children}</>;
 }
 
-/** Authenticated users should not sit on /login — send them to the dashboard. */
+/** Authenticated users should not sit on /login or /register. */
 export function GuestGuard({ children }: { children: ReactNode }) {
-  const { user, initializing } = useAuth();
+  const { user, initializing, orgId } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
-  const isGuestPage = pathname === paths.login;
+  const isGuestPage = pathname === paths.login || pathname === paths.register;
 
   useEffect(() => {
     if (!initializing && user && isGuestPage) {
-      router.replace(paths.dashboard);
+      router.replace(user && orgId ? paths.dashboard : paths.workspace);
     }
-  }, [initializing, user, isGuestPage, router]);
+  }, [initializing, user, orgId, isGuestPage, router]);
 
   if (isGuestPage && (initializing || user)) {
     return <LoadingState label="Loading…" />;
@@ -55,8 +65,9 @@ export function GuestGuard({ children }: { children: ReactNode }) {
 }
 
 const PROTECTED_SET = new Set<string>([
-  "/dashboard",
-  "/mails",
-  "/batches",
-  "/settings",
+  paths.dashboard,
+  paths.mails,
+  paths.batches,
+  paths.settings,
+  paths.workspace,
 ]);

@@ -1,28 +1,24 @@
-import { getDb } from "./db";
-import { getTokens } from "./gmail";
+import { getDb, getSetting, setSetting } from "./db";
+import { connectionInfo } from "./gmail";
 import type { AppSettings } from "@/types";
 
-function getSetting(key: string, fb = ""): string {
-  const row = getDb().prepare("SELECT value FROM settings WHERE key=?").get(key) as
-    | { value: string } | undefined;
-  return row?.value ?? fb;
-}
+export { setSetting };
 
-export function setSetting(key: string, value: string): void {
-  getDb().prepare(
-    "INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value"
-  ).run(key, value);
-}
-
-export function loadSettings(): AppSettings {
-  const tokens = getTokens();
-  const connected = Boolean(tokens?.refresh_token);
-  const account = tokens?.account_email ?? (getSetting("gmailAccount") || null);
+/** Server-managed connection settings + org-editable values, scoped to one org. */
+export function loadSettings(orgId: string): AppSettings {
+  const info = connectionInfo(orgId);
+  const org = getDb().prepare("SELECT name FROM organizations WHERE id=?").get(orgId) as
+    | { name: string } | undefined;
+  const senders = getDb().prepare(
+    "SELECT sender_email FROM sender_rules WHERE org_id=? ORDER BY sender_email ASC"
+  ).all(orgId) as Array<{ sender_email: string }>;
   return {
-    ccEmail: getSetting("ccEmail"),
-    autoForwarding: getSetting("autoForwarding", "1") === "1",
-    gmailConnected: connected && getSetting("gmailConnected", "0") === "1",
-    gmailAccount: connected ? account : null,
-    lastSyncedAt: getSetting("lastSyncedAt") || null,
+    organizationName: org?.name ?? "",
+    allowedSenders: senders.map((s) => s.sender_email),
+    ccEmail: getSetting(orgId, "ccEmail"),
+    autoForwarding: getSetting(orgId, "autoForwarding", "1") === "1",
+    gmailConnected: info.connected && getSetting(orgId, "gmailConnected", "0") === "1",
+    gmailAccount: info.connected ? info.account : null,
+    lastSyncedAt: info.lastSyncedAt,
   };
 }

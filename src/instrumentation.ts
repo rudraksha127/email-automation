@@ -13,18 +13,25 @@ export async function register(): Promise<void> {
   let running = false;
 
   const tick = async (): Promise<void> => {
-    if (running) return;
+    if (running) return; // single poller — no overlapping cycles
     running = true;
     try {
-      const { getTokens } = await import("./lib/gmail");
-      if (!getTokens()?.refresh_token) return; // not connected yet — skip quietly
+      const { listConnectedOrgs } = await import("./lib/db");
       const { syncGmailInbox } = await import("./lib/gmailSync");
-      const result = await syncGmailInbox(10);
-      if (result.errors.length > 0) {
-        console.warn(`[pilot-sync] ${result.errors.length} error(s):`, result.errors.slice(0, 3));
+      // Sequential per-organization: each org only ever uses ITS OWN tokens;
+      // the in-flight guard above guarantees no duplicate pollers.
+      for (const orgId of listConnectedOrgs()) {
+        try {
+          const result = await syncGmailInbox(orgId, 10);
+          if (result.errors.length > 0) {
+            console.warn(`[mail-sync] org=${orgId} ${result.errors.length} error(s):`, result.errors.slice(0, 3));
+          }
+        } catch (e) {
+          console.warn(`[mail-sync] org=${orgId} failed:`, e instanceof Error ? e.message : e);
+        }
       }
     } catch (e) {
-      console.warn("[pilot-sync] cycle failed:", e instanceof Error ? e.message : e);
+      console.warn("[mail-sync] cycle failed:", e instanceof Error ? e.message : e);
     } finally {
       running = false;
     }
@@ -33,5 +40,5 @@ export async function register(): Promise<void> {
   // First pass shortly after boot, then on the configured interval.
   setTimeout(() => void tick(), 10_000);
   setInterval(() => void tick(), intervalMs);
-  console.log(`[pilot-sync] background Gmail poller started (every ${intervalMs / 1000}s)`);
+  console.log(`[mail-sync] background Gmail poller started (every ${intervalMs / 1000}s)`);
 }

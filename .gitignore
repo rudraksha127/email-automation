@@ -54,3 +54,6 @@ prisma/*.db
 # misc
 *.tsbuildinfo
 next-env.d.ts
+
+# Browser sweep artifacts (regenerable via scripts/*.mjs)
+sweep-shots/

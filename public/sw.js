@@ -16,7 +16,16 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(STATIC_CACHE)
-      .then((cache) => cache.addAll([OFFLINE_URL, "/manifest.webmanifest", "/icons/icon.svg"]))
+      .then((cache) =>
+        cache.addAll([
+          OFFLINE_URL,
+          "/manifest.webmanifest",
+          "/icons/icon.svg",
+          "/icons/icon-192.png",
+          "/icons/icon-512.png",
+          "/icons/icon-512-maskable.png",
+        ])
+      )
       .then(() => self.skipWaiting())
   );
 });
@@ -51,7 +60,8 @@ self.addEventListener("fetch", (event) => {
   const isImmutableAsset =
     url.pathname.startsWith("/_next/static/") ||
     url.pathname.startsWith("/icons/") ||
-    url.pathname === "/manifest.webmanifest";
+    url.pathname === "/manifest.webmanifest" ||
+    url.pathname === "/sw.js";
   if (!isImmutableAsset) return;
 
   // Cache-first for immutable, content-hashed assets.

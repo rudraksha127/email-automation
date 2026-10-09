@@ -1,4 +1,4 @@
-import { checkLogin, createSession, err, json, requireAdmin } from "@/lib/auth";
+import { checkLogin, createSession, err, json, requireUser } from "@/lib/auth";
 import { clientIp, rateLimit, rateLimitReset } from "@/lib/rateLimit";
 
 export async function POST(req: Request): Promise<Response> {
@@ -29,7 +29,7 @@ export async function POST(req: Request): Promise<Response> {
 }
 
 export async function GET(): Promise<Response> {
-  const admin = await requireAdmin();
-  if (!admin) return err("Unauthorized", 401);
+  const user = await requireUser();
+  if (!user) return err("Unauthorized", 401);
   return json({ ok: true });
 }

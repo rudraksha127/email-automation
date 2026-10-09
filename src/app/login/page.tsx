@@ -2,6 +2,7 @@
 
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { paths } from "@/routes/paths";
 import { useAuth } from "@/hooks/AuthContext";
@@ -123,7 +124,13 @@ export default function LoginPage() {
       </form>
 
       <footer className="mt-auto pt-10 text-center">
-        <p className="text-xs font-semibold tracking-tight text-slate-800">IT Department</p>
+        <p className="text-xs font-medium text-slate-500">
+          No account yet?{" "}
+          <Link href={paths.register} className="font-semibold text-brand-600 hover:text-brand-700">
+            Create one
+          </Link>
+        </p>
+        <p className="mt-2 text-xs font-semibold tracking-tight text-slate-800">IT Department</p>
         <p className="text-[11px] text-slate-500">Mail Automation System</p>
       </footer>
     </main>

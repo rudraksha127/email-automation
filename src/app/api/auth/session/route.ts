@@ -1,7 +1,8 @@
-import { err, json, requireAdmin } from "@/lib/auth";
+import { err, json, sessionState } from "@/lib/auth";
 
+/** GET /api/auth/session — current user + workspaces (never tokens). */
 export async function GET(): Promise<Response> {
-  const admin = await requireAdmin();
-  if (!admin) return err("Unauthorized", 401);
-  return json({ user: admin });
+  const state = await sessionState();
+  if (!state.user) return err("Unauthorized", 401);
+  return json({ user: state.user, orgId: state.orgId, orgs: state.orgs });
 }

@@ -60,7 +60,7 @@ export default function DashboardPage() {
       <PageHeading title="Dashboard" subtitle="Overview of email automation" />
 
       {/* Summary grid — click-through to the relevant filtered section */}
-      <section aria-label="Summary" className="grid grid-cols-2 gap-3">
+      <section aria-label="Summary" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard stat={STAT_META.newMails} value={stats.data?.newMails} loading={stats.loading} />
         <StatCard stat={STAT_META.forwardedToday} value={stats.data?.forwardedToday} loading={stats.loading} />
         <StatCard stat={STAT_META.needsReview} value={stats.data?.needsReview} loading={stats.loading} />
@@ -91,7 +91,7 @@ export default function DashboardPage() {
             description="Incoming departmental mails will appear here once processing begins."
           />
         ) : (
-          <div className="space-y-2.5">
+          <div className="space-y-2.5 lg:grid lg:grid-cols-2 lg:gap-x-6 lg:gap-y-2.5 lg:space-y-0">
             {recent.map((m) => (
               <Link
                 key={m.id}
