@@ -22,7 +22,9 @@ frontend and API are served from the same origin by design.
 
 ### Backend + frontend: Render Web Service (recommended for the pilot)
 
-A single Render Web Service runs the whole app:
+A ready-to-use [`render.yaml`](../render.yaml) Blueprint is committed at the
+repository root (service + persistent disk + secret env-var stubs). A single
+Render Web Service runs the whole app:
 
 - **Build command:** `npm ci && npm run build`
 - **Start command:** `npm start` (Next respects the `PORT` Render assigns)
@@ -84,7 +86,8 @@ never put secrets behind that prefix.
 
 ## 4. First deployment checklist
 
-1. Create the Render Web Service from the GitHub repository (branch `main`).
+1. Create the Render Web Service from the GitHub repository (branch `main`)
+   — Render → New → Blueprint and pick `render.yaml`, or configure manually.
 2. Attach a persistent disk; set `PILOT_DB_PATH` to it.
 3. Set every required env var above (real values only in the dashboard).
 4. Deploy; verify `GET https://<backend-host>/api/health` returns

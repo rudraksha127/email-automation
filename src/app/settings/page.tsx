@@ -86,6 +86,10 @@ function SettingsInner() {
 
   const [disconnecting, setDisconnecting] = useState(false);
 
+  // Manual inbox sync (member-triggered) — POST /api/gmail/sync
+  const [syncing, setSyncing] = useState(false);
+  const [syncMsg, setSyncMsg] = useState<{ ok: boolean; text: string } | null>(null);
+
   // Keep the CC field in sync with loaded settings without fighting the user's typing:
   // adjust during render only when a NEW loaded value arrives (React's "adjust state
   // when a prop changes" pattern — no setState inside an effect).
@@ -229,6 +233,26 @@ function SettingsInner() {
       setInviteError(err instanceof Error ? err.message : "Unable to remove the member.");
     } finally {
       setBusyMember(null);
+    }
+  }
+
+  async function handleSyncNow() {
+    setSyncing(true);
+    setSyncMsg(null);
+    try {
+      const r = await http.post<{ checked: number; ingested: number; forwarded: number; needsReview: number }>(
+        "/api/gmail/sync",
+        {}
+      );
+      setSyncMsg({
+        ok: true,
+        text: `Checked ${r.checked} · ${r.ingested} new · ${r.forwarded} forwarded · ${r.needsReview} in review`,
+      });
+      settings.reload();
+    } catch (err) {
+      setSyncMsg({ ok: false, text: err instanceof Error ? err.message : "Sync failed." });
+    } finally {
+      setSyncing(false);
     }
   }
 
@@ -683,6 +707,16 @@ function SettingsInner() {
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-1.5">
+                  {s.gmailConnected ? (
+                    <button
+                      type="button"
+                      onClick={handleSyncNow}
+                      disabled={syncing}
+                      className="rounded-lg border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 transition-transform active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {syncing ? "Syncing…" : "Sync Now"}
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     disabled={!isAdmin}
@@ -707,6 +741,16 @@ function SettingsInner() {
                   ) : null}
                 </div>
               </div>
+              {syncMsg ? (
+                <p
+                  role={syncMsg.ok ? "status" : "alert"}
+                  className={`rounded-lg px-2.5 py-1.5 text-[10px] font-medium ${
+                    syncMsg.ok ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"
+                  }`}
+                >
+                  {syncMsg.text}
+                </p>
+              ) : null}
               {s.lastSyncedAt ? (
                 <div className="flex items-center justify-between border-t border-slate-100 pt-2 text-[10px] text-slate-400">
                   <span>Last synced: {formatDateTime(s.lastSyncedAt)}</span>

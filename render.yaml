@@ -1,0 +1,49 @@
+# Render Blueprint — Mail Automation PWA (single web service).
+#
+# First deploy: push this file to `main`, then in Render → New → Blueprint,
+# select the repository. After the service exists, fill the secret env vars
+# in the dashboard (they are intentionally NOT committed here) and follow
+# docs/DEPLOYMENT.md §4-5 for the Gmail OAuth redirect URI.
+services:
+  - type: web
+    name: mail-automation
+    runtime: node
+    plan: starter # upgrade for continuous background polling headroom
+    region: singapore # pick the region closest to the department
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+
+    disk:
+      name: mail-automation-data
+      mountPath: /disks/pilot
+      sizeGB: 1
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # SQLite file lives on the persistent disk — without it the database
+      # resets on every redeploy.
+      - key: PILOT_DB_PATH
+        value: /disks/pilot/data/pilot.db
+      # ---- Secrets: set real values in the Render dashboard, never here ----
+      - key: GMAIL_CLIENT_ID
+        sync: false
+      - key: GMAIL_CLIENT_SECRET
+        sync: false
+      - key: GMAIL_REDIRECT_URI
+        sync: false # https://<your-render-host>/api/gmail/callback
+      - key: GMAIL_TOKEN_KEY
+        sync: false # openssl rand -hex 32
+      - key: PILOT_ADMIN_EMAIL
+        sync: false
+      - key: PILOT_ADMIN_PASSWORD
+        sync: false
+      # Optional seeds (comma-separated); manage from the UI after first boot:
+      - key: GMAIL_TARGET_EMAIL
+        sync: false
+      - key: PILOT_ALLOWED_SENDERS
+        sync: false
+      - key: PILOT_CC_EMAIL
+        sync: false
