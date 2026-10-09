@@ -9,8 +9,8 @@
  *  - The offline page makes NO claim that email automation works offline.
  */
 
-const OFFLINE_URL = "/offline";
-const STATIC_CACHE = "pwa-static-v1";
+const OFFLINE_URL = "/offline.html";
+const STATIC_CACHE = "pwa-static-v2";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -25,6 +25,8 @@ self.addEventListener("install", (event) => {
           "/icons/icon-512.png",
           "/icons/icon-512-maskable.png",
         ])
+        /* NOTE: /offline.html is a fully static, JS-free page — it renders
+         * instantly from cache even when no script chunks can be fetched. */
       )
       .then(() => self.skipWaiting())
   );

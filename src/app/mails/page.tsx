@@ -9,6 +9,7 @@ import { StatusBadge, BatchChip } from "@/components/ui/Badge";
 import { EmptyState, LoadingState, ErrorState } from "@/components/ui/EmptyState";
 import { SearchIcon, MailIcon } from "@/components/icons";
 import { useAsync } from "@/hooks/useAsync";
+import { useDebounced } from "@/hooks/useDebounced";
 import { mailsService } from "@/services";
 import { avatarInitial, formatRelativeTimestamp, statusLabel } from "@/utils/format";
 import { cn } from "@/utils/cn";
@@ -28,9 +29,12 @@ export default function MailsPage() {
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
 
+  // One API call per typing pause instead of one per keystroke.
+  const debouncedSearch = useDebounced(search, 300);
+
   const mails = useAsync<MailSummary[]>(
-    () => mailsService.list({ status, search }),
-    [status, search]
+    () => mailsService.list({ status, search: debouncedSearch }),
+    [status, debouncedSearch]
   );
 
   return (

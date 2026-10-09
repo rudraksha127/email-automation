@@ -27,7 +27,10 @@
   body {
     background-color: var(--color-slate-50);
     color: var(--color-slate-800);
-    font-family: var(--font-sans);
+    /* --font-inter is injected by next/font (layout.tsx) — the Stitch-approved
+     * desktop typeface, self-hosted with display:swap. System stack is the
+     * instant fallback, so first paint never blocks on the font file. */
+    font-family: var(--font-inter), var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
 
