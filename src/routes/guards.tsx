@@ -43,13 +43,13 @@ export function AuthGuard({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-/** Authenticated users should not sit on /login or /register. */
+/** Authenticated users should not sit on the login page. */
 export function GuestGuard({ children }: { children: ReactNode }) {
   const { user, initializing, orgId } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
-  const isGuestPage = pathname === paths.login || pathname === paths.register;
+  const isGuestPage = pathname === paths.login;
 
   useEffect(() => {
     if (!initializing && user && isGuestPage) {

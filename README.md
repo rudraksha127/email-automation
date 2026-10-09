@@ -64,8 +64,8 @@ gitignored and verified by the CI secret scan.
 Approved Google Stitch layouts (17 screens: `code.html` + `screen.png` each)
 are preserved in
 [`docs/design-references/stitch_faculty_student_count_app/`](docs/design-references/stitch_faculty_student_count_app/)
-and are the source of truth for UI fidelity. Browser-verification scripts
-(viewport/functional/PWA sweeps) live in [`scripts/`](scripts/).
+and are the source of truth for UI fidelity. PWA icons can be regenerated
+from the brand SVG with `node scripts/generate-pwa-icons.mjs`.
 
 ## Status
 

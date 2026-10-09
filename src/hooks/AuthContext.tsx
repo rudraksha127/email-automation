@@ -23,7 +23,6 @@ interface AuthContextValue {
   /** Role within the active workspace. */
   role: "admin" | "member" | null;
   login: (email: string, password: string, remember: boolean) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
   switchWorkspace: (orgId: string) => Promise<void>;
   refresh: () => Promise<void>;
@@ -85,14 +84,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [refresh]
   );
 
-  const register = useCallback(
-    async (email: string, password: string, name: string) => {
-      await http.post("/api/auth/register", { email, password, name });
-      await refresh();
-    },
-    [refresh]
-  );
-
   const logout = useCallback(async () => {
     await authService.logout();
     clearSession();
@@ -115,7 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user, initializing, orgId, orgs, role,
-        login, register, logout, switchWorkspace, refresh,
+        login, logout, switchWorkspace, refresh,
       }}
     >
       {children}
