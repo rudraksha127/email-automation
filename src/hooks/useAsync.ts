@@ -22,12 +22,23 @@ export function useAsync<T>(fn: () => Promise<T>, deps: unknown[] = []): AsyncSt
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
   const fnRef = useRef(fn);
-  fnRef.current = fn;
+
+  // Keep the latest fn without writing refs during render.
+  useEffect(() => {
+    fnRef.current = fn;
+  }, [fn]);
+
+  // When reload() bumps tick, flip back to loading during render
+  // (React's recommended alternative to setState-in-effect).
+  const [prevTick, setPrevTick] = useState(tick);
+  if (prevTick !== tick) {
+    setPrevTick(tick);
+    setLoading(true);
+    setError(null);
+  }
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    setError(null);
     fnRef
       .current()
       .then((result) => {

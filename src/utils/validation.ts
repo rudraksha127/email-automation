@@ -56,6 +56,7 @@ export function validateChangePassword(current: string, next: string, confirm: s
   if (!next) errors.newPassword = "New password is required";
   else if (next.length < 8) errors.newPassword = "New password must be at least 8 characters";
   else if (next === current) errors.newPassword = "New password must be different from the current password";
-  if (confirm !== next) errors.confirmPassword = "Passwords do not match";
+  if (!confirm) errors.confirmPassword = "Please confirm your new password";
+  else if (confirm !== next) errors.confirmPassword = "Passwords do not match";
   return errors;
 }

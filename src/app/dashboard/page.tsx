@@ -1,5 +1,6 @@
 "use client";
 
+
 import Link from "next/link";
 import { paths } from "@/routes/paths";
 import { PageHeading, AppLayout } from "@/components/layout";

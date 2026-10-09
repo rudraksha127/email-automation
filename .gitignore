@@ -22,6 +22,8 @@ prisma/dev.db
 prisma/dev.db-journal
 *.db
 *.sqlite
+# pilot runtime data (SQLite + WAL sidecars) — never commit
+data/
 
 # gmail tokens / credentials
 oauth-tokens.json

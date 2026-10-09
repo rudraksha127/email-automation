@@ -26,6 +26,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .then((session) => {
         if (!cancelled) setUser(session);
       })
+      .catch(() => {
+        // 401 when signed out (or transient failure) — treat as no session.
+        if (!cancelled) setUser(null);
+      })
       .finally(() => {
         if (!cancelled) setInitializing(false);
       });

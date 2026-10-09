@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { paths } from "@/routes/paths";
 import { PageHeading, AppLayout } from "@/components/layout";
 import { LoadingState, ErrorState } from "@/components/ui/EmptyState";
@@ -13,12 +14,15 @@ import { useAuth } from "@/hooks/AuthContext";
 import { settingsService, authService } from "@/services";
 import { formatDateTime } from "@/utils/format";
 import { validateCcEmail, validateChangePassword } from "@/utils/validation";
-import type { AppSettings } from "@/types";
 
-export default function SettingsPage() {
+function SettingsInner() {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const oauthParams = useSearchParams();
   const settings = useAsync(() => settingsService.get(), []);
+  // OAuth callback results (?gmailError=… / ?gmailConnected=1) — read at render time.
+  const oauthError = oauthParams.get("gmailError");
+  const oauthConnected = oauthParams.get("gmailConnected") === "1";
 
   const [ccEmail, setCcEmail] = useState("");
   const [ccError, setCcError] = useState<string | null>(null);
@@ -39,10 +43,15 @@ export default function SettingsPage() {
 
   const [loggingOut, setLoggingOut] = useState(false);
 
-  // Keep the CC field in sync with loaded settings without fighting the user's typing.
-  useEffect(() => {
-    if (settings.data) setCcEmail(settings.data.ccEmail);
-  }, [settings.data]);
+  // Keep the CC field in sync with loaded settings without fighting the user's typing:
+  // adjust during render only when a NEW loaded value arrives (React's "adjust state
+  // when a prop changes" pattern — no setState inside an effect).
+  const loadedCc = settings.data?.ccEmail;
+  const [lastLoadedCc, setLastLoadedCc] = useState<string | null>(null);
+  if (loadedCc !== undefined && loadedCc !== lastLoadedCc) {
+    setLastLoadedCc(loadedCc);
+    setCcEmail(loadedCc);
+  }
 
   async function handleSaveCc(e: React.FormEvent) {
     e.preventDefault();
@@ -215,6 +224,15 @@ export default function SettingsPage() {
           {/* Gmail connection */}
           <section className="space-y-2" aria-label="Gmail connection">
             <h2 className="text-xs font-semibold text-slate-800">Gmail Connection</h2>
+            {oauthError ? (
+              <p role="alert" className="rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-[11px] font-medium text-rose-700">
+                {oauthError}
+              </p>
+            ) : oauthConnected && s.gmailConnected ? (
+              <p role="status" className="rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2 text-[11px] font-medium text-emerald-700">
+                Gmail connected successfully as {s.gmailAccount ?? "account"}.
+              </p>
+            ) : null}
             <div className="space-y-2.5 rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
@@ -240,6 +258,11 @@ export default function SettingsPage() {
                 </div>
                 <button
                   type="button"
+                  onClick={() => {
+                    // Full page load is required: the server responds with a 302 to Google's consent screen.
+                    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+                    window.location.href = "/api/gmail/connect";
+                  }}
                   className="rounded-lg border border-brand-100 bg-brand-50 px-2.5 py-1 text-[11px] font-semibold text-brand-600 transition-transform active:scale-95"
                 >
                   Reconnect
@@ -349,5 +372,14 @@ export default function SettingsPage() {
         </form>
       </Modal>
     </AppLayout>
+  );
+}
+
+/** useSearchParams requires a Suspense boundary when prerendering. */
+export default function SettingsPage() {
+  return (
+    <Suspense fallback={<LoadingState label="Loading settings…" />}>
+      <SettingsInner />
+    </Suspense>
   );
 }

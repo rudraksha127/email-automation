@@ -147,6 +147,6 @@ describe("format utilities", () => {
   });
 
   it("derives avatar initials", () => {
-    expect(avatarInitial("admin@acropolis.in")).toBe("A");
+    expect(avatarInitial("admin@fixture.test")).toBe("A");
   });
 });

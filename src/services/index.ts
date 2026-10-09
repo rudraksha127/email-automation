@@ -17,11 +17,11 @@ import { ApiSettingsService } from "./settings/apiSettingsService";
 /**
  * Service registry.
  *
- * Phase 0 runs on isolated mock implementations (NEXT_PUBLIC_USE_MOCK_API != "false").
- * Once the backend endpoints exist, set NEXT_PUBLIC_USE_MOCK_API=false and every
- * screen switches to the real API with zero UI changes.
+ * PILOT MODE runs on the real API by default.
+ * Mock implementations remain ONLY for isolated unit tests and are NEVER
+ * used by the UI unless NEXT_PUBLIC_USE_MOCK_API=true is set explicitly.
  */
-const useMock = process.env.NEXT_PUBLIC_USE_MOCK_API !== "false";
+const useMock = process.env.NEXT_PUBLIC_USE_MOCK_API === "true";
 
 export const authService: AuthService = useMock ? new MockAuthService() : new ApiAuthService();
 export const mailsService: MailsService = useMock ? new MockMailsService() : new ApiMailsService();

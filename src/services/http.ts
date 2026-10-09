@@ -8,15 +8,15 @@ async function request<T>(path: string, init?: RequestInit): Promise<HttpResult<
     credentials: "same-origin",
     ...init,
   });
-  if (res.status === 401) {
-    // Centralized handling of expired/unauthorized sessions (Phase 3 wires redirect).
-    const error = new Error("UNAUTHORIZED") as Error & { status: number };
-    error.status = 401;
-    throw error;
-  }
   if (!res.ok) {
+    // Surface the server's human-readable message (validation/auth failures).
+    // The status is attached so callers can distinguish session expiry.
     const body = (await res.json().catch(() => null)) as { error?: string } | null;
-    throw new Error(body?.error ?? `Request failed (${res.status})`);
+    const fallback =
+      res.status === 401 ? "Your session has expired. Please sign in again." : `Request failed (${res.status})`;
+    const error = new Error(body?.error ?? fallback) as Error & { status: number };
+    error.status = res.status;
+    throw error;
   }
   if (res.status === 204) return undefined as T;
   return (await res.json()) as T;

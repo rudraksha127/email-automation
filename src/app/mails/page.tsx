@@ -1,5 +1,6 @@
 "use client";
 
+
 import Link from "next/link";
 import { useState } from "react";
 import { paths } from "@/routes/paths";
@@ -8,7 +9,7 @@ import { StatusBadge, BatchChip } from "@/components/ui/Badge";
 import { EmptyState, LoadingState, ErrorState } from "@/components/ui/EmptyState";
 import { SearchIcon, MailIcon } from "@/components/icons";
 import { useAsync } from "@/hooks/useAsync";
-import { mailsService, batchesService } from "@/services";
+import { mailsService } from "@/services";
 import { avatarInitial, formatRelativeTimestamp, statusLabel } from "@/utils/format";
 import { cn } from "@/utils/cn";
 import { ALL_STATUSES } from "@/services/mails/mailsService";
@@ -136,6 +137,3 @@ export default function MailsPage() {
     </AppLayout>
   );
 }
-
-// Keep batchesService imported for future batch filtering (Phase 4 wires the dropdown).
-void batchesService;

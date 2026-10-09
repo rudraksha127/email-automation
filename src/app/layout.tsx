@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import "./globals.css";
 import { AuthProvider } from "@/hooks/AuthContext";
 import { AuthGuard, GuestGuard } from "@/routes/guards";
+import { LoadingState } from "@/components/ui/EmptyState";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 
 export const metadata: Metadata = {
   title: {
@@ -28,14 +31,20 @@ export const viewport: Viewport = {
   themeColor: "#2563eb",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full bg-slate-50 text-slate-800">
+        <ServiceWorkerRegister />
         <AuthProvider>
-          <GuestGuard>
-            <AuthGuard>{children}</AuthGuard>
-          </GuestGuard>
+          {/* Suspense boundary: guards use usePathname(), which streams in during prerender. */}
+          <Suspense fallback={<LoadingState label="Loading…" />}>
+            <GuestGuard>
+              <AuthGuard>{children}</AuthGuard>
+            </GuestGuard>
+          </Suspense>
         </AuthProvider>
       </body>
     </html>

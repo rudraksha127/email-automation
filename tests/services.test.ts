@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { applyMailFilters } from "@/services/mails/mailsService";
 import type { MailSummary } from "@/services/mails/mailsService";
 import { MockBatchesService } from "@/services/batches/mockBatchesService";
@@ -6,6 +6,7 @@ import { MockRecipientsService } from "@/services/recipients/mockRecipientsServi
 import { MockMailsService } from "@/services/mails/mockMailsService";
 import { MockSettingsService } from "@/services/settings/mockSettingsService";
 import { MockAuthService } from "@/services/auth/mockAuthService";
+import { mockDb } from "@/services/mock/mockDb";
 
 function summary(partial: Partial<MailSummary>): MailSummary {
   return {
@@ -101,17 +102,71 @@ describe("MockRecipientsService", () => {
 });
 
 describe("MockMailsService forwarding", () => {
+  beforeEach(() => {
+    mockDb.mails = [
+      {
+        id: "m1",
+        gmailMessageId: "g-1001",
+        sender: "sender.a@fixture.test",
+        senderName: "Lucky Udiya",
+        subject: "Pilot 2027",
+        bodyText: "Batch 2027",
+        receivedAt: new Date().toISOString(),
+        status: "forwarded",
+        batchId: "b2027",
+        batchName: "Batch 2027",
+        recipientCount: 3,
+        failureReason: null,
+        attachments: [],
+        forwardedAt: new Date().toISOString(),
+        ccEmail: "cc@fixture.test",
+      },
+      {
+        id: "m2",
+        gmailMessageId: "g-1002",
+        sender: "sender.b@fixture.test",
+        senderName: "Rudraksh Udiya",
+        subject: "Review mail",
+        bodyText: "General mail",
+        receivedAt: new Date().toISOString(),
+        status: "needs_review",
+        batchId: null,
+        batchName: null,
+        recipientCount: null,
+        failureReason: "No supported batch detected",
+        attachments: [],
+        forwardedAt: null,
+        ccEmail: null,
+      },
+      {
+        id: "m3",
+        gmailMessageId: "g-1003",
+        sender: "sender.a@fixture.test",
+        senderName: "Lucky Udiya",
+        subject: "Pilot 2028",
+        bodyText: "Batch 2028",
+        receivedAt: new Date().toISOString(),
+        status: "forwarded",
+        batchId: "b2028",
+        batchName: "Batch 2028",
+        recipientCount: 4,
+        failureReason: null,
+        attachments: [],
+        forwardedAt: new Date().toISOString(),
+        ccEmail: "cc@fixture.test",
+      },
+    ];
+  });
+
   it("rejects double forwarding (duplicate protection)", async () => {
     const svc = new MockMailsService();
-    // m3 starts forwarded in the mock data
-    await expect(svc.forward("m3", "b2024")).rejects.toThrow(/already been forwarded/);
+    await expect(svc.forward("m3", "b2028")).rejects.toThrow(/already been forwarded/);
   });
 
   it("rejects forwarding to an empty batch and records CC", async () => {
     const batches = new MockBatchesService();
     const empty = await batches.create({ name: "Empty Batch" });
     const svc = new MockMailsService();
-    // m2 is needs_review with no recipient conflicts
     await expect(svc.forward("m2", empty.id)).rejects.toThrow(/no recipients/);
   });
 
