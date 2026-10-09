@@ -8,6 +8,7 @@ export const paths = {
   batches: "/batches",
   batchDetails: (id: string) => `/batches/${id}`,
   settings: "/settings",
+  profile: "/profile",
 } as const;
 
 /** Routes that require an authenticated admin session. */
@@ -16,4 +17,5 @@ export const PROTECTED_PATHS = [
   paths.mails,
   paths.batches,
   paths.settings,
+  paths.profile,
 ] as const;

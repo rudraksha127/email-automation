@@ -34,6 +34,7 @@ type LoginRoute = typeof import("@/app/api/auth/login/route");
 type SessionRoute = typeof import("@/app/api/auth/session/route");
 type LogoutRoute = typeof import("@/app/api/auth/logout/route");
 type ChangePwRoute = typeof import("@/app/api/auth/change-password/route");
+type ProfileRoute = typeof import("@/app/api/auth/profile/route");
 type BatchesRoute = typeof import("@/app/api/batches/route");
 type BatchRoute = typeof import("@/app/api/batches/[id]/route");
 type RecipientsRoute = typeof import("@/app/api/batches/[id]/recipients/route");
@@ -48,6 +49,7 @@ let login: LoginRoute;
 let session: SessionRoute;
 let logout: LogoutRoute;
 let changePw: ChangePwRoute;
+let profileRoute: ProfileRoute;
 let batches: BatchesRoute;
 let batch: BatchRoute;
 let recipients: RecipientsRoute;
@@ -66,6 +68,7 @@ beforeAll(async () => {
   session = await import("@/app/api/auth/session/route");
   logout = await import("@/app/api/auth/logout/route");
   changePw = await import("@/app/api/auth/change-password/route");
+  profileRoute = await import("@/app/api/auth/profile/route");
   batches = await import("@/app/api/batches/route");
   batch = await import("@/app/api/batches/[id]/route");
   recipients = await import("@/app/api/batches/[id]/recipients/route");
@@ -162,6 +165,31 @@ describe("authentication", () => {
     expect((await session.GET()).status).toBe(200);
     expect((await logout.POST()).status).toBe(200);
     expect((await session.GET()).status).toBe(401);
+  });
+
+  it("profile requires session and allows updating metadata", async () => {
+    expect((await profileRoute.GET()).status).toBe(401);
+    await loginAs();
+    const res = await profileRoute.GET();
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.email).toBe(ADMIN_EMAIL);
+    expect(body.employeeId).toBe("HOD-IT-001");
+    expect(body.departmentScope).toBe("IT & CSE-DS");
+
+    const patchReq = new Request("http://test.local/api/auth/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: "Prof. (Dr.) Prashant Lakkadwala",
+        employeeId: "HOD-IT-999",
+      }),
+    });
+    const patchRes = await profileRoute.PATCH(patchReq);
+    expect(patchRes.status).toBe(200);
+    const updated = await patchRes.json();
+    expect(updated.name).toBe("Prof. (Dr.) Prashant Lakkadwala");
+    expect(updated.employeeId).toBe("HOD-IT-999");
   });
 
   it("change-password validates the current password and enforces a minimum length", async () => {

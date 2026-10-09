@@ -11,18 +11,28 @@ import {
   MailIcon,
   InboxIcon,
   SettingsIcon,
+  UserIcon,
 } from "@/components/icons";
+import { useSyncExternalStore } from "react";
+
+const emptySubscribe = () => () => {};
+function useIsClient() {
+  return useSyncExternalStore(emptySubscribe, () => true, () => false);
+}
 
 const NAV_ITEMS = [
   { href: paths.dashboard, label: "Dashboard", icon: HomeIcon },
   { href: paths.mails, label: "Mails", icon: MailIcon },
   { href: paths.batches, label: "Batches", icon: InboxIcon },
   { href: paths.settings, label: "Settings", icon: SettingsIcon },
+  { href: paths.profile, label: "Profile", icon: UserIcon },
 ] as const;
 
 /** Top brand bar shared by all authenticated screens (incl. workspace switcher). */
 export function AppHeader() {
   const { user, orgs, orgId, switchWorkspace } = useAuth();
+  const mounted = useIsClient();
+
   const initial = (user?.email?.[0] ?? "A").toUpperCase();
 
   function handleSwitch(nextOrgId: string) {
@@ -54,7 +64,7 @@ export function AppHeader() {
           </span>
         </Link>
         <div className="flex shrink-0 items-center gap-2">
-          {orgs.length > 0 ? (
+          {mounted && orgs.length > 0 ? (
             <select
               aria-label="Active workspace"
               value={orgId ?? ""}
@@ -69,12 +79,13 @@ export function AppHeader() {
               <option value={paths.workspace}>＋ Create workspace…</option>
             </select>
           ) : null}
-          <span
-            aria-hidden="true"
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-700 text-xs font-bold text-white shadow-sm shadow-brand-700/20"
+          <Link
+            href={paths.profile}
+            title="Institutional Profile & Settings"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-700 text-xs font-bold text-white shadow-sm shadow-brand-700/20 transition-opacity hover:opacity-90"
           >
             {initial}
-          </span>
+          </Link>
         </div>
       </div>
     </header>

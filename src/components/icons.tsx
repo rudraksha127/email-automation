@@ -305,3 +305,76 @@ export function GmailIcon(props: IconProps) {
     </svg>
   );
 }
+
+export function KeyIcon(props: IconProps) {
+  return (
+    <BaseIcon {...props}>
+      <path d="M21 2l-2 2m-1.5 1.5L14 9l-1.5-1.5-2 2 1.5 1.5-2 2-4-4a5.5 5.5 0 1 0 7 7l4-4 2 2 2-2-1.5-1.5L21 4l1-2z" />
+      <circle cx="7.5" cy="16.5" r="1.5" />
+    </BaseIcon>
+  );
+}
+
+export function DevicesIcon(props: IconProps) {
+  return (
+    <BaseIcon {...props}>
+      <rect x="2" y="3" width="14" height="12" rx="2" />
+      <rect x="14" y="9" width="8" height="12" rx="2" />
+      <line x1="6" y1="19" x2="10" y2="19" />
+    </BaseIcon>
+  );
+}
+
+export function UserCheckIcon(props: IconProps) {
+  return (
+    <BaseIcon {...props}>
+      <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="8.5" cy="7" r="4" />
+      <polyline points="17 11 19 13 23 9" />
+    </BaseIcon>
+  );
+}
+
+export function HelpCircleIcon(props: IconProps) {
+  return (
+    <BaseIcon {...props}>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
+    </BaseIcon>
+  );
+}
+
+export function InfoIcon(props: IconProps) {
+  return (
+    <BaseIcon {...props}>
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="16" x2="12" y2="12" />
+      <line x1="12" y1="8" x2="12.01" y2="8" />
+    </BaseIcon>
+  );
+}
+
+export function BuildingIcon(props: IconProps) {
+  return (
+    <BaseIcon {...props}>
+      <path d="M3 21h18" />
+      <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16" />
+      <path d="M9 9h1" />
+      <path d="M9 13h1" />
+      <path d="M9 17h1" />
+      <path d="M14 9h1" />
+      <path d="M14 13h1" />
+      <path d="M14 17h1" />
+    </BaseIcon>
+  );
+}
+
+export function CheckIcon(props: IconProps) {
+  return (
+    <BaseIcon {...props}>
+      <polyline points="20 6 9 17 4 12" />
+    </BaseIcon>
+  );
+}
+
