@@ -59,13 +59,37 @@ and a dev admin seeded with a generated password printed to the console.
 Real secrets never belong in git — `.env*`, `data/`, and token files are
 gitignored and verified by the CI secret scan.
 
+## Repository map
+
+```
+.
+|-- src/                  # The application (Next.js App Router)
+|   |-- app/              #   UI routes + backend API route handlers (same process)
+|   |-- components/       #   Shared UI components + design tokens consumer
+|   |-- hooks/ lib/ services/ routes/ types/ utils/
+|-- tests/                # Vitest unit + API integration suites
+|-- public/               # PWA runtime assets (manifest, sw.js, icons, offline.html)
+|-- design/               # Approved Google Stitch references (NOT bundled)
+|   `-- stitch-references/stitch_faculty_student_count_app/   (19 screens)
+|-- database/             # Schema documentation (DDL lives in src/lib/db.ts)
+|-- docs/                 # DEPLOYMENT.md
+|-- scripts/              # Icon generation
+|-- .github/workflows/    # CI (secret scan, lint, typecheck, tests, build)
+`-- render.yaml           # Production blueprint (persistent disk + secrets)
+```
+
+The frontend and backend are **one deployable unit by design**: Next.js
+route handlers (`src/app/api/**`) serve the same origin as the UI, so a
+single Render web service runs everything (see `docs/DEPLOYMENT.md` §2).
+
 ## Design references
 
-Approved Google Stitch layouts (17 screens: `code.html` + `screen.png` each)
-are preserved in
-[`docs/design-references/stitch_faculty_student_count_app/`](docs/design-references/stitch_faculty_student_count_app/)
-and are the source of truth for UI fidelity. PWA icons can be regenerated
-from the brand SVG with `node scripts/generate-pwa-icons.mjs`.
+Approved Google Stitch layouts (19 screen folders, each with `code.html` +
+`screen.png`) are preserved in
+[`design/stitch-references/`](design/stitch-references/) and are the source
+of truth for UI fidelity — they are documentation, never shipped in the
+production bundle. PWA icons can be regenerated from the brand SVG with
+`node scripts/generate-pwa-icons.mjs`.
 
 ## Status
 
