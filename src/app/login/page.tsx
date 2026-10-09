@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { paths } from "@/routes/paths";
 import { useAuth } from "@/hooks/AuthContext";
@@ -174,13 +173,7 @@ export default function LoginPage() {
             Acropolis Institute of Technology and Research Indore
           </p>
           <p className="mt-1 text-xs text-slate-500">Department of Information Technology</p>
-          <p className="mt-4 text-xs text-slate-600">
-            No account yet?{" "}
-            <Link href={paths.register} className="font-bold text-brand-600 hover:text-brand-700">
-              Create one
-            </Link>
-          </p>
-          <p className="mx-auto mt-4 w-fit rounded-full bg-slate-200/70 px-3.5 py-1.5 text-[11px] font-semibold text-slate-600">
+          <p className="mt-4 w-fit rounded-full bg-slate-200/70 px-3.5 py-1.5 text-[11px] font-semibold text-slate-600">
             Developed by Student of IT Department
           </p>
         </footer>
