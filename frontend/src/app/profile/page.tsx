@@ -75,6 +75,7 @@ export default function ProfilePage() {
 
   // Edit profile form
   const [nameInput, setNameInput] = useState("");
+  const [roleTitleInput, setRoleTitleInput] = useState("");
   const [empIdInput, setEmpIdInput] = useState("");
   const [deptScopeInput, setDeptScopeInput] = useState("");
   const [batchesInput, setBatchesInput] = useState("");
@@ -86,6 +87,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (profileState.data && !editProfileOpen) {
       setNameInput(profileState.data.name);
+      setRoleTitleInput(profileState.data.roleTitle || "Role: HOD");
       setEmpIdInput(profileState.data.employeeId);
       setDeptScopeInput(profileState.data.departmentScope);
       setBatchesInput(profileState.data.activeBatches);
@@ -95,6 +97,7 @@ export default function ProfilePage() {
   /** Populate form inputs with current profile values and open the edit modal */
   function handleOpenEdit() {
     setNameInput(profile.name);
+    setRoleTitleInput(profile.roleTitle || "Role: HOD");
     setEmpIdInput(profile.employeeId);
     setDeptScopeInput(profile.departmentScope);
     setBatchesInput(profile.activeBatches);
@@ -133,6 +136,7 @@ export default function ProfilePage() {
     try {
       await http.patch<ProfileResponse>("/api/auth/profile", {
         name: nameInput.trim(),
+        roleTitle: roleTitleInput.trim(),
         employeeId: empIdInput.trim(),
         departmentScope: deptScopeInput.trim(),
         activeBatches: batchesInput.trim(),
@@ -509,6 +513,20 @@ export default function ProfilePage() {
               required
               value={nameInput}
               onChange={(e) => setNameInput(e.target.value)}
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs font-medium text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-700">
+              Role / Designation
+            </label>
+            <input
+              type="text"
+              required
+              value={roleTitleInput}
+              onChange={(e) => setRoleTitleInput(e.target.value)}
+              placeholder="e.g. Placement Coordinator"
               className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs font-medium text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none"
             />
           </div>
