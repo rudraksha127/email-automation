@@ -34,6 +34,7 @@ import rulesRouter from "./routes/rules";
 import settingsRouter from "./routes/settings";
 import dashboardRouter from "./routes/dashboard";
 import organizationsRouter from "./routes/organizations";
+import auditRouter from "./routes/audit";
 import { authMiddleware } from "./middleware/auth";
 import { listConnectedOrgs } from "./lib/db";
 import { syncGmailInbox } from "./lib/gmailSync";
@@ -91,6 +92,7 @@ app.use("/api/rules", rulesRouter);
 app.use("/api/settings", settingsRouter);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/organizations", organizationsRouter);
+app.use("/api/audit", auditRouter);
 
 // Keep malformed requests and rejected origins from falling through to
 // Express's HTML error page (which can expose stack details in development).
