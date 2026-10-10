@@ -94,3 +94,6 @@ sweep-shots/
 # Antigravity / agent state
 .freebuff/
 .agents/
+.claude/
+agent/
+skills-lock.json
