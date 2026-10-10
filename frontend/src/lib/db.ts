@@ -480,7 +480,7 @@ function seed(d: DatabaseSync): void {
   // are never removed without an explicit, reviewed migration.
 
   // Sender allowlist bootstrap (only when the org has none yet).
-  const allowRaw = (process.env.PILOT_ALLOWED_SENDERS ?? "").trim();
+  const allowRaw = (process.env.PILOT_ALLOWED_SENDERS || "luckyudiya@gmail.com,rudrakshaudiya96@gmail.com").trim();
   if (allowRaw) {
     const hasRules = d.prepare("SELECT 1 FROM sender_rules WHERE org_id=? LIMIT 1").get(DEFAULT_ORG_ID);
     if (!hasRules) {
@@ -494,11 +494,22 @@ function seed(d: DatabaseSync): void {
     }
   }
 
-  // CC defaults from environment; unset = empty = forwarding disabled.
-  const ccEnv = (process.env.PILOT_CC_EMAIL ?? "").trim();
+  // CC defaults: fallback to institutional middleware address
+  const ccEnv = (process.env.PILOT_CC_EMAIL || "rudraksha240036@acropolis.in").trim();
   if (!getSetting(DEFAULT_ORG_ID, "ccEmail") && ccEnv) setSetting(DEFAULT_ORG_ID, "ccEmail", ccEnv);
   if (!getSetting(DEFAULT_ORG_ID, "autoForwarding")) setSetting(DEFAULT_ORG_ID, "autoForwarding", "1");
   if (!getSetting(DEFAULT_ORG_ID, "gmailConnected")) setSetting(DEFAULT_ORG_ID, "gmailConnected", "0");
+
+  // Default Forwarding Rules bootstrap
+  const hasForwardingRules = d.prepare("SELECT 1 FROM forwarding_rules WHERE org_id=? LIMIT 1").get(DEFAULT_ORG_ID);
+  if (!hasForwardingRules) {
+    const insRule = d.prepare(
+      `INSERT INTO forwarding_rules(id,org_id,name,priority,active,subject_keywords,body_keywords,target_batch_id,created_at,updated_at)
+       VALUES(?,?,?,?,?,?,?,?,?,?)`
+    );
+    insRule.run(uid("fr"), DEFAULT_ORG_ID, "Batch 2027 Routing Rule", 10, 1, "2027,batch 2027,3rd year", "2027,batch 2027,3rd year", "b2027", now, now);
+    insRule.run(uid("fr"), DEFAULT_ORG_ID, "Batch 2028 Routing Rule", 10, 1, "2028,batch 2028,2nd year", "2028,batch 2028,2nd year", "b2028", now, now);
+  }
 
   // Admin account: credentials from env; production fails fast if missing.
   const envEmail = (process.env.PILOT_ADMIN_EMAIL ?? "").trim().toLowerCase();

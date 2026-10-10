@@ -25,9 +25,9 @@ export const PILOT_TARGET_MAILBOX = (process.env.GMAIL_TARGET_EMAIL ?? "").trim(
  * Senders accepted for auto-forwarding (comma-separated env list).
  * Empty = fail closed: every sender is held for manual review.
  */
-export const PILOT_ALLOWED_SENDERS: string[] = csv(process.env.PILOT_ALLOWED_SENDERS).map((e) =>
-  e.toLowerCase()
-);
+export const PILOT_ALLOWED_SENDERS: string[] = csv(
+  process.env.PILOT_ALLOWED_SENDERS || "luckyudiya@gmail.com,rudrakshaudiya96@gmail.com"
+).map((e) => e.toLowerCase());
 
 export type PilotYear = "2027" | "2028";
 
@@ -41,8 +41,13 @@ export interface PilotBatchSeed {
 }
 
 function recipientsFor(year: PilotYear): Array<{ name: string; email: string }> {
-  return csv(process.env[`PILOT_BATCH_${year}_RECIPIENTS`]).map((email, i) => ({
-    name: `Pilot Student ${i + 1}`,
+  const defaultRecipients: Record<PilotYear, string> = {
+    "2027": "cg712987@gmail.com,sonaliporwal82@gmail.com,cutie9459@gmail.com",
+    "2028": "cpie55808@gmail.com,kishteejaiswal11@gmail.com,kuttakutti92247@gmail.com,poojaporwal6734@gmail.com",
+  };
+  const raw = process.env[`PILOT_BATCH_${year}_RECIPIENTS`] || defaultRecipients[year];
+  return csv(raw).map((email, i) => ({
+    name: `Student ${i + 1}`,
     email,
   }));
 }
