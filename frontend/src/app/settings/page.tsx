@@ -462,7 +462,7 @@ function SettingsInner() {
                 </>
               ) : (
                 <a
-                  href="/api/gmail/auth"
+                  href="/api/gmail/connect"
                   className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-blue-700"
                 >
                   <GmailIcon className="h-4 w-4" />

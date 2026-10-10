@@ -27,8 +27,8 @@ function getFrontendBaseUrl(): string {
   return "http://localhost:3000";
 }
 
-/** GET /api/gmail/connect — start OAuth consent flow */
-router.get("/connect", requireWorkspace(true), (req, res) => {
+/** GET /api/gmail/connect & /api/gmail/auth — start OAuth consent flow */
+const handleConnect = (req: any, res: any) => {
   const auth = req.orgAuth!;
   if (!auth.ok) {
     res.status(auth.status).json({ error: auth.message });
@@ -53,7 +53,10 @@ router.get("/connect", requireWorkspace(true), (req, res) => {
   } catch (e) {
     res.status(500).json({ error: e instanceof Error ? e.message : "Unable to start OAuth" });
   }
-});
+};
+
+router.get("/connect", requireWorkspace(true), handleConnect);
+router.get("/auth", requireWorkspace(true), handleConnect);
 
 /** GET /api/gmail/callback — OAuth redirect handler from Google */
 router.get("/callback", async (req, res) => {
