@@ -1,64 +1,93 @@
-# dependencies
+# ==============================================================================
+# Mail Automation Platform — .gitignore
+# ==============================================================================
+# RULE: Nothing secret EVER gets committed. When in doubt, add it here.
+
+# ======================== ENVIRONMENT & SECRETS ========================
+# ALL .env variants — catch everything
+.env
+.env.*
+!.env.example
+!.env*.example
+*.env
+# explicit patterns just in case
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production
+.env.production.local
+.env.staging
+
+# ======================== CREDENTIALS & KEYS ========================
+# Gmail OAuth / Google API
+credentials*.json
+client_secret*.json
+token*.json
+oauth-tokens.json
+*credential*
+crediential*
+*.pem
+*.key
+*.p12
+*.pfx
+service-account*.json
+
+# Generic secrets
+*secret*
+!client_secret*.json.example
+*.keystore
+
+# ======================== DEPENDENCIES ========================
 node_modules/
 .pnp
 .pnp.js
+.pnp.cjs
+.yarn/install-state.gz
 
-# build outputs
+# ======================== BUILD OUTPUTS ========================
 .next/
 out/
 build/
 dist/
-
-# env & secrets — NEVER commit
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production
-.env.production.local
-.env*.local
-.env*.production
-
-# db (local dev)
-prisma/dev.db
-prisma/dev.db-journal
-*.db
-*.sqlite
-# pilot runtime data (SQLite + WAL sidecars) — never commit
-data/
-
-# gmail tokens / credentials
-oauth-tokens.json
-token*.json
-credentials*.json
-client_secret*.json
-*credential*
-crediential*
-
-# testing
-coverage/
-.vitest/
-
-# logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-*.log
-
-# os / editor
-.DS_Store
-Thumbs.db
-.idea/
-.vscode/
-*.swp
-
-# prisma generated (kept out of git, generated on install/build)
-prisma/*.db
-
-# misc
 *.tsbuildinfo
 next-env.d.ts
 
+# ======================== DATABASE (local dev) ========================
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+prisma/dev.db
+prisma/dev.db-journal
+data/
+
+# ======================== TESTING ========================
+coverage/
+.vitest/
+.nyc_output/
+
+# ======================== LOGS ========================
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# ======================== OS & EDITOR ========================
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ======================== MISC ========================
 # Browser sweep artifacts (regenerable via scripts/*.mjs)
 sweep-shots/
 
