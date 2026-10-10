@@ -227,6 +227,12 @@ export default function LoginPage() {
             Acropolis Institute of Technology and Research Indore
           </p>
           <p className="mt-1 text-xs text-slate-500">Department of Information Technology</p>
+          
+          <div className="mt-4 flex justify-center gap-4 text-xs font-medium text-brand-600">
+            <a href="/privacy-policy" className="hover:underline">Privacy Policy</a>
+            <a href="/terms" className="hover:underline">Terms of Service</a>
+          </div>
+
           <button
             type="button"
             onClick={() => setShowDevModal(true)}
