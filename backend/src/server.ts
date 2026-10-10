@@ -1,6 +1,30 @@
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+
+// Auto-load environment files for local development
+if (typeof process.loadEnvFile === "function") {
+  const envCandidates = [
+    resolve(process.cwd(), ".env.local"),
+    resolve(process.cwd(), ".env"),
+    resolve(process.cwd(), "backend", ".env.local"),
+    resolve(process.cwd(), "backend", ".env"),
+    resolve(__dirname, "..", ".env.local"),
+    resolve(__dirname, "..", ".env"),
+  ];
+  for (const envPath of envCandidates) {
+    if (existsSync(envPath)) {
+      try {
+        process.loadEnvFile(envPath);
+      } catch {
+        // ignore syntax/duplicate warnings
+      }
+    }
+  }
+}
+
 import healthRouter from "./routes/health";
 import authRouter from "./routes/auth";
 import gmailRouter from "./routes/gmail";
