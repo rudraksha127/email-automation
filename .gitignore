@@ -14,8 +14,10 @@ dist/
 .env.local
 .env.development.local
 .env.test.local
+.env.production
 .env.production.local
 .env*.local
+.env*.production
 
 # db (local dev)
 prisma/dev.db
