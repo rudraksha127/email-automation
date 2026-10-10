@@ -101,6 +101,8 @@ export interface MailListFilters {
   status: MailStatus | "all";
   batchId: string | "all";
   search: string;
+  limit?: number;
+  offset?: number;
 }
 
 export interface ChangePasswordInput {

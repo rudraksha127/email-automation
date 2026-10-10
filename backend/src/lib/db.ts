@@ -264,6 +264,7 @@ function createIndexes(d: DatabaseSync): void {
   d.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_mails_gmail ON mails(org_id, gmail_message_id);");
   d.exec("CREATE INDEX IF NOT EXISTS idx_mails_org ON mails(org_id);");
   d.exec("CREATE INDEX IF NOT EXISTS idx_mails_status ON mails(org_id, status);");
+  d.exec("CREATE INDEX IF NOT EXISTS idx_mails_fwd_date ON mails(org_id, status, forwarded_at);");
   d.exec("CREATE INDEX IF NOT EXISTS idx_mails_batch ON mails(batch_id);");
   d.exec("CREATE INDEX IF NOT EXISTS idx_mails_received ON mails(org_id, received_at DESC);");
   d.exec("CREATE INDEX IF NOT EXISTS idx_fwd_mail ON forward_logs(mail_id);");

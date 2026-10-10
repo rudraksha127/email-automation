@@ -83,17 +83,6 @@ export default function ProfilePage() {
   const [profileMsg, setProfileMsg] = useState<string | null>(null);
   const [profileError, setProfileError] = useState<string | null>(null);
 
-  // Sync form inputs whenever fresh profile data arrives from server (only when not actively editing)
-  useEffect(() => {
-    if (profileState.data && !editProfileOpen) {
-      setNameInput(profileState.data.name);
-      setRoleTitleInput(profileState.data.roleTitle || "Role: HOD");
-      setEmpIdInput(profileState.data.employeeId);
-      setDeptScopeInput(profileState.data.departmentScope);
-      setBatchesInput(profileState.data.activeBatches);
-    }
-  }, [profileState.data, editProfileOpen]);
-
   /** Populate form inputs with current profile values and open the edit modal */
   function handleOpenEdit() {
     setNameInput(profile.name);

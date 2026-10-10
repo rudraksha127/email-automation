@@ -35,5 +35,9 @@ export function applyMailFilters(mails: MailSummary[], filters: Partial<MailList
       (m) => m.subject.toLowerCase().includes(q) || m.sender.toLowerCase().includes(q)
     );
   }
-  return out.sort((a, b) => new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime());
+  let result = out.sort((a, b) => new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime());
+  if (filters.limit) {
+    result = result.slice(filters.offset || 0, (filters.offset || 0) + filters.limit);
+  }
+  return result;
 }

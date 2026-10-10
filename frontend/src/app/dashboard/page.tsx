@@ -51,9 +51,9 @@ function StatCard({
 
 export default function DashboardPage() {
   const stats = useAsync<DashboardStats>(() => settingsService.getDashboardStats(), []);
-  const mails = useAsync<MailSummary[]>(() => mailsService.list({ status: "all", batchId: "all", search: "" }), []);
+  const mails = useAsync<MailSummary[]>(() => mailsService.list({ status: "all", batchId: "all", search: "", limit: 4 }), []);
 
-  const recent = (mails.data ?? []).slice(0, 4);
+  const recent = (mails.data ?? []);
 
   return (
     <AppLayout>

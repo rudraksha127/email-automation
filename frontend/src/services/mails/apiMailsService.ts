@@ -9,6 +9,8 @@ export class ApiMailsService implements MailsService {
     if (filters.status && filters.status !== "all") params.set("status", filters.status);
     if (filters.batchId && filters.batchId !== "all") params.set("batchId", filters.batchId);
     if (filters.search) params.set("search", filters.search);
+    if (filters.limit) params.set("limit", filters.limit.toString());
+    if (filters.offset) params.set("offset", filters.offset.toString());
     const qs = params.toString();
     return http.get<MailSummary[]>(`/api/mails${qs ? `?${qs}` : ""}`);
   }
