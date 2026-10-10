@@ -1,97 +1,101 @@
-# Mail Automation PWA
+# Mail Automation Platform
 
-Admin PWA for an IT Department that automates incoming Gmail emails and forwards
-them to the correct academic batch/year recipients.
+Admin platform for an IT Department that automates incoming Gmail emails and
+forwards them to the correct academic batch/year recipients.
 
-## Build Phases
+## Architecture
 
-Implemented incrementally, one phase at a time (each phase is fully tested before push):
-
-- [x] Phase 0 — Approved UI converted to a functional frontend
-- [x] Phase 1 — PWA foundation & architecture
-- [ ] Phase 2 — UI polish pass
-- [x] Phase 3 — Secure admin authentication
-- [x] Phase 4 — Batch & recipient management
-- [x] Phase 5 — Gmail integration & auto-forwarding engine
-- [x] Phase 6 — Mail management module
-- [x] Phase 7 — Backend hardening (security / APIs / rate limiting / health)
-- [ ] Phase 8 — Production readiness & deployment
+| Folder | Deploy Target | Description |
+|--------|---------------|-------------|
+| `frontend/` | **Vercel** | Next.js 16 PWA — UI pages, components, client services |
+| `backend/` | **Render** | Express API — Gmail OAuth, poller, REST endpoints |
+| `database/` | **Supabase** | PostgreSQL DDL, migrations, RLS policies, seed data |
 
 ## Tech Stack
 
-- **Frontend:** Next.js (React) + TypeScript + Tailwind CSS, installable PWA
-- **Backend:** Next.js API route handlers (clean service/layer architecture)
-- **Database:** SQLite via built-in `node:sqlite` (local/pilot) — schema is
-  created idempotently on boot; a Supabase PostgreSQL migration is planned for
-  multi-instance production
+- **Frontend:** Next.js 16 (React 19) + TypeScript + Tailwind CSS v4, installable PWA
+- **Backend:** Express.js + TypeScript — background Gmail poller + REST API
+- **Database:** Supabase PostgreSQL (SQLite fallback for local dev)
 - **Email:** Gmail API (OAuth 2.0) — credentials never in frontend code
-- **Tests:** Vitest (unit + API integration), 106 tests
+- **Tests:** Vitest (unit + API integration)
 
 ## Quickstart (local development)
 
 ```bash
+# Install all workspace dependencies
 npm ci
-cp .env.example .env.local   # then fill in real pilot values
-npm run dev                  # http://localhost:3000
+
+# Frontend (Next.js)
+cp frontend/.env.example frontend/.env.local
+npm run dev                    # http://localhost:3000
+
+# Backend (Express API) — separate terminal
+cp backend/.env.example backend/.env.local
+npm run dev:backend            # http://localhost:3001
 ```
 
 Useful commands:
 
 ```bash
-npm test         # unit + API integration tests (uses isolated fixtures)
-npm run typecheck
-npm run lint
-npm run build    # production build
-npm start        # production server
+npm test              # frontend tests
+npm run typecheck     # typecheck frontend + backend
+npm run build         # production build (frontend)
+npm run build:backend # production build (backend)
 ```
 
-Without `.env.local` the app still boots (fail-closed): empty allowlist, no CC,
-and a dev admin seeded with a generated password printed to the console.
+## Environment & Deployment
 
-## Environment & deployment
+| Platform | Env File | Docs |
+|----------|----------|------|
+| Vercel (frontend) | [`frontend/.env.example`](frontend/.env.example) | Vercel dashboard → Environment Variables |
+| Render (backend) | [`backend/.env.example`](backend/.env.example) | [`backend/render.yaml`](backend/render.yaml) blueprint |
+| Supabase (database) | [`database/.env.example`](database/.env.example) | [`database/README.md`](database/README.md) |
 
-- All supported variables: [`.env.example`](.env.example)
-- Deployment instructions (Render, env vars, OAuth redirect URI derivation,
-  rollback): [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)
-- CI: [`.github/workflows/ci.yml`](.github/workflows/ci.yml) (secret scan,
-  lint, typecheck, tests, production dependency audit, build)
+Deployment guide: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)
 
 Real secrets never belong in git — `.env*`, `data/`, and token files are
-gitignored and verified by the CI secret scan.
+gitignored and verified by CI.
 
-## Repository map
+## Repository Map
 
 ```
-.
-|-- src/                  # The application (Next.js App Router)
-|   |-- app/              #   UI routes + backend API route handlers (same process)
-|   |-- components/       #   Shared UI components + design tokens consumer
-|   |-- hooks/ lib/ services/ routes/ types/ utils/
-|-- tests/                # Vitest unit + API integration suites
-|-- public/               # PWA runtime assets (manifest, sw.js, icons, offline.html)
-|-- design/               # Approved Google Stitch references (NOT bundled)
-|   `-- stitch-references/stitch_faculty_student_count_app/   (19 screens)
-|-- database/             # Schema documentation (DDL lives in src/lib/db.ts)
-|-- docs/                 # DEPLOYMENT.md
-|-- scripts/              # Icon generation
-|-- .github/workflows/    # CI (secret scan, lint, typecheck, tests, build)
-`-- render.yaml           # Production blueprint (persistent disk + secrets)
+email-automation/
+├── frontend/               ➔ VERCEL — Next.js 16 PWA
+│   ├── src/
+│   │   ├── app/            UI routes (pages + API proxy rewrites)
+│   │   ├── components/     Shared React components
+│   │   ├── hooks/          Auth context, custom hooks
+│   │   ├── services/       API client services (real + mock)
+│   │   ├── lib/            Shared utilities
+│   │   └── types/          TypeScript interfaces
+│   ├── tests/              Vitest test suites
+│   ├── public/             PWA assets (manifest, sw.js, icons)
+│   ├── next.config.ts      API proxy to backend via rewrites
+│   └── .env.example
+│
+├── backend/                ➔ RENDER — Express API + Gmail Poller
+│   ├── src/
+│   │   ├── server.ts       Express server + background poller
+│   │   ├── routes/         REST API route handlers
+│   │   ├── lib/            Core logic (db, gmail, pipeline, crypto)
+│   │   ├── middleware/     Auth middleware
+│   │   └── types/          Shared type definitions
+│   ├── render.yaml         Render Blueprint (rootDir: backend)
+│   └── .env.example
+│
+├── database/               ➔ SUPABASE — PostgreSQL
+│   ├── schema.sql          Table definitions (paste in SQL Editor)
+│   ├── seed.sql            Initial roles & demo data
+│   ├── migrations/         Incremental schema changes
+│   └── policies/           Row-Level Security (RLS) policies
+│
+├── docs/                   Deployment & environment docs
+├── scripts/                Build utilities (icon generation)
+└── .github/workflows/      CI (lint, typecheck, tests, build)
 ```
-
-The frontend and backend are **one deployable unit by design**: Next.js
-route handlers (`src/app/api/**`) serve the same origin as the UI, so a
-single Render web service runs everything (see `docs/DEPLOYMENT.md` §2).
-
-## Design references
-
-Approved Google Stitch layouts (19 screen folders, each with `code.html` +
-`screen.png`) are preserved in
-[`design/stitch-references/`](design/stitch-references/) and are the source
-of truth for UI fidelity — they are documentation, never shipped in the
-production bundle. PWA icons can be regenerated from the brand SVG with
-`node scripts/generate-pwa-icons.mjs`.
 
 ## Status
 
-🚧 Under active development — hardening/testing phase complete; deployment
-pending hosting credentials and Google OAuth configuration.
+🚧 Under active development — repository restructured for split deployment
+(Vercel + Render + Supabase). Deployment pending hosting credentials and
+Google OAuth configuration.

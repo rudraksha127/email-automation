@@ -1,0 +1,71 @@
+# Render Blueprint — Mail Automation Express API Backend Service
+#
+# Deploy this service on Render:
+# 1. In Render Dashboard -> Blueprints -> New Blueprint Instance
+# 2. Select this repository.
+# 3. Render reads this file and configures the backend service.
+# 4. Fill required secrets in Render dashboard (they are sync: false).
+
+services:
+  - type: web
+    name: mail-automation-api
+    runtime: node
+    plan: starter
+    region: singapore
+    rootDir: backend
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+
+    disk:
+      name: mail-automation-api-data
+      mountPath: /disks/pilot
+      sizeGB: 1
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PILOT_DB_PATH
+        value: /disks/pilot/data/pilot.db
+
+      # ---- Supabase PostgreSQL Connection ----
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+
+      # ---- CORS (Vercel Frontend URL) ----
+      - key: CORS_ORIGIN
+        sync: false # e.g. https://your-frontend.vercel.app
+
+      # ---- Gmail OAuth Secrets ----
+      - key: GMAIL_CLIENT_ID
+        sync: false
+      - key: GMAIL_CLIENT_SECRET
+        sync: false
+      - key: GMAIL_REDIRECT_URI
+        sync: false # https://<your-render-host>/api/gmail/callback
+      - key: GMAIL_TOKEN_KEY
+        sync: false # openssl rand -hex 32
+
+      # ---- Admin Account Credentials ----
+      - key: PILOT_ADMIN_EMAIL
+        sync: false
+      - key: PILOT_ADMIN_PASSWORD
+        sync: false
+
+      - key: FRONTEND_URL
+        sync: false # e.g. https://your-frontend.vercel.app
+
+      # ---- Pilot Configuration Seeds ----
+      - key: GMAIL_TARGET_EMAIL
+        sync: false
+      - key: PILOT_ALLOWED_SENDERS
+        sync: false
+      - key: PILOT_BATCH_2027_RECIPIENTS
+        sync: false
+      - key: PILOT_BATCH_2028_RECIPIENTS
+        sync: false
+      - key: PILOT_CC_EMAIL
+        sync: false

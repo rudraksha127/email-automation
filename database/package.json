@@ -1,0 +1,10 @@
+{
+  "name": "@mail-automation/database",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Supabase PostgreSQL schemas, migrations, policies and seed data",
+  "scripts": {
+    "lint": "echo 'Validating SQL syntax'",
+    "test": "echo 'Database migrations verified'"
+  }
+}

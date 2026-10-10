@@ -57,3 +57,7 @@ next-env.d.ts
 
 # Browser sweep artifacts (regenerable via scripts/*.mjs)
 sweep-shots/
+
+# Antigravity / agent state
+.freebuff/
+.agents/
