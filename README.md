@@ -5,6 +5,12 @@ forwards them to the correct academic batch/year recipients.
 
 ## Architecture
 
+> **Current deployment authority:** `backend/` is the production API and owns
+> sessions, Gmail OAuth, polling, and SQLite persistence. `frontend/` proxies
+> all `/api/*` traffic there whenever `BACKEND_API_URL` is configured. The
+> `database/` folder is a prepared Supabase migration path, not the live
+> database implementation.
+
 | Folder | Deploy Target | Description |
 |--------|---------------|-------------|
 | `frontend/` | **Vercel** | Next.js 16 PWA — UI pages, components, client services |

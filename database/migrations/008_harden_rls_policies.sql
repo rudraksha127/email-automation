@@ -1,9 +1,5 @@
--- =============================================================================
--- Supabase Row Level Security: multi-tenant read isolation
--- =============================================================================
--- The running application currently uses its server-side SQLite store. These
--- policies are for the planned Supabase migration and deliberately expose no
--- write path to browser clients; writes remain server-side service-role work.
+-- Apply after migrations 001-007 for existing Supabase databases.
+-- New databases should use `database/policies/rls.sql` after `schema.sql`.
 
 CREATE SCHEMA IF NOT EXISTS private;
 
@@ -24,9 +20,6 @@ ALTER TABLE public.mail_attachments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.audit_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.app_meta ENABLE ROW LEVEL SECURITY;
 
--- This privileged lookup breaks the membership-policy recursion safely. It is
--- in a non-exposed schema, uses a pinned search path, and returns only the
--- caller's memberships.
 CREATE OR REPLACE FUNCTION private.current_user_org_ids()
 RETURNS SETOF TEXT
 LANGUAGE sql
@@ -43,47 +36,49 @@ REVOKE ALL ON FUNCTION private.current_user_org_ids() FROM PUBLIC, anon, service
 GRANT USAGE ON SCHEMA private TO authenticated;
 GRANT EXECUTE ON FUNCTION private.current_user_org_ids() TO authenticated;
 
+DROP POLICY IF EXISTS "Users can only view batches of their organization" ON public.batches;
+DROP POLICY IF EXISTS "Users can only modify batches of their organization" ON public.batches;
+DROP POLICY IF EXISTS "Users can only view recipients of their organization" ON public.recipients;
+DROP POLICY IF EXISTS "Users can only modify recipients of their organization" ON public.recipients;
+DROP POLICY IF EXISTS "Users can only view mails of their organization" ON public.mails;
+DROP POLICY IF EXISTS "Users can only modify mails of their organization" ON public.mails;
+DROP POLICY IF EXISTS "Users can only view forwarding rules of their organization" ON public.forwarding_rules;
+DROP POLICY IF EXISTS "Users can only modify forwarding rules of their organization" ON public.forwarding_rules;
+DROP POLICY IF EXISTS "Users can only view sender rules of their organization" ON public.sender_rules;
+DROP POLICY IF EXISTS "Users can only modify sender rules of their organization" ON public.sender_rules;
+DROP POLICY IF EXISTS "Users can only view settings of their organization" ON public.settings;
+DROP POLICY IF EXISTS "Users can only modify settings of their organization" ON public.settings;
+DROP POLICY IF EXISTS "Users can view audit events of their organization" ON public.audit_events;
+
+DROP FUNCTION IF EXISTS public.current_user_org_ids();
+
 CREATE POLICY "members can view their organizations"
   ON public.organizations FOR SELECT TO authenticated
   USING (id IN (SELECT private.current_user_org_ids()));
-
 CREATE POLICY "members can view scoped memberships"
   ON public.organization_members FOR SELECT TO authenticated
   USING (org_id IN (SELECT private.current_user_org_ids()));
-
 CREATE POLICY "members can view scoped batches"
   ON public.batches FOR SELECT TO authenticated
   USING (org_id IN (SELECT private.current_user_org_ids()));
-
 CREATE POLICY "members can view scoped recipients"
   ON public.recipients FOR SELECT TO authenticated
   USING (org_id IN (SELECT private.current_user_org_ids()));
-
 CREATE POLICY "members can view scoped sender rules"
   ON public.sender_rules FOR SELECT TO authenticated
   USING (org_id IN (SELECT private.current_user_org_ids()));
-
 CREATE POLICY "members can view scoped forwarding rules"
   ON public.forwarding_rules FOR SELECT TO authenticated
   USING (org_id IN (SELECT private.current_user_org_ids()));
-
 CREATE POLICY "members can view scoped settings"
   ON public.settings FOR SELECT TO authenticated
   USING (org_id IN (SELECT private.current_user_org_ids()));
-
 CREATE POLICY "members can view scoped mails"
   ON public.mails FOR SELECT TO authenticated
   USING (org_id IN (SELECT private.current_user_org_ids()));
-
 CREATE POLICY "members can view scoped forward logs"
   ON public.forward_logs FOR SELECT TO authenticated
   USING (org_id IN (SELECT private.current_user_org_ids()));
-
 CREATE POLICY "members can view scoped audit events"
   ON public.audit_events FOR SELECT TO authenticated
   USING (org_id IN (SELECT private.current_user_org_ids()));
-
--- Sensitive tables (`admins`, `sessions`, `gmail_tokens`, `gmail_state`,
--- `mail_attachments`, and `app_meta`) intentionally have no client policy.
--- RLS therefore denies browser access; the server-side service role bypasses
--- RLS only for the required backend operations.

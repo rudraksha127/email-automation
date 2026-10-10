@@ -73,7 +73,9 @@ router.post("/login", (req, res) => {
   const token = createSessionToken(admin.email);
   setSessionCookie(res, token);
 
-  res.json({ user: admin, token });
+  // The token stays in the httpOnly cookie. Returning it would expose a
+  // bearer credential to browser JavaScript and any XSS on the frontend.
+  res.json({ user: admin });
 });
 
 /** GET /api/auth/login — verification endpoint */
@@ -254,7 +256,7 @@ router.post("/register", (req, res) => {
 
   const token = createSessionToken(email);
   setSessionCookie(res, token);
-  res.status(201).json({ user: { email, name: name || email.split("@")[0] }, token });
+  res.status(201).json({ user: { email, name: name || email.split("@")[0] } });
 });
 
 /** POST /api/auth/workspace */

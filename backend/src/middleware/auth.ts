@@ -139,6 +139,12 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
 /** Express route guard: Requires valid authenticated user. */
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {
   if (!req.user) {
+    const { user, orgId, token } = resolveSession(req);
+    req.user = user;
+    req.sessionToken = token;
+    req.orgAuth = resolveOrgAuth(user, orgId);
+  }
+  if (!req.user) {
     res.status(401).json({ error: "Unauthorized — please sign in" });
     return;
   }
@@ -148,13 +154,17 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
 /** Express route guard: Requires active workspace membership (optional admin requirement). */
 export function requireWorkspace(requireAdmin = false) {
   return (req: Request, res: Response, next: NextFunction): void => {
-    const { user, orgId } = resolveSession(req);
-    const orgAuth = resolveOrgAuth(user, orgId, requireAdmin);
+    if (!req.user || !req.orgAuth || !req.orgAuth.ok) {
+      const { user, orgId, token } = resolveSession(req);
+      req.user = user;
+      req.sessionToken = token;
+      req.orgAuth = resolveOrgAuth(user, orgId, requireAdmin);
+    }
+    const orgAuth = req.orgAuth;
     if (!orgAuth.ok) {
       res.status(orgAuth.status).json({ error: orgAuth.message });
       return;
     }
-    req.orgAuth = orgAuth;
     next();
   };
 }

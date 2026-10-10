@@ -34,6 +34,7 @@ import rulesRouter from "./routes/rules";
 import settingsRouter from "./routes/settings";
 import dashboardRouter from "./routes/dashboard";
 import organizationsRouter from "./routes/organizations";
+import { authMiddleware } from "./middleware/auth";
 import { listConnectedOrgs } from "./lib/db";
 import { syncGmailInbox } from "./lib/gmailSync";
 
@@ -78,6 +79,7 @@ app.use(
 
 app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
+app.use(authMiddleware);
 
 // Mount API routes
 app.use("/api/health", healthRouter);
@@ -89,6 +91,21 @@ app.use("/api/rules", rulesRouter);
 app.use("/api/settings", settingsRouter);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/organizations", organizationsRouter);
+
+// Keep malformed requests and rejected origins from falling through to
+// Express's HTML error page (which can expose stack details in development).
+app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  if (error instanceof SyntaxError && "body" in error) {
+    res.status(400).json({ error: "Invalid JSON request body" });
+    return;
+  }
+  if (error instanceof Error && error.message.includes("not allowed by CORS")) {
+    res.status(403).json({ error: "Origin is not allowed" });
+    return;
+  }
+  console.error("[api] unhandled request error:", error instanceof Error ? error.message : error);
+  res.status(500).json({ error: "Internal server error" });
+});
 
 // Root heartbeat
 app.get("/", (_req, res) => {

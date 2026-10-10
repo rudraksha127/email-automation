@@ -12,9 +12,8 @@ services:
     runtime: node
     plan: starter
     region: singapore
-    rootDir: backend
-    buildCommand: npm ci --include=dev && npm run build
-    startCommand: npm start
+    buildCommand: npm ci --include=dev && npm run build:backend
+    startCommand: npm --prefix backend start
     healthCheckPath: /api/health
     autoDeploy: true
 

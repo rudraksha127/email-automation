@@ -11,6 +11,9 @@ const nextConfig: NextConfig = {
     if (!backendUrl) return [];
     return {
       beforeFiles: [
+        // The backend owns every API route and the server-side session store.
+        // Rewriting before filesystem routes keeps browser cookies scoped to
+        // the frontend origin while forwarding API traffic to Render.
         {
           source: "/api/:path*",
           destination: `${backendUrl.replace(/\/$/, "")}/api/:path*`,

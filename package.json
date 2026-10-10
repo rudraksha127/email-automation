@@ -11,6 +11,7 @@
     "dev": "concurrently -n frontend,backend -c cyan,magenta \"npm --prefix frontend run dev\" \"npm --prefix backend run dev\"",
     "dev:frontend": "npm --prefix frontend run dev",
     "dev:backend": "npm --prefix backend run dev",
+    "lint": "npm --prefix frontend run lint && npm --prefix backend run lint",
     "build": "npm --prefix frontend run build",
     "build:backend": "npm --prefix backend run build",
     "typecheck": "npm --prefix frontend run typecheck && npm --prefix backend run typecheck",
