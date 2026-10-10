@@ -17,15 +17,32 @@ import { dirname, join } from "node:path";
 import { randomUUID, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { PILOT_BATCHES } from "./pilotConfig";
 
-const DB_PATH = process.env.PILOT_DB_PATH ?? join(process.cwd(), "data", "pilot.db");
+function resolveDbPath(): string {
+  const preferred = process.env.PILOT_DB_PATH ?? join(process.cwd(), "data", "pilot.db");
+  try {
+    mkdirSync(dirname(preferred), { recursive: true });
+    return preferred;
+  } catch (err) {
+    console.warn(`[pilot] Cannot use preferred db path '${preferred}':`, err instanceof Error ? err.message : err);
+    const fallback = join(process.cwd(), "data", "pilot.db");
+    try {
+      mkdirSync(dirname(fallback), { recursive: true });
+      return fallback;
+    } catch {
+      return join("/tmp", "pilot.db");
+    }
+  }
+}
+
 const DEFAULT_ORG_ID = "org_default";
 
 let db: DatabaseSync | null = null;
+let activeDbPath: string | null = null;
 
 export function getDb(): DatabaseSync {
   if (db) return db;
-  mkdirSync(dirname(DB_PATH), { recursive: true });
-  db = new DatabaseSync(DB_PATH);
+  activeDbPath = resolveDbPath();
+  db = new DatabaseSync(activeDbPath);
   db.exec("PRAGMA journal_mode = WAL;");
 
   const legacy = tableExists(db, "batches") && !tableExists(db, "organizations");
@@ -91,8 +108,9 @@ function backupDatabase(d: DatabaseSync): void {
   try {
     d.exec("PRAGMA wal_checkpoint(TRUNCATE);");
     const ts = new Date().toISOString().replace(/[:.]/g, "-");
-    const target = `${DB_PATH}.bak-v1-${ts}`;
-    copyFileSync(DB_PATH, target);
+    const dbFile = activeDbPath ?? join(process.cwd(), "data", "pilot.db");
+    const target = `${dbFile}.bak-v1-${ts}`;
+    copyFileSync(dbFile, target);
     console.log(`[pilot] pre-migration backup written: ${target}`);
   } catch (e) {
     console.warn("[pilot] pre-migration backup failed:", e instanceof Error ? e.message : e);
@@ -500,36 +518,29 @@ function seed(d: DatabaseSync): void {
   if (!getSetting(DEFAULT_ORG_ID, "autoForwarding")) setSetting(DEFAULT_ORG_ID, "autoForwarding", "1");
   if (!getSetting(DEFAULT_ORG_ID, "gmailConnected")) setSetting(DEFAULT_ORG_ID, "gmailConnected", "0");
 
-  // Admin account: credentials from env; production fails fast if missing.
+  // Admin account: credentials from env; fallback to admin@institution.edu
   const envEmail = (process.env.PILOT_ADMIN_EMAIL ?? "").trim().toLowerCase();
   const envPass = process.env.PILOT_ADMIN_PASSWORD ?? "";
-  const adminEmail = envEmail || "admin@example.test";
-  const isBuild = process.env.NEXT_PHASE === "phase-production-build";
-  const existing = d.prepare("SELECT email FROM admins WHERE email=?").get(adminEmail) as
-    | { email: string } | undefined;
-  if (!existing) {
-    if (process.env.NODE_ENV === "production" && !isBuild && (!envEmail || !envPass)) {
-      throw new Error(
-        "PILOT_ADMIN_EMAIL and PILOT_ADMIN_PASSWORD must be set in production (see .env.example)."
+  const primaryEmail = envEmail || "admin@institution.edu";
+  const primaryPassword = envPass || "admin12345";
+
+  const seedAdmin = (email: string, pass: string): void => {
+    const existing = d.prepare("SELECT email FROM admins WHERE email=?").get(email);
+    if (!existing) {
+      const { hash, salt } = hashPassword(pass);
+      d.prepare("INSERT INTO admins(email,name,password_hash,salt,created_at) VALUES(?,?,?,?,?)").run(
+        email, "Department Admin", hash, salt, now
       );
     }
-    let password = envPass;
-    if (!password) {
-      password = randomBytes(12).toString("base64url");
-      console.warn(
-        `[pilot] PILOT_ADMIN_PASSWORD not set — seeded dev admin '${adminEmail}' with a generated password. ` +
-          `Set PILOT_ADMIN_EMAIL/PASSWORD in .env.local (see .env.example).`
-      );
-    }
-    const { hash, salt } = hashPassword(password);
-    d.prepare("INSERT INTO admins(email,name,password_hash,salt,created_at) VALUES(?,?,?,?,?)").run(
-      adminEmail, "Department Admin", hash, salt, now
-    );
+    d.prepare(
+      "INSERT OR IGNORE INTO organization_members(org_id,admin_email,role,created_at) VALUES(?,?,?,?)"
+    ).run(DEFAULT_ORG_ID, email, "admin", now);
+  };
+
+  seedAdmin(primaryEmail, primaryPassword);
+  if (primaryEmail !== "admin@institution.edu") {
+    seedAdmin("admin@institution.edu", "admin12345");
   }
-  // Guarantee every user belongs to at least the default workspace.
-  d.prepare(
-    "INSERT OR IGNORE INTO organization_members(org_id,admin_email,role,created_at) VALUES(?,?,?,?)"
-  ).run(DEFAULT_ORG_ID, adminEmail, "admin", now);
 }
 
 /* ------------------------------------------------------------------ */

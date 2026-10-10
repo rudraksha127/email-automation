@@ -12,11 +12,13 @@ const router = Router();
 router.get("/", (req, res) => {
   const checks: Record<string, "ok" | "error"> = {};
 
+  let databaseError: string | null = null;
   try {
     getDb().prepare("SELECT 1").get();
     checks.database = "ok";
-  } catch {
+  } catch (e) {
     checks.database = "error";
+    databaseError = e instanceof Error ? e.message : String(e);
   }
 
   const allOk = Object.values(checks).every((v) => v === "ok");
@@ -33,6 +35,7 @@ router.get("/", (req, res) => {
     status,
     uptimeSeconds: Math.round(process.uptime()),
     checks,
+    ...(databaseError ? { databaseError } : {}),
     gmailConfigured,
     supabaseConfigured: isSupabaseConfigured(),
     timestamp: new Date().toISOString(),
