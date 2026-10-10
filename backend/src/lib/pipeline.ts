@@ -386,9 +386,27 @@ export async function deliverStoredMail(
     ).run(status, to.length, error ?? null, nowIso(), orgId, gmailId);
   };
   try {
-    const subject = String(row.subject ?? "");
-    const bodyText = String(row.body_text ?? "");
-    const bodyHtml = row.body_html ? String(row.body_html) : undefined;
+    const rawSubject = String(row.subject ?? "");
+    const subject = rawSubject.toLowerCase().startsWith("fwd:") ? rawSubject : `Fwd: ${rawSubject}`;
+
+    const senderEmail = String(row.sender ?? "");
+    const senderName = row.sender_name ? String(row.sender_name) : "";
+    const receivedAt = String(row.received_at ?? "");
+    let dateFormatted = receivedAt;
+    try {
+      dateFormatted = new Date(receivedAt).toLocaleString("en-US", { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true });
+    } catch { /* fallback to iso */ }
+
+    const fromDisplay = senderName ? `${senderName} <${senderEmail}>` : `<${senderEmail}>`;
+    const fwdTextHeader = `\n\n---------- Forwarded message ---------\nFrom: ${fromDisplay}\nDate: ${dateFormatted}\nSubject: ${rawSubject}\nTo: \n\n`;
+
+    const bodyText = fwdTextHeader + String(row.body_text ?? "");
+    let bodyHtml = row.body_html ? String(row.body_html) : undefined;
+    if (bodyHtml) {
+      const fwdHtmlHeader = `<br><br><div class="gmail_quote"><div dir="ltr" class="gmail_attr">---------- Forwarded message ---------<br>From: <b class="gmail_sendername" dir="auto">${senderName || senderEmail}</b> <span dir="auto">&lt;<a href="mailto:${senderEmail}">${senderEmail}</a>&gt;</span><br>Date: ${dateFormatted}<br>Subject: ${rawSubject}<br>To: <br></div><br>`;
+      bodyHtml = fwdHtmlHeader + bodyHtml + `</div>`;
+    }
+
     await sendViaGmail(orgId, {
       to: to.map((r) => r.email),
       cc,
