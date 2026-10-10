@@ -69,6 +69,8 @@ data/
 coverage/
 .vitest/
 .nyc_output/
+playwright-report/
+test-results/
 
 # ======================== LOGS ========================
 npm-debug.log*

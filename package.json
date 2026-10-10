@@ -15,9 +15,11 @@
     "build": "npm --prefix frontend run build",
     "build:backend": "npm --prefix backend run build",
     "typecheck": "npm --prefix frontend run typecheck && npm --prefix backend run typecheck",
-    "test": "npm --prefix frontend run test"
+    "test": "npm --prefix frontend run test",
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.0",
     "concurrently": "^10.0.6"
   }
 }

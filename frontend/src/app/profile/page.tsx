@@ -624,8 +624,10 @@ export default function ProfilePage() {
               onChange={(e) => setCurrentPw(e.target.value)}
               className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none"
             />
-            {pwErrors.current && (
-              <p className="mt-1 text-[11px] text-rose-600">{pwErrors.current}</p>
+            {(pwErrors.currentPassword || pwErrors.current) && (
+              <p className="mt-1 text-[11px] text-rose-600">
+                {pwErrors.currentPassword || pwErrors.current}
+              </p>
             )}
           </div>
 
@@ -639,8 +641,10 @@ export default function ProfilePage() {
               onChange={(e) => setNextPw(e.target.value)}
               className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none"
             />
-            {pwErrors.next && (
-              <p className="mt-1 text-[11px] text-rose-600">{pwErrors.next}</p>
+            {(pwErrors.newPassword || pwErrors.next) && (
+              <p className="mt-1 text-[11px] text-rose-600">
+                {pwErrors.newPassword || pwErrors.next}
+              </p>
             )}
           </div>
 
@@ -654,8 +658,10 @@ export default function ProfilePage() {
               onChange={(e) => setConfirmPw(e.target.value)}
               className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none"
             />
-            {pwErrors.confirm && (
-              <p className="mt-1 text-[11px] text-rose-600">{pwErrors.confirm}</p>
+            {(pwErrors.confirmPassword || pwErrors.confirm) && (
+              <p className="mt-1 text-[11px] text-rose-600">
+                {pwErrors.confirmPassword || pwErrors.confirm}
+              </p>
             )}
           </div>
 
