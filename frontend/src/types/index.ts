@@ -20,6 +20,7 @@ export interface Mail {
   senderName: string | null;
   subject: string;
   bodyText: string;
+  bodyHtml?: string | null;
   receivedAt: string; // ISO datetime
   status: MailStatus;
   batchId: string | null;

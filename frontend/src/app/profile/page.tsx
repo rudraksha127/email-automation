@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AppLayout } from "@/components/layout";
 import { Button } from "@/components/ui/Button";
@@ -24,6 +24,7 @@ import { paths } from "@/routes/paths";
 import { authService } from "@/services";
 import { http } from "@/services/http";
 import { validateChangePassword } from "@/utils/validation";
+import { DeveloperModal } from "@/components/DeveloperModal";
 import type { ProfileResponse } from "@/app/api/auth/profile/route";
 
 interface OrgMember {
@@ -70,6 +71,7 @@ export default function ProfilePage() {
   const [helpModalOpen, setHelpModalOpen] = useState(false);
   const [appInfoModalOpen, setAppInfoModalOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [devModalOpen, setDevModalOpen] = useState(false);
 
   // Edit profile form
   const [nameInput, setNameInput] = useState("");
@@ -78,16 +80,27 @@ export default function ProfilePage() {
   const [batchesInput, setBatchesInput] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileMsg, setProfileMsg] = useState<string | null>(null);
+  const [profileError, setProfileError] = useState<string | null>(null);
 
-  // Keep inputs synchronized with loaded profile data
-  const loadedProfile = profileState.data;
-  const [lastLoaded, setLastLoaded] = useState<ProfileResponse | null>(null);
-  if (loadedProfile && loadedProfile !== lastLoaded) {
-    setLastLoaded(loadedProfile);
-    setNameInput(loadedProfile.name);
-    setEmpIdInput(loadedProfile.employeeId);
-    setDeptScopeInput(loadedProfile.departmentScope);
-    setBatchesInput(loadedProfile.activeBatches);
+  // Sync form inputs whenever fresh profile data arrives from server (only when not actively editing)
+  useEffect(() => {
+    if (profileState.data && !editProfileOpen) {
+      setNameInput(profileState.data.name);
+      setEmpIdInput(profileState.data.employeeId);
+      setDeptScopeInput(profileState.data.departmentScope);
+      setBatchesInput(profileState.data.activeBatches);
+    }
+  }, [profileState.data, editProfileOpen]);
+
+  /** Populate form inputs with current profile values and open the edit modal */
+  function handleOpenEdit() {
+    setNameInput(profile.name);
+    setEmpIdInput(profile.employeeId);
+    setDeptScopeInput(profile.departmentScope);
+    setBatchesInput(profile.activeBatches);
+    setProfileMsg(null);
+    setProfileError(null);
+    setEditProfileOpen(true);
   }
 
   // Change password form
@@ -116,6 +129,7 @@ export default function ProfilePage() {
     e.preventDefault();
     setSavingProfile(true);
     setProfileMsg(null);
+    setProfileError(null);
     try {
       await http.patch<ProfileResponse>("/api/auth/profile", {
         name: nameInput.trim(),
@@ -128,7 +142,7 @@ export default function ProfilePage() {
       setProfileMsg("Profile updated successfully");
       setTimeout(() => setEditProfileOpen(false), 900);
     } catch (err) {
-      setProfileMsg(err instanceof Error ? err.message : "Failed to save profile");
+      setProfileError(err instanceof Error ? err.message : "Failed to save profile");
     } finally {
       setSavingProfile(false);
     }
@@ -271,7 +285,7 @@ export default function ProfilePage() {
             <div className="sm:self-start">
               <button
                 type="button"
-                onClick={() => setEditProfileOpen(true)}
+                onClick={handleOpenEdit}
                 className="w-full rounded-xl bg-[#0B57D0] px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:w-auto"
               >
                 Edit Profile
@@ -465,6 +479,15 @@ export default function ProfilePage() {
             <ShieldIcon className="h-3 w-3 text-slate-400" />
             <span>{profile?.academicSession}</span>
           </div>
+          <div className="mt-3">
+            <button
+              type="button"
+              onClick={() => setDevModalOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-full bg-blue-50/80 px-3.5 py-1 text-[11px] font-semibold text-blue-700 hover:bg-blue-100/80 transition-colors cursor-pointer border border-blue-200/60"
+            >
+              Developed by Student of IT Department
+            </button>
+          </div>
         </div>
       </div>
 
@@ -531,6 +554,9 @@ export default function ProfilePage() {
 
           {profileMsg && (
             <p className="text-[11px] font-semibold text-emerald-600">{profileMsg}</p>
+          )}
+          {profileError && (
+            <p className="text-[11px] font-semibold text-rose-600">{profileError}</p>
           )}
 
           <div className="flex justify-end gap-2 pt-2">
@@ -835,9 +861,25 @@ export default function ProfilePage() {
             <span className="text-slate-500">Database Engine:</span>
             <span className="font-semibold text-slate-800">SQLite (node:sqlite WAL mode v2)</span>
           </div>
-          <div className="flex justify-between py-1.5">
+          <div className="flex justify-between py-1.5 border-b border-slate-100">
             <span className="text-slate-500">Session Status:</span>
             <span className="font-semibold text-emerald-600">Encrypted & Authenticated</span>
+          </div>
+          <div className="flex items-center justify-between py-2 border-t border-slate-100 mt-1">
+            <div>
+              <span className="block text-[11px] font-medium text-slate-500">Developer:</span>
+              <span className="font-semibold text-slate-800 text-xs">Rudraksh Udiya (IT Dept)</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setAppInfoModalOpen(false);
+                setDevModalOpen(true);
+              }}
+              className="rounded-lg bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-700 hover:bg-blue-100 transition-colors cursor-pointer"
+            >
+              View Developer Info
+            </button>
           </div>
           <div className="flex justify-end pt-3">
             <Button onClick={() => setAppInfoModalOpen(false)}>Close</Button>
@@ -863,6 +905,10 @@ export default function ProfilePage() {
           </div>
         </div>
       </Modal>
+
+      {/* 10. Developer Info Modal */}
+      <DeveloperModal open={devModalOpen} onClose={() => setDevModalOpen(false)} />
     </AppLayout>
   );
 }
+

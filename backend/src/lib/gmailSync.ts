@@ -41,6 +41,7 @@ function htmlToPlainText(html: string): string {
 
 function extractBody(payload: Record<string, unknown>): {
   text: string;
+  html: string;
   attachments: Array<{ filename: string; mimeType: string; sizeBytes: number; gmailAttachmentId: string | null }>;
 } {
   let plainText = "";
@@ -81,7 +82,7 @@ function extractBody(payload: Record<string, unknown>): {
   walk(payload);
 
   const text = plainText || (htmlText ? htmlToPlainText(htmlText) : "");
-  return { text, attachments };
+  return { text, html: htmlText, attachments };
 }
 
 export async function syncGmailInbox(orgId: string, limit = 25): Promise<{
@@ -151,7 +152,7 @@ export async function syncGmailInbox(orgId: string, limit = 25): Promise<{
         payload?: { headers?: Array<{ name: string; value: string }>; [k: string]: unknown };
       };
       const headers = full.payload?.headers ?? [];
-      const { text, attachments } = extractBody((full.payload ?? {}) as Record<string, unknown>);
+      const { text, html, attachments } = extractBody((full.payload ?? {}) as Record<string, unknown>);
       const from = header(headers, "From");
       const subject = header(headers, "Subject");
       const nameMatch = from.match(/^\"?([^\"<]+)\"?\s*<.+>$/);
@@ -166,6 +167,7 @@ export async function syncGmailInbox(orgId: string, limit = 25): Promise<{
         senderName,
         subject,
         body: text.slice(0, 50000),
+        bodyHtml: html ? html.slice(0, 200000) : undefined,
         receivedAt,
         attachments,
       });

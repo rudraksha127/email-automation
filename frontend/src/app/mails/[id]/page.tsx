@@ -176,9 +176,16 @@ export default function MailDetailsPage({ params }: { params: Promise<{ id: stri
         </dl>
 
         {/* Body */}
-        <div className="whitespace-pre-line px-5 py-4 text-sm leading-relaxed text-slate-700">
-          {data.bodyText}
-        </div>
+        {data.bodyHtml ? (
+          <div
+            className="prose max-w-none px-5 py-4 text-sm leading-relaxed text-slate-800 break-words overflow-x-auto"
+            dangerouslySetInnerHTML={{ __html: data.bodyHtml }}
+          />
+        ) : (
+          <div className="whitespace-pre-line px-5 py-4 text-sm leading-relaxed text-slate-700">
+            {data.bodyText}
+          </div>
+        )}
 
         {/* Attachments */}
         {data.attachments.length > 0 ? (

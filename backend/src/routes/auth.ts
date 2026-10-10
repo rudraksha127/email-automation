@@ -131,49 +131,47 @@ router.get("/profile", requireAuth, (req, res) => {
 });
 
 /** PATCH /api/auth/profile — update profile metadata */
-router.patch("/profile", requireWorkspace(false), (req, res) => {
-  const auth = req.orgAuth!;
-  if (!auth.ok) {
-    res.status(auth.status).json({ error: auth.message });
-    return;
-  }
+router.patch("/profile", requireAuth, (req, res) => {
+  const user = req.user!;
+  const orgs = listUserOrgs(user.email);
+  const orgId = req.orgAuth?.ok ? req.orgAuth.orgId : (orgs[0]?.orgId ?? "org_default");
 
   const body = req.body ?? {};
   const d = getDb();
 
   if (typeof body.name === "string" && body.name.trim()) {
     const trimmedName = body.name.trim();
-    d.prepare("UPDATE admins SET name=? WHERE email=?").run(trimmedName, auth.email);
+    d.prepare("UPDATE admins SET name=? WHERE email=?").run(trimmedName, user.email);
   }
 
   if (typeof body.employeeId === "string") {
-    setSetting(auth.orgId, "profile_employee_id", body.employeeId.trim());
+    setSetting(orgId, "profile_employee_id", body.employeeId.trim());
   }
   if (typeof body.departmentScope === "string") {
-    setSetting(auth.orgId, "profile_department_scope", body.departmentScope.trim());
+    setSetting(orgId, "profile_department_scope", body.departmentScope.trim());
   }
   if (typeof body.activeBatches === "string") {
-    setSetting(auth.orgId, "profile_active_batches", body.activeBatches.trim());
+    setSetting(orgId, "profile_active_batches", body.activeBatches.trim());
   }
   if (typeof body.roleTitle === "string") {
-    setSetting(auth.orgId, "profile_role_title", body.roleTitle.trim());
+    setSetting(orgId, "profile_role_title", body.roleTitle.trim());
   }
 
-  audit(auth.orgId, auth.email, "profile.updated", "User updated institutional profile");
+  audit(orgId, user.email, "profile.updated", "User updated institutional profile");
 
-  const adminRow = d.prepare("SELECT name FROM admins WHERE email=?").get(auth.email) as
+  const adminRow = d.prepare("SELECT name FROM admins WHERE email=?").get(user.email) as
     | { name: string }
     | undefined;
 
-  const updatedName = adminRow?.name ?? auth.name;
+  const updatedName = adminRow?.name ?? user.name;
   res.json({
     name: updatedName,
-    email: auth.email,
-    employeeId: getSetting(auth.orgId, "profile_employee_id", "HOD-IT-001"),
-    roleTitle: getSetting(auth.orgId, "profile_role_title", "Role: HOD"),
-    status: getSetting(auth.orgId, "profile_status", "Active"),
-    departmentScope: getSetting(auth.orgId, "profile_department_scope", "IT & CSE-DS"),
-    activeBatches: getSetting(auth.orgId, "profile_active_batches", "2nd, 3rd & 4th Year"),
+    email: user.email,
+    employeeId: getSetting(orgId, "profile_employee_id", "HOD-IT-001"),
+    roleTitle: getSetting(orgId, "profile_role_title", "Role: HOD"),
+    status: getSetting(orgId, "profile_status", "Active"),
+    departmentScope: getSetting(orgId, "profile_department_scope", "IT & CSE-DS"),
+    activeBatches: getSetting(orgId, "profile_active_batches", "2nd, 3rd & 4th Year"),
     institution: "Acropolis Institute of Technology And Research Indore",
     department: "IT Department",
     academicSession: "Academic Session 2026–27",

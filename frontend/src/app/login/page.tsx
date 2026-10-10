@@ -15,6 +15,7 @@ import {
   ShieldIcon,
 } from "@/components/icons";
 import { validateLoginForm } from "@/utils/validation";
+import { DeveloperModal } from "@/components/DeveloperModal";
 
 /** "Fri, 9 Oct, 2026" — computed after mount to avoid hydration mismatch. */
 function formatToday(): string {
@@ -42,6 +43,7 @@ export default function LoginPage() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string | undefined>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [showDevModal, setShowDevModal] = useState(false);
   // This page is fully client-rendered (the auth guard streams the shell as a
   // Suspense fallback), so a lazy initializer is hydration-safe.
   const [today] = useState(formatToday);
@@ -173,11 +175,18 @@ export default function LoginPage() {
             Acropolis Institute of Technology and Research Indore
           </p>
           <p className="mt-1 text-xs text-slate-500">Department of Information Technology</p>
-          <p className="mt-4 w-fit rounded-full bg-slate-200/70 px-3.5 py-1.5 text-[11px] font-semibold text-slate-600">
+          <button
+            type="button"
+            onClick={() => setShowDevModal(true)}
+            className="mt-4 mx-auto w-fit rounded-full bg-slate-200/70 px-3.5 py-1.5 text-[11px] font-semibold text-slate-600 hover:bg-slate-300/70 transition-colors cursor-pointer"
+          >
             Developed by Student of IT Department
-          </p>
+          </button>
         </footer>
       </div>
+
+      {/* Developer Info Modal */}
+      <DeveloperModal open={showDevModal} onClose={() => setShowDevModal(false)} />
     </main>
   );
 }

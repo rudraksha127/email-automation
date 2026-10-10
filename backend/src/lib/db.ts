@@ -201,13 +201,16 @@ function createTables(d: DatabaseSync): void {
     org_id TEXT NOT NULL DEFAULT '' REFERENCES organizations(id) ON DELETE CASCADE,
     gmail_message_id TEXT,
     sender TEXT NOT NULL, sender_name TEXT, subject TEXT NOT NULL DEFAULT '',
-    body_text TEXT NOT NULL DEFAULT '', received_at TEXT NOT NULL,
+    body_text TEXT NOT NULL DEFAULT '', body_html TEXT, received_at TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'pending'
       CHECK(status IN ('pending','forwarded','needs_review','failed')),
     batch_id TEXT REFERENCES batches(id) ON DELETE SET NULL,
     batch_name TEXT, recipient_count INTEGER, failure_reason TEXT,
     forwarded_at TEXT, cc_email TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL
   );`);
+  if (tableExists(d, "mails") && !hasColumn(d, "mails", "body_html")) {
+    d.exec("ALTER TABLE mails ADD COLUMN body_html TEXT;");
+  }
 
   d.exec(`CREATE TABLE IF NOT EXISTS forward_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

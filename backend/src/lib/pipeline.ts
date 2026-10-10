@@ -9,6 +9,7 @@ export interface IngestInput {
   senderName?: string | null;
   subject: string;
   body: string;
+  bodyHtml?: string;
   receivedAt?: string;
   attachments?: Array<{
     filename: string;
@@ -69,6 +70,7 @@ export function mailToApi(row: Record<string, unknown>): Record<string, unknown>
     id: row.id, gmailMessageId: row.gmail_message_id ?? null,
     sender: row.sender, senderName: row.sender_name ?? null,
     subject: row.subject, bodyText: row.body_text,
+    bodyHtml: row.body_html ?? null,
     receivedAt: row.received_at, status: row.status,
     batchId: row.batch_id ?? null, batchName: row.batch_name ?? null,
     recipientCount: row.recipient_count ?? null,
@@ -158,48 +160,117 @@ function setMail(id: string, patch: Record<string, unknown>): void {
 
 /** Send via Gmail API (MIME) using the ORGANIZATION's connection. */
 export async function sendViaGmail(orgId: string, opts: {
-  to: string[]; cc?: string | null; subject: string; body: string;
+  to: string[]; cc?: string | null; subject: string; body: string; html?: string;
   attachments?: Array<{ filename: string; mimeType: string; dataB64: string }>;
 }): Promise<string> {
   const token = await getValidAccessToken(orgId);
   const b64url = (s: string): string =>
     Buffer.from(s, "utf8").toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 
+  const hasAttachments = Boolean(opts.attachments && opts.attachments.length > 0);
+  const hasHtml = Boolean(opts.html);
+
+  const toHeader = `To: ${opts.to.join(", ")}`;
+  const ccHeader = opts.cc ? `Cc: ${opts.cc}` : null;
+  const subjectHeader = `Subject: =?UTF-8?B?${Buffer.from(opts.subject, "utf8").toString("base64")}?=`;
+
   let raw: string;
-  if (opts.attachments && opts.attachments.length > 0) {
-    const boundary = `pilot-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
-    const parts: string[] = [
-      `To: ${opts.to.join(", ")}`,
-      ...(opts.cc ? [`Cc: ${opts.cc}`] : []),
-      `Subject: ${opts.subject}`,
-      `MIME-Version: 1.0`,
-      `Content-Type: multipart/mixed; boundary="${boundary}"`,
+  if (hasAttachments) {
+    const mixedBoundary = `pilot_mixed_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    const altBoundary = `pilot_alt_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+
+    const headers = [
+      toHeader,
+      ...(ccHeader ? [ccHeader] : []),
+      subjectHeader,
+      "MIME-Version: 1.0",
+      `Content-Type: multipart/mixed; boundary="${mixedBoundary}"`,
       "",
-      `--${boundary}`,
-      `Content-Type: text/plain; charset=UTF-8`,
-      `Content-Transfer-Encoding: 8bit`,
-      "",
-      opts.body,
     ];
-    for (const a of opts.attachments) {
-      parts.push(
-        `--${boundary}`,
+
+    const bodyParts: string[] = [];
+    if (hasHtml) {
+      bodyParts.push(
+        `--${mixedBoundary}`,
+        `Content-Type: multipart/alternative; boundary="${altBoundary}"`,
+        "",
+        `--${altBoundary}`,
+        "Content-Type: text/plain; charset=UTF-8",
+        "Content-Transfer-Encoding: 8bit",
+        "",
+        opts.body,
+        "",
+        `--${altBoundary}`,
+        "Content-Type: text/html; charset=UTF-8",
+        "Content-Transfer-Encoding: 8bit",
+        "",
+        opts.html!,
+        "",
+        `--${altBoundary}--`
+      );
+    } else {
+      bodyParts.push(
+        `--${mixedBoundary}`,
+        "Content-Type: text/plain; charset=UTF-8",
+        "Content-Transfer-Encoding: 8bit",
+        "",
+        opts.body
+      );
+    }
+
+    for (const a of opts.attachments!) {
+      bodyParts.push(
+        "",
+        `--${mixedBoundary}`,
         `Content-Type: ${a.mimeType}; name="${a.filename.replace(/"/g, "")}"`,
         `Content-Disposition: attachment; filename="${a.filename.replace(/"/g, "")}"`,
-        `Content-Transfer-Encoding: base64`,
+        "Content-Transfer-Encoding: base64",
         "",
         a.dataB64.replace(/\s+/g, "")
       );
     }
-    parts.push(`--${boundary}--`, "");
+
+    bodyParts.push("", `--${mixedBoundary}--`, "");
+    raw = b64url([...headers, ...bodyParts].join("\r\n"));
+  } else if (hasHtml) {
+    const altBoundary = `pilot_alt_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    const parts: string[] = [
+      toHeader,
+      ...(ccHeader ? [ccHeader] : []),
+      subjectHeader,
+      "MIME-Version: 1.0",
+      `Content-Type: multipart/alternative; boundary="${altBoundary}"`,
+      "",
+      `--${altBoundary}`,
+      "Content-Type: text/plain; charset=UTF-8",
+      "Content-Transfer-Encoding: 8bit",
+      "",
+      opts.body,
+      "",
+      `--${altBoundary}`,
+      "Content-Type: text/html; charset=UTF-8",
+      "Content-Transfer-Encoding: 8bit",
+      "",
+      opts.html!,
+      "",
+      `--${altBoundary}--`,
+      "",
+    ];
     raw = b64url(parts.join("\r\n"));
   } else {
-    raw = b64url(
-      [`To: ${opts.to.join(", ")}`, ...(opts.cc ? [`Cc: ${opts.cc}`] : []),
-        `Subject: ${opts.subject}`, `Content-Type: text/plain; charset=UTF-8`, "",
-        opts.body].join("\r\n")
-    );
+    const parts: string[] = [
+      toHeader,
+      ...(ccHeader ? [ccHeader] : []),
+      subjectHeader,
+      "MIME-Version: 1.0",
+      "Content-Type: text/plain; charset=UTF-8",
+      "Content-Transfer-Encoding: 8bit",
+      "",
+      opts.body,
+    ];
+    raw = b64url(parts.join("\r\n"));
   }
+
   const res = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
@@ -315,12 +386,15 @@ export async function deliverStoredMail(
     ).run(status, to.length, error ?? null, nowIso(), orgId, gmailId);
   };
   try {
+    const subject = String(row.subject ?? "");
+    const bodyText = String(row.body_text ?? "");
+    const bodyHtml = row.body_html ? String(row.body_html) : undefined;
     await sendViaGmail(orgId, {
-      to: to.map((r) => r.email), cc,
-      subject: String(row.subject ?? "").startsWith("Fwd:") ? String(row.subject) : `Fwd: ${String(row.subject ?? "")}`,
-      body:
-        `Forwarded from ${String(row.sender ?? "")}\nOriginal subject: ${String(row.subject ?? "")}\nDetected group: ${batchName(orgId, batchId) ?? batchId}\n\n${String(row.body_text ?? "")}` +
-        (missingAtts > 0 ? `\n\n[Note: ${missingAtts} attachment(s) could not be retrieved from Gmail and were omitted.]` : ""),
+      to: to.map((r) => r.email),
+      cc,
+      subject,
+      body: bodyText + (missingAtts > 0 ? `\n\n[Note: ${missingAtts} attachment(s) could not be retrieved from Gmail and were omitted.]` : ""),
+      html: bodyHtml,
       attachments: attachPayload.length > 0 ? attachPayload : undefined,
     });
     const now = nowIso();
@@ -355,10 +429,10 @@ export async function ingestMessage(
 
   const id = uid("mail");
   getDb().prepare(
-    `INSERT INTO mails(id,org_id,gmail_message_id,sender,sender_name,subject,body_text,received_at,status,created_at,updated_at)
-     VALUES(?,?,?,?,?,?,?,?,?,?,?)`
+    `INSERT INTO mails(id,org_id,gmail_message_id,sender,sender_name,subject,body_text,body_html,received_at,status,created_at,updated_at)
+     VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`
   ).run(id, orgId, input.gmailMessageId, senderEmail, input.senderName ?? null, input.subject ?? "",
-    input.body ?? "", input.receivedAt ?? now, "pending", now, now);
+    input.body ?? "", input.bodyHtml ?? null, input.receivedAt ?? now, "pending", now, now);
   if (input.attachments && input.attachments.length > 0) {
     const ins = getDb().prepare(
       "INSERT INTO mail_attachments(id,mail_id,filename,mime,size_bytes,gmail_attachment_id) VALUES(?,?,?,?,?,?)"

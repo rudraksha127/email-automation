@@ -1,5 +1,5 @@
-import { err, json, requireOrg, sessionState } from "@/lib/auth";
-import { getDb, getSetting, setSetting, audit } from "@/lib/db";
+import { err, json, sessionState } from "@/lib/auth";
+import { getDb, getSetting, setSetting, audit, listUserOrgs } from "@/lib/db";
 
 export interface ProfileResponse {
   name: string;
@@ -56,8 +56,11 @@ export async function GET(): Promise<Response> {
  * PATCH /api/auth/profile — update profile metadata (name, employeeId, departmentScope, activeBatches).
  */
 export async function PATCH(req: Request): Promise<Response> {
-  const auth = await requireOrg(false);
-  if (!auth.ok) return err(auth.message, auth.status);
+  const state = await sessionState();
+  if (!state.user) return err("Unauthorized", 401);
+
+  const user = state.user;
+  const orgId = state.orgId ?? state.orgs[0]?.orgId ?? "org_default";
 
   let body: Record<string, unknown>;
   try {
@@ -70,42 +73,42 @@ export async function PATCH(req: Request): Promise<Response> {
 
   if (typeof body.name === "string" && body.name.trim()) {
     const trimmedName = body.name.trim();
-    d.prepare("UPDATE admins SET name=? WHERE email=?").run(trimmedName, auth.email);
+    d.prepare("UPDATE admins SET name=? WHERE email=?").run(trimmedName, user.email);
   }
 
   if (typeof body.employeeId === "string") {
-    setSetting(auth.orgId, "profile_employee_id", body.employeeId.trim());
+    setSetting(orgId, "profile_employee_id", body.employeeId.trim());
   }
 
   if (typeof body.departmentScope === "string") {
-    setSetting(auth.orgId, "profile_department_scope", body.departmentScope.trim());
+    setSetting(orgId, "profile_department_scope", body.departmentScope.trim());
   }
 
   if (typeof body.activeBatches === "string") {
-    setSetting(auth.orgId, "profile_active_batches", body.activeBatches.trim());
+    setSetting(orgId, "profile_active_batches", body.activeBatches.trim());
   }
 
   if (typeof body.roleTitle === "string") {
-    setSetting(auth.orgId, "profile_role_title", body.roleTitle.trim());
+    setSetting(orgId, "profile_role_title", body.roleTitle.trim());
   }
 
-  audit(auth.orgId, auth.email, "profile.updated", "User updated institutional profile");
+  audit(orgId, user.email, "profile.updated", "User updated institutional profile");
 
   // Re-fetch updated profile
-  const adminRow = d.prepare("SELECT name FROM admins WHERE email=?").get(auth.email) as
+  const adminRow = d.prepare("SELECT name FROM admins WHERE email=?").get(user.email) as
     | { name: string }
     | undefined;
 
-  const updatedName = adminRow?.name ?? auth.name;
-  const updatedEmployeeId = getSetting(auth.orgId, "profile_employee_id", "HOD-IT-001");
-  const updatedRoleTitle = getSetting(auth.orgId, "profile_role_title", "Role: HOD");
-  const updatedStatus = getSetting(auth.orgId, "profile_status", "Active");
-  const updatedDepartmentScope = getSetting(auth.orgId, "profile_department_scope", "IT & CSE-DS");
-  const updatedActiveBatches = getSetting(auth.orgId, "profile_active_batches", "2nd, 3rd & 4th Year");
+  const updatedName = adminRow?.name ?? user.name;
+  const updatedEmployeeId = getSetting(orgId, "profile_employee_id", "HOD-IT-001");
+  const updatedRoleTitle = getSetting(orgId, "profile_role_title", "Role: HOD");
+  const updatedStatus = getSetting(orgId, "profile_status", "Active");
+  const updatedDepartmentScope = getSetting(orgId, "profile_department_scope", "IT & CSE-DS");
+  const updatedActiveBatches = getSetting(orgId, "profile_active_batches", "2nd, 3rd & 4th Year");
 
   return json({
     name: updatedName,
-    email: auth.email,
+    email: user.email,
     employeeId: updatedEmployeeId,
     roleTitle: updatedRoleTitle,
     status: updatedStatus,
