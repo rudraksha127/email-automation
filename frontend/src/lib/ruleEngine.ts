@@ -77,7 +77,19 @@ export function findMentionedGroups(
   const found = new Set<string>();
   for (const g of groups) {
     const re = groupNamePattern(g.name);
-    if (re && re.test(haystack)) found.add(g.id);
+    if (re && re.test(haystack)) {
+      found.add(g.id);
+      continue;
+    }
+    // Also detect 4-digit batch/graduation year in group name (e.g. "Batch 2027" -> 2027)
+    const yearMatch = g.name.match(/\b(20\d{2})\b/);
+    if (yearMatch) {
+      const year = yearMatch[1];
+      const yearRegex = new RegExp(`(?<!\\w)${year}(?!\\w)`, "i");
+      if (yearRegex.test(haystack)) {
+        found.add(g.id);
+      }
+    }
   }
   return [...found];
 }
@@ -98,15 +110,15 @@ export function matchingRules(
   body: string
 ): DetectionRule[] {
   const senderLower = (sender ?? "").trim().toLowerCase();
+  const haystack = `${subject ?? ""}\n${body ?? ""}`;
   return rules.filter((r) => {
     if (!r.active || !r.targetBatchId) return false;
     if (r.senderPattern && r.senderPattern.trim().toLowerCase() !== senderLower) return false;
     const subj = r.subjectKeywords.filter((k) => k.trim());
     const bod = r.bodyKeywords.filter((k) => k.trim());
     if (subj.length === 0 && bod.length === 0) return false; // invalid rule
-    if (subj.length > 0 && !keywordsHit(subj, subject ?? "")) return false;
-    if (bod.length > 0 && !keywordsHit(bod, body ?? "")) return false;
-    return true;
+    const allKeywords = [...subj, ...bod];
+    return keywordsHit(allKeywords, haystack);
   });
 }
 

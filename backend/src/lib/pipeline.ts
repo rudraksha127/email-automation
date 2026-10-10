@@ -275,10 +275,6 @@ export async function deliverStoredMail(
   }
 
   const cc = getSetting(orgId, "ccEmail", "");
-  if (!cc) {
-    setMail(mailId, { status: "failed", batch_id: batchId, batch_name: batchName(orgId, batchId), failure_reason: "CC is not configured — forwarding disabled until configured." });
-    return getMailRow(mailId)!;
-  }
   const to = recipientsOf(orgId, batchId);
   if (to.length === 0) {
     setMail(mailId, { status: "needs_review", batch_id: batchId, batch_name: batchName(orgId, batchId), failure_reason: "Target group has no recipients." });
@@ -348,6 +344,15 @@ export async function ingestMessage(
   const dupe = getMailByGmail(orgId, input.gmailMessageId);
   if (dupe) return { mail: mailToApi(dupe), action: "duplicate_ignored" };
 
+  // Fail-closed sender allowlist check BEFORE saving to database:
+  // If sender is not in the allowed list, do NOT pollute the application inbox!
+  if (!isAllowedSender(orgId, senderEmail)) {
+    getDb().prepare(
+      "INSERT INTO gmail_state(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value"
+    ).run(`ignored_mail:${input.gmailMessageId}`, JSON.stringify({ orgId, sender: senderEmail, at: now }));
+    return { mail: null as any, action: "unauthorized_ignored" };
+  }
+
   const id = uid("mail");
   getDb().prepare(
     `INSERT INTO mails(id,org_id,gmail_message_id,sender,sender_name,subject,body_text,received_at,status,created_at,updated_at)
@@ -361,11 +366,6 @@ export async function ingestMessage(
     for (const a of input.attachments) {
       ins.run(uid("att"), id, a.filename, a.mimeType, a.sizeBytes, a.gmailAttachmentId ?? null);
     }
-  }
-
-  if (!isAllowedSender(orgId, senderEmail)) {
-    setMail(id, { status: "needs_review", failure_reason: `Unauthorized sender (${senderEmail}) — held for review, not forwarded.` });
-    return { mail: mailToApi(getMailRow(id)!), action: "unauthorized_held" };
   }
 
   const det = detectTarget({

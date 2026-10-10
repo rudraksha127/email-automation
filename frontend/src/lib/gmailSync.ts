@@ -95,7 +95,22 @@ export async function syncGmailInbox(orgId: string, limit = 25): Promise<{
   const tok = getTokens(orgId);
   if (!tok?.access_token) throw new Error("Gmail not connected for this workspace");
   const token = await getValidAccessToken(orgId);
-  const q = encodeURIComponent(`newer_than:30d`);
+  // Tenant-scoped allowed senders
+  const allowedSenders = (
+    getDb()
+      .prepare("SELECT sender_email FROM sender_rules WHERE org_id=? AND active=1")
+      .all(orgId) as Array<{ sender_email: string }>
+  )
+    .map((s) => s.sender_email.trim().toLowerCase())
+    .filter(Boolean);
+
+  // When allowed senders are configured, query Gmail ONLY for messages from those senders!
+  let queryStr = "newer_than:30d";
+  if (allowedSenders.length > 0) {
+    const fromFilter = allowedSenders.map((s) => `from:${s}`).join(" OR ");
+    queryStr = `(${fromFilter}) newer_than:30d`;
+  }
+  const q = encodeURIComponent(queryStr);
   const listRes = await fetchWithRetry(
     `https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${q}&maxResults=${limit}`,
     { headers: { Authorization: `Bearer ${token}` } }
@@ -109,14 +124,17 @@ export async function syncGmailInbox(orgId: string, limit = 25): Promise<{
   const list = (await listRes.json()) as { messages?: Array<{ id: string }> };
   const ids = (list.messages ?? []).map((m) => m.id);
 
-  // Already-ingested ids for THIS organization (tenant-scoped dedupe).
-  const seen = new Set(
-    (
-      getDb()
-        .prepare("SELECT gmail_message_id AS id FROM mails WHERE org_id=? AND gmail_message_id IS NOT NULL")
-        .all(orgId) as Array<{ id: string }>
-    ).map((r) => r.id)
-  );
+  // Already-ingested or already-ignored ids for THIS organization (tenant-scoped dedupe).
+  const seenRows = getDb()
+    .prepare("SELECT gmail_message_id AS id FROM mails WHERE org_id=? AND gmail_message_id IS NOT NULL")
+    .all(orgId) as Array<{ id: string }>;
+  const ignoredRows = getDb()
+    .prepare("SELECT key FROM gmail_state WHERE key LIKE 'ignored_mail:%'")
+    .all() as Array<{ key: string }>;
+  const seen = new Set([
+    ...seenRows.map((r) => r.id),
+    ...ignoredRows.map((r) => r.key.replace("ignored_mail:", "")),
+  ]);
 
   for (const gid of ids) {
     if (seen.has(gid)) continue;
@@ -151,6 +169,10 @@ export async function syncGmailInbox(orgId: string, limit = 25): Promise<{
         receivedAt,
         attachments,
       });
+
+      if (action === "unauthorized_ignored") {
+        continue;
+      }
 
       out.ingested += 1;
       if (action === "forwarded") out.forwarded += 1;
