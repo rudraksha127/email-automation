@@ -35,7 +35,12 @@ declare global {
 /** Extracts session token from cookie or Authorization header. */
 export function extractToken(req: Request): string | null {
   if (req.cookies && req.cookies[SESSION_COOKIE]) {
-    return req.cookies[SESSION_COOKIE];
+    const val = req.cookies[SESSION_COOKIE];
+    return typeof val === "string" ? val.replace(/^"+|"+$/g, "").trim() : val;
+  }
+  if (req.headers.cookie) {
+    const match = req.headers.cookie.match(new RegExp(`(?:^|;\\s*)${SESSION_COOKIE}=([^;]+)`));
+    if (match) return decodeURIComponent(match[1].trim()).replace(/^"+|"+$/g, "").trim();
   }
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith("Bearer ")) {

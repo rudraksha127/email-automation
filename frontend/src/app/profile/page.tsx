@@ -146,7 +146,13 @@ export default function ProfilePage() {
       setProfileMsg("Profile updated successfully");
       setTimeout(() => setEditProfileOpen(false), 900);
     } catch (err) {
-      setProfileError(err instanceof Error ? err.message : "Failed to save profile");
+      const msg = err instanceof Error ? err.message : "Failed to save profile";
+      if (msg.toLowerCase().includes("unauthorized") || msg.toLowerCase().includes("sign in")) {
+        setProfileError("Session expired or signed out. Redirecting to login…");
+        setTimeout(() => router.replace(paths.login), 1200);
+      } else {
+        setProfileError(msg);
+      }
     } finally {
       setSavingProfile(false);
     }
@@ -574,7 +580,20 @@ export default function ProfilePage() {
             <p className="text-[11px] font-semibold text-emerald-600">{profileMsg}</p>
           )}
           {profileError && (
-            <p className="text-[11px] font-semibold text-rose-600">{profileError}</p>
+            <div className="flex items-center justify-between rounded-lg bg-rose-50 p-2.5 text-[11px] text-rose-700">
+              <span className="font-semibold">{profileError}</span>
+              {(profileError.toLowerCase().includes("session") ||
+                profileError.toLowerCase().includes("sign in") ||
+                profileError.toLowerCase().includes("unauthorized")) && (
+                <button
+                  type="button"
+                  onClick={() => router.replace(paths.login)}
+                  className="ml-2 font-bold underline hover:text-rose-900 cursor-pointer"
+                >
+                  Sign In Now
+                </button>
+              )}
+            </div>
           )}
 
           <div className="flex justify-end gap-2 pt-2">

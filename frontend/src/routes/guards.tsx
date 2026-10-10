@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
-import { paths } from "@/routes/paths";
+import { paths, PROTECTED_PATHS } from "@/routes/paths";
 import { useAuth } from "@/hooks/AuthContext";
 import { LoadingState } from "@/components/ui/EmptyState";
 
@@ -65,9 +65,6 @@ export function GuestGuard({ children }: { children: ReactNode }) {
 }
 
 const PROTECTED_SET = new Set<string>([
-  paths.dashboard,
-  paths.mails,
-  paths.batches,
-  paths.settings,
+  ...PROTECTED_PATHS,
   paths.workspace,
 ]);
