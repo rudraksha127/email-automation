@@ -24,7 +24,7 @@ import { requireAuth, requireWorkspace } from "../middleware/auth";
 
 const router = Router();
 
-function setSessionCookie(res: any, token: string): void {
+export function setSessionCookie(res: any, token: string): void {
   res.cookie(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
@@ -34,7 +34,7 @@ function setSessionCookie(res: any, token: string): void {
   });
 }
 
-function clearSessionCookie(res: any): void {
+export function clearSessionCookie(res: any): void {
   res.clearCookie(SESSION_COOKIE, {
     httpOnly: true,
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
@@ -277,6 +277,23 @@ router.post("/workspace", requireAuth, (req, res) => {
     setSessionOrg(req.sessionToken, orgId);
   }
   res.json({ orgId, orgs });
+});
+
+import { buildAuthUrl, gmailConfig } from "../lib/gmail";
+
+/** GET /api/auth/google — start Google Sign-In */
+router.get("/google", (req, res) => {
+  const cfg = gmailConfig();
+  if (!cfg.configured) {
+    res.status(503).json({ error: "Google OAuth is not configured" });
+    return;
+  }
+  try {
+    const { url } = buildAuthUrl("__login__");
+    res.redirect(302, url);
+  } catch (e) {
+    res.status(500).json({ error: e instanceof Error ? e.message : "Unable to start OAuth" });
+  }
 });
 
 export default router;

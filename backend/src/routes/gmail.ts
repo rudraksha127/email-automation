@@ -13,7 +13,17 @@ import {
 } from "../lib/gmail";
 import { tokenEncryptionReady } from "../lib/crypto";
 import { syncGmailInbox } from "../lib/gmailSync";
-import { audit } from "../lib/db";
+import {
+  getDb,
+  hashPassword,
+  nowIso,
+  createOrganization,
+  listUserOrgs,
+  audit
+} from "../lib/db";
+import { createSessionToken } from "../lib/auth";
+import { setSessionCookie } from "./auth";
+import { randomBytes } from "node:crypto";
 
 const router = Router();
 let syncInProgress = false;
@@ -78,6 +88,35 @@ router.get("/callback", async (req, res) => {
   try {
     const tokens = await exchangeCode(code);
     const account = await fetchAccountEmail(tokens.access_token);
+
+    if (orgId === "__login__") {
+      if (!tokens.refresh_token) {
+        return res.redirect(302, `${frontendBase}/login?error=${encodeURIComponent("Google did not return a refresh token. Please reconnect with prompt=consent.")}`);
+      }
+
+      const d = getDb();
+      let adminRow = d.prepare("SELECT email FROM admins WHERE email=?").get(account) as { email: string } | undefined;
+      let targetOrgId = "org_default";
+
+      if (!adminRow) {
+        const { hash, salt } = hashPassword(randomBytes(16).toString("hex"));
+        d.prepare("INSERT INTO admins(email,name,password_hash,salt,created_at) VALUES(?,?,?,?,?)").run(
+          account, account.split("@")[0] || "User", hash, salt, nowIso()
+        );
+        const newOrg = createOrganization(`${account.split("@")[0]}'s Workspace`, account);
+        targetOrgId = newOrg.id;
+      } else {
+        const orgs = listUserOrgs(account);
+        if (orgs.length > 0) targetOrgId = orgs[0].orgId;
+      }
+
+      saveTokens(targetOrgId, account, tokens.access_token, tokens.refresh_token, tokens.expires_in ?? 3600);
+      const token = createSessionToken(account);
+      setSessionCookie(res, token);
+      
+      return res.redirect(302, `${frontendBase}/dashboard`);
+    }
+
     if (!tokens.refresh_token) {
       return fail("Google did not return a refresh token. Please reconnect with prompt=consent.");
     }
@@ -86,6 +125,9 @@ router.get("/callback", async (req, res) => {
     res.redirect(302, `${frontendBase}/settings?gmailConnected=1`);
   } catch (e) {
     const safe = e instanceof Error ? e.message.slice(0, 200) : "OAuth connection failed";
+    if (orgId === "__login__") {
+      return res.redirect(302, `${frontendBase}/login?error=${encodeURIComponent(safe)}`);
+    }
     fail(safe);
   }
 });
