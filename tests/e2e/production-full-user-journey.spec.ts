@@ -45,10 +45,23 @@ test.describe("Production User Journey & E2E Validation", () => {
     await submitBtn.click();
     await expect(page.locator("text=Enter a valid email address")).toBeVisible();
 
-    // Test invalid credentials
+    // Test invalid credentials and password visibility toggle
     await emailInput.fill("wrong@institution.edu");
-    const passwordInput = page.locator('input[type="password"]');
+    const passwordInput = page.locator('#password');
     await passwordInput.fill("wrongpassword123");
+
+    // Test password visibility toggle control
+    const toggleBtn = page.getByRole("button", { name: /show password/i });
+    await expect(toggleBtn).toBeVisible();
+    await expect(passwordInput).toHaveAttribute("type", "password");
+    await toggleBtn.click();
+    await expect(passwordInput).toHaveAttribute("type", "text");
+    await expect(passwordInput).toHaveValue("wrongpassword123");
+    const hideBtn = page.getByRole("button", { name: /hide password/i });
+    await expect(hideBtn).toBeVisible();
+    await hideBtn.click();
+    await expect(passwordInput).toHaveAttribute("type", "password");
+
     await submitBtn.click();
     await expect(page.locator("text=Invalid email or password")).toBeVisible();
 

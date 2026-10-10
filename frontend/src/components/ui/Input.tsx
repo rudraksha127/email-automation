@@ -53,18 +53,21 @@ export const Input = forwardRef<HTMLInputElement, TextFieldProps>(function Input
           aria-invalid={!!error || undefined}
           aria-describedby={error ? errorId : undefined}
           className={cn(
-            "block w-full rounded-xl border-0 bg-transparent py-3 pr-4 pl-11 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none",
-            !icon && "pl-4",
-            passwordToggle && !icon && "pr-11"
+            "block w-full rounded-xl border-0 bg-transparent py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none",
+            icon ? "pl-11" : "pl-4",
+            passwordToggle ? "pr-11" : "pr-4"
           )}
           {...props}
         />
         {passwordToggle ? (
           <button
             type="button"
+            tabIndex={0}
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => setShow((s) => !s)}
             aria-label={show ? "Hide password" : "Show password"}
-            className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 transition-colors hover:text-slate-600"
+            aria-pressed={show}
+            className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 transition-colors hover:text-slate-600 focus-visible:outline-2 focus-visible:outline-brand-600 rounded-lg cursor-pointer"
           >
             {show ? <EyeOffIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
           </button>
