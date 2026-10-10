@@ -524,22 +524,27 @@ function seed(d: DatabaseSync): void {
   const primaryEmail = envEmail || "admin@institution.edu";
   const primaryPassword = envPass || "admin12345";
 
-  const seedAdmin = (email: string, pass: string): void => {
+  const seedAdmin = (email: string, pass: string, forcePasswordSync = false): void => {
     const existing = d.prepare("SELECT email FROM admins WHERE email=?").get(email);
     if (!existing) {
       const { hash, salt } = hashPassword(pass);
       d.prepare("INSERT INTO admins(email,name,password_hash,salt,created_at) VALUES(?,?,?,?,?)").run(
         email, "Department Admin", hash, salt, now
       );
+    } else if (forcePasswordSync) {
+      // When env vars explicitly set credentials, keep DB in sync on every restart
+      const { hash, salt } = hashPassword(pass);
+      d.prepare("UPDATE admins SET password_hash=?, salt=? WHERE email=?").run(hash, salt, email);
     }
     d.prepare(
       "INSERT OR IGNORE INTO organization_members(org_id,admin_email,role,created_at) VALUES(?,?,?,?)"
     ).run(DEFAULT_ORG_ID, email, "admin", now);
   };
 
-  seedAdmin(primaryEmail, primaryPassword);
+  // Always force-sync the password so login matches current config
+  seedAdmin(primaryEmail, primaryPassword, true);
   if (primaryEmail !== "admin@institution.edu") {
-    seedAdmin("admin@institution.edu", "admin12345");
+    seedAdmin("admin@institution.edu", "admin12345", true);
   }
 }
 
