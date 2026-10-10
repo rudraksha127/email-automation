@@ -32,6 +32,8 @@ oauth-tokens.json
 token*.json
 credentials*.json
 client_secret*.json
+*credential*
+crediential*
 
 # testing
 coverage/
