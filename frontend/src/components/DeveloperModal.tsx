@@ -27,7 +27,7 @@ export function DeveloperModal({ open, onClose }: DeveloperModalProps) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
       {/* Dimmed backdrop */}
       <div
         className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
@@ -41,64 +41,74 @@ export function DeveloperModal({ open, onClose }: DeveloperModalProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="developer-info-title"
-        className="relative z-10 w-full max-w-[430px] rounded-3xl bg-white p-6 sm:p-7 shadow-2xl animate-in fade-in zoom-in-95 duration-150"
+        className="relative z-10 w-full max-w-[420px] max-h-[92vh] overflow-y-auto rounded-3xl bg-white p-5 sm:p-7 shadow-2xl animate-in fade-in zoom-in-95 duration-150"
       >
-        <h2 id="developer-info-title" className="text-xl font-bold text-slate-900 tracking-tight">
-          Developer Information
-        </h2>
+        <div className="flex items-center justify-between pb-1">
+          <h2 id="developer-info-title" className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
+            Developer Information
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close dialog"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+          >
+            ✕
+          </button>
+        </div>
 
         {/* Developer Core Details */}
-        <div className="mt-5 space-y-3.5 text-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-slate-500 font-normal">Developer</span>
-            <span className="font-semibold text-slate-900">Rudraksh Udiya</span>
+        <div className="mt-4 space-y-3 text-xs sm:text-sm">
+          <div className="flex items-start justify-between gap-3">
+            <span className="shrink-0 text-slate-500 font-normal">Developer</span>
+            <span className="text-right font-semibold text-slate-900 break-words">Rudraksh Udiya</span>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-slate-500 font-normal">Enrollment No.</span>
-            <span className="font-semibold text-slate-900">0827IT241115</span>
+          <div className="flex items-start justify-between gap-3">
+            <span className="shrink-0 text-slate-500 font-normal">Enrollment No.</span>
+            <span className="text-right font-semibold text-slate-900 font-mono">0827IT241115</span>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-slate-500 font-normal">Year</span>
-            <span className="font-semibold text-slate-900">3rd Year</span>
+          <div className="flex items-start justify-between gap-3">
+            <span className="shrink-0 text-slate-500 font-normal">Year</span>
+            <span className="text-right font-semibold text-slate-900">3rd Year</span>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-slate-500 font-normal">Department</span>
-            <span className="font-semibold text-slate-900">Information Technology (IT)</span>
+          <div className="flex items-start justify-between gap-3">
+            <span className="shrink-0 text-slate-500 font-normal">Department</span>
+            <span className="text-right font-semibold text-slate-900 break-words">Information Technology (IT)</span>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-slate-500 font-normal">Email</span>
-            <span className="font-semibold text-slate-900">rudraksha240036@acropolis.in</span>
+          <div className="flex items-start justify-between gap-3">
+            <span className="shrink-0 text-slate-500 font-normal">Email</span>
+            <span className="text-right font-semibold text-slate-900 break-all">rudraksha240036@acropolis.in</span>
           </div>
         </div>
 
         {/* Guided By Section */}
-        <div className="mt-6">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-blue-600">
+        <div className="mt-5">
+          <h3 className="text-[11px] font-bold uppercase tracking-wider text-blue-600">
             GUIDED BY
           </h3>
-          <div className="mt-2.5 rounded-2xl bg-slate-50 p-4 space-y-3 text-sm border border-slate-100/70">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-500 font-normal">Faculty Mentor</span>
-              <span className="font-semibold text-slate-900">Dr. Nitin Kulkarni</span>
+          <div className="mt-2 rounded-2xl bg-slate-50 p-3.5 sm:p-4 space-y-2.5 text-xs sm:text-sm border border-slate-100">
+            <div className="flex items-start justify-between gap-3">
+              <span className="shrink-0 text-slate-500 font-normal">Faculty Mentor</span>
+              <span className="text-right font-semibold text-slate-900 break-words">Dr. Nitin Kulkarni</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-500 font-normal">Designation</span>
-              <span className="font-semibold text-slate-900">Faculty Mentor</span>
+            <div className="flex items-start justify-between gap-3">
+              <span className="shrink-0 text-slate-500 font-normal">Designation</span>
+              <span className="text-right font-semibold text-slate-900">Faculty Mentor</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-500 font-normal">Department</span>
-              <span className="font-semibold text-slate-900">Information Technology (IT)</span>
+            <div className="flex items-start justify-between gap-3">
+              <span className="shrink-0 text-slate-500 font-normal">Department</span>
+              <span className="text-right font-semibold text-slate-900 break-words">Information Technology (IT)</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-500 font-normal">Email</span>
-              <span className="font-semibold text-slate-900">nitinkulkarni@acropolis.in</span>
+            <div className="flex items-start justify-between gap-3">
+              <span className="shrink-0 text-slate-500 font-normal">Email</span>
+              <span className="text-right font-semibold text-slate-900 break-all">nitinkulkarni@acropolis.in</span>
             </div>
           </div>
         </div>
 
         {/* Technical Support Section */}
         <div className="mt-5">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-blue-600">
+          <h3 className="text-[11px] font-bold uppercase tracking-wider text-blue-600">
             TECHNICAL SUPPORT
           </h3>
           <p className="mt-1 text-xs text-slate-500 leading-relaxed">
@@ -106,7 +116,7 @@ export function DeveloperModal({ open, onClose }: DeveloperModalProps) {
           </p>
           <a
             href="mailto:rudraksha240036@acropolis.in"
-            className="mt-1.5 inline-block text-sm font-semibold text-blue-600 underline underline-offset-2 hover:text-blue-700 transition"
+            className="mt-1 inline-block text-xs sm:text-sm font-semibold text-blue-600 underline underline-offset-2 hover:text-blue-700 transition break-all"
           >
             rudraksha240036@acropolis.in
           </a>
@@ -116,7 +126,7 @@ export function DeveloperModal({ open, onClose }: DeveloperModalProps) {
         <button
           type="button"
           onClick={onClose}
-          className="mt-6 w-full rounded-2xl bg-blue-50/80 py-3 text-sm font-semibold text-slate-800 hover:bg-blue-100 transition-colors cursor-pointer"
+          className="mt-5 w-full rounded-2xl bg-blue-50/80 py-2.5 sm:py-3 text-sm font-semibold text-slate-800 hover:bg-blue-100 transition-colors cursor-pointer"
         >
           Close
         </button>
