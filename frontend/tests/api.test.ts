@@ -174,8 +174,8 @@ describe("authentication", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.email).toBe(ADMIN_EMAIL);
-    expect(body.employeeId).toBe("HOD-IT-001");
-    expect(body.departmentScope).toBe("IT & CSE-DS");
+    expect(body.employeeId).toBe("EMP-001");
+    expect(body.departmentScope).toBe("Placement Cell");
 
     const patchReq = new Request("http://test.local/api/auth/profile", {
       method: "PATCH",

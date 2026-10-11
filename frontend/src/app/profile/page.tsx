@@ -33,6 +33,19 @@ interface OrgMember {
   role: "admin" | "member";
 }
 
+const EMPTY_PROFILE: ProfileResponse = {
+  name: "",
+  email: "",
+  employeeId: "",
+  roleTitle: "",
+  status: "Active",
+  departmentScope: "",
+  activeBatches: "",
+  institution: "",
+  department: "",
+  academicSession: "",
+};
+
 export default function ProfilePage() {
   const router = useRouter();
   const { user, logout, refresh } = useAuth();
@@ -46,18 +59,17 @@ export default function ProfilePage() {
     []
   );
 
+  // Blank profile while loading or for a brand-new user — only the email is
+  // pre-filled; every other field is set by the user via Edit Profile.
   const profile = profileState.data ?? {
-    name: user?.name || "Prof. (Dr.) Prashant Lakkadwala",
-    email: user?.email || "hodit@acropolis.in",
-    employeeId: "HOD-IT-001",
-    roleTitle: "Role: HOD",
-    status: "Active",
-    departmentScope: "IT & CSE-DS",
-    activeBatches: "2nd, 3rd & 4th Year",
-    institution: "Acropolis Institute of Technology And Research Indore",
-    department: "IT Department",
-    academicSession: "Academic Session 2026–27",
+    ...EMPTY_PROFILE,
+    name: user?.name && user.name !== "Department Admin" ? user.name : "",
+    email: user?.email ?? "",
   };
+
+  // First-login detection: name has never been set (seeded "Department Admin"
+  // or empty) — the dialog nudges the user to complete their own details.
+  const needsSetup = profileState.data != null && !profileState.data.name.trim();
 
   const facultyList = facultyState.data ?? [];
 
@@ -79,6 +91,8 @@ export default function ProfilePage() {
   const [empIdInput, setEmpIdInput] = useState("");
   const [deptScopeInput, setDeptScopeInput] = useState("");
   const [batchesInput, setBatchesInput] = useState("");
+  const [institutionInput, setInstitutionInput] = useState("");
+  const [departmentInput, setDepartmentInput] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileMsg, setProfileMsg] = useState<string | null>(null);
   const [profileError, setProfileError] = useState<string | null>(null);
@@ -86,14 +100,26 @@ export default function ProfilePage() {
   /** Populate form inputs with current profile values and open the edit modal */
   function handleOpenEdit() {
     setNameInput(profile.name);
-    setRoleTitleInput(profile.roleTitle || "Role: HOD");
+    setRoleTitleInput(profile.roleTitle);
     setEmpIdInput(profile.employeeId);
     setDeptScopeInput(profile.departmentScope);
     setBatchesInput(profile.activeBatches);
+    setInstitutionInput(profile.institution);
+    setDepartmentInput(profile.department);
     setProfileMsg(null);
     setProfileError(null);
     setEditProfileOpen(true);
   }
+
+  // Open the editor automatically on first login so the user enters their
+  // own name and role — nothing about them is assumed from code.
+  useEffect(() => {
+    if (needsSetup && profileState.data != null) {
+      setEditProfileOpen(true);
+    }
+    // Only trigger once per page load.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [needsSetup]);
 
   // Change password form
   const [currentPw, setCurrentPw] = useState("");
@@ -110,7 +136,7 @@ export default function ProfilePage() {
   const [inviting, setInviting] = useState(false);
   const [facultyMsg, setFacultyMsg] = useState<string | null>(null);
 
-  // Transfer HOD
+  // Transfer ownership
   const [transferTargetEmail, setTransferTargetEmail] = useState("");
   const [transferring, setTransferring] = useState(false);
   const [transferMsg, setTransferMsg] = useState<string | null>(null);
@@ -123,14 +149,16 @@ export default function ProfilePage() {
     setProfileMsg(null);
     setProfileError(null);
     try {
-      await http.patch<ProfileResponse>("/api/auth/profile", {
+      const result = await http.patch<ProfileResponse>("/api/auth/profile", {
         name: nameInput.trim(),
         roleTitle: roleTitleInput.trim(),
         employeeId: empIdInput.trim(),
         departmentScope: deptScopeInput.trim(),
         activeBatches: batchesInput.trim(),
+        institution: institutionInput.trim(),
+        department: departmentInput.trim(),
       });
-      profileState.reload();
+      profileState.setData(result); // instant UI update
       await refresh();
       setProfileMsg("Profile updated successfully");
       setTimeout(() => setEditProfileOpen(false), 900);
@@ -212,7 +240,7 @@ export default function ProfilePage() {
         email: transferTargetEmail.trim().toLowerCase(),
         role: "admin",
       });
-      setTransferMsg(`HOD admin rights granted to ${transferTargetEmail}`);
+      setTransferMsg(`Admin rights granted to ${transferTargetEmail}`);
       facultyState.reload();
       setTimeout(() => setTransferModalOpen(false), 1200);
     } catch (err) {
@@ -232,15 +260,16 @@ export default function ProfilePage() {
     }
   }
 
-  // Derive initials from name
-  const displayName = profile?.name || "Prof. (Dr.) Prashant Lakkadwala";
-  const initials = displayName
-    .replace(/Prof\.|\(Dr\.\)|Dr\./gi, "")
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() || "")
-    .join("") || "PL";
+  // Derive initials from the user's own name; fall back to the email initial.
+  const displayName = profile.name || profile.email;
+  const initials =
+    displayName
+      .replace(/Prof\.|\(Dr\.\)|Dr\./gi, "")
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((w) => w[0]?.toUpperCase() || "")
+      .join("") || "U";
 
   if (profileState.loading && !profileState.data) {
     return (
@@ -262,20 +291,22 @@ export default function ProfilePage() {
               </div>
               <div>
                 <h1 className="text-base font-bold text-slate-900 sm:text-lg">
-                  {profile?.name}
+                  {profile.name || "New User"}
                 </h1>
-                <p className="text-xs text-slate-500">{profile?.email}</p>
-                <p className="text-[11px] font-medium text-slate-400">
-                  {profile?.employeeId}
-                </p>
+                <p className="text-xs text-slate-500">{profile.email}</p>
+                {profile.employeeId ? (
+                  <p className="text-[11px] font-medium text-slate-400">{profile.employeeId}</p>
+                ) : null}
                 <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200/80 bg-blue-50/80 px-2.5 py-0.5 text-[11px] font-semibold text-blue-700">
-                    <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
-                    {profile?.roleTitle || "Role: HOD"}
-                  </span>
+                  {profile.roleTitle ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200/80 bg-blue-50/80 px-2.5 py-0.5 text-[11px] font-semibold text-blue-700">
+                      <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
+                      {profile.roleTitle}
+                    </span>
+                  ) : null}
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/80 bg-emerald-50/80 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                    {profile?.status || "Active"}
+                    {profile.status || "Active"}
                   </span>
                 </div>
               </div>
@@ -294,26 +325,28 @@ export default function ProfilePage() {
         </div>
 
         {/* Department Scope & Active Batches Banner */}
-        <div className="my-4 rounded-xl border border-blue-100/80 bg-blue-50/50 p-4 transition-all sm:p-4.5">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                Department Scope
-              </p>
-              <p className="mt-0.5 text-xs font-bold text-slate-900 sm:text-sm">
-                {profile?.departmentScope}
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                Active Batches
-              </p>
-              <p className="mt-0.5 text-xs font-bold text-blue-700 sm:text-sm">
-                {profile?.activeBatches}
-              </p>
+        {(profile.departmentScope || profile.activeBatches) && (
+          <div className="my-4 rounded-xl border border-blue-100/80 bg-blue-50/50 p-4 transition-all sm:p-4.5">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                  Department Scope
+                </p>
+                <p className="mt-0.5 text-xs font-bold text-slate-900 sm:text-sm">
+                  {profile.departmentScope || "—"}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                  Active Batches
+                </p>
+                <p className="mt-0.5 text-xs font-bold text-blue-700 sm:text-sm">
+                  {profile.activeBatches || "—"}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Navigation / Action Rows Card */}
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xs divide-y divide-slate-100">
@@ -368,7 +401,7 @@ export default function ProfilePage() {
             <ChevronRightIcon className="h-4 w-4 text-slate-400" />
           </button>
 
-          {/* Faculty Management */}
+          {/* Faculty / Team Management */}
           <button
             type="button"
             onClick={() => setFacultyModalOpen(true)}
@@ -379,16 +412,16 @@ export default function ProfilePage() {
                 <UsersIcon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-slate-800 sm:text-sm">Faculty Management</p>
+                <p className="text-xs font-semibold text-slate-800 sm:text-sm">Team Management</p>
                 <p className="text-[11px] font-medium text-slate-400">
-                  Invite, activate, reset passwords and remove faculty
+                  Invite teammates and manage access
                 </p>
               </div>
             </div>
             <ChevronRightIcon className="h-4 w-4 text-slate-400" />
           </button>
 
-          {/* Transfer HOD Ownership */}
+          {/* Transfer Ownership */}
           <button
             type="button"
             onClick={() => setTransferModalOpen(true)}
@@ -399,9 +432,11 @@ export default function ProfilePage() {
                 <UserCheckIcon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-slate-800 sm:text-sm">Transfer HOD Ownership</p>
+                <p className="text-xs font-semibold text-slate-800 sm:text-sm">
+                  Transfer Ownership
+                </p>
                 <p className="text-[11px] font-medium text-slate-400">
-                  Hand over department head role to another faculty member
+                  Hand over administrator role to another team member
                 </p>
               </div>
             </div>
@@ -465,28 +500,33 @@ export default function ProfilePage() {
           </button>
         </div>
 
-        {/* Institutional Footer */}
-        <div className="mt-8 text-center">
-          <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-slate-600">
-            <BuildingIcon className="h-4 w-4 text-slate-400" />
-            <span>{profile?.institution}</span>
+        {/* Institutional footer — rendered only when the user has set these. */}
+        {(profile.institution || profile.department || profile.academicSession) && (
+          <div className="mt-8 text-center">
+            <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-slate-600">
+              <BuildingIcon className="h-4 w-4 text-slate-400" />
+              <span>{profile.institution || profile.department}</span>
+            </div>
+            {profile.institution && profile.department ? (
+              <p className="mt-0.5 text-[11px] font-medium text-slate-400">{profile.department}</p>
+            ) : null}
+            {profile.academicSession ? (
+              <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-slate-100/80 px-3 py-1 text-[10px] font-semibold text-slate-500">
+                <ShieldIcon className="h-3 w-3 text-slate-400" />
+                <span>{profile.academicSession}</span>
+              </div>
+            ) : null}
           </div>
-          <p className="mt-0.5 text-[11px] font-medium text-slate-400">
-            {profile?.department}
-          </p>
-          <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-slate-100/80 px-3 py-1 text-[10px] font-semibold text-slate-500">
-            <ShieldIcon className="h-3 w-3 text-slate-400" />
-            <span>{profile?.academicSession}</span>
-          </div>
-          <div className="mt-3">
-            <button
-              type="button"
-              onClick={() => setDevModalOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-full bg-blue-50/80 px-3.5 py-1 text-[11px] font-semibold text-blue-700 hover:bg-blue-100/80 transition-colors cursor-pointer border border-blue-200/60"
-            >
-              Developed by Student of IT Department
-            </button>
-          </div>
+        )}
+
+        <div className="mt-3 text-center">
+          <button
+            type="button"
+            onClick={() => setDevModalOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-full bg-slate-100/80 px-3.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-200/80 transition-colors cursor-pointer"
+          >
+            Developed by Student of IT Department
+          </button>
         </div>
       </div>
 
@@ -496,18 +536,23 @@ export default function ProfilePage() {
       <Modal
         open={editProfileOpen}
         onClose={() => setEditProfileOpen(false)}
-        title="Edit Institutional Profile"
+        title="Edit Profile"
       >
         <form onSubmit={handleSaveProfile} className="space-y-3.5">
+          {needsSetup && (
+            <p className="rounded-lg bg-blue-50 p-2.5 text-[11px] font-medium text-blue-800">
+              Welcome! Please enter your name and role to complete your account setup.
+            </p>
+          )}
+
           <div>
-            <label className="block text-[11px] font-semibold text-slate-700">
-              Full Name & Title
-            </label>
+            <label className="block text-[11px] font-semibold text-slate-700">Full Name</label>
             <input
               type="text"
               required
               value={nameInput}
               onChange={(e) => setNameInput(e.target.value)}
+              placeholder="e.g. Prof. Kapil Sahu"
               className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs font-medium text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none"
             />
           </div>
@@ -532,9 +577,9 @@ export default function ProfilePage() {
             </label>
             <input
               type="text"
-              required
               value={empIdInput}
               onChange={(e) => setEmpIdInput(e.target.value)}
+              placeholder="e.g. EMP-007"
               className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs font-medium text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none"
             />
           </div>
@@ -545,22 +590,48 @@ export default function ProfilePage() {
             </label>
             <input
               type="text"
-              required
               value={deptScopeInput}
               onChange={(e) => setDeptScopeInput(e.target.value)}
+              placeholder="e.g. Placement Cell"
               className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs font-medium text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none"
             />
           </div>
 
           <div>
             <label className="block text-[11px] font-semibold text-slate-700">
-              Active Batches Description
+              Active Batches
             </label>
             <input
               type="text"
-              required
               value={batchesInput}
               onChange={(e) => setBatchesInput(e.target.value)}
+              placeholder="e.g. 2nd, 3rd & 4th Year"
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs font-medium text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-700">
+              Institution (optional)
+            </label>
+            <input
+              type="text"
+              value={institutionInput}
+              onChange={(e) => setInstitutionInput(e.target.value)}
+              placeholder="e.g. Acropolis Institute of Technology and Research"
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs font-medium text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-700">
+              Department (optional)
+            </label>
+            <input
+              type="text"
+              value={departmentInput}
+              onChange={(e) => setDepartmentInput(e.target.value)}
+              placeholder="e.g. IT Department"
               className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs font-medium text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none"
             />
           </div>
@@ -676,7 +747,7 @@ export default function ProfilePage() {
       <Modal
         open={securityModalOpen}
         onClose={() => setSecurityModalOpen(false)}
-        title="Department Security & Cryptography"
+        title="Security Settings"
       >
         <div className="space-y-3.5 text-xs text-slate-600">
           <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
@@ -694,7 +765,7 @@ export default function ProfilePage() {
           <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
             <p className="font-semibold text-slate-900">Allowlist Fail-Closed Enforcement</p>
             <p className="mt-0.5 text-[11px] text-slate-500">
-              Only verified emails from authorized faculty/senders are eligible for automatic forwarding; all others require HOD review.
+              Only verified emails from authorized senders are eligible for automatic forwarding; all others require administrator review.
             </p>
           </div>
           <div className="flex justify-end pt-2">
@@ -713,14 +784,14 @@ export default function ProfilePage() {
           <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50/50 p-3">
             <div>
               <p className="font-semibold text-emerald-900">Current Session (Active)</p>
-              <p className="text-[11px] text-emerald-700">Signed in as {profile?.email}</p>
+              <p className="text-[11px] text-emerald-700">Signed in as {profile.email}</p>
             </div>
             <span className="rounded-full bg-emerald-600 px-2.5 py-0.5 text-[10px] font-bold text-white">
               Online
             </span>
           </div>
           <p className="text-[11px] text-slate-400">
-            Your session is secured with httpOnly cookie storage. Logging out will immediately invalidate this token in SQLite.
+            Your session is secured with httpOnly cookie storage. Logging out will immediately invalidate this token.
           </p>
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="ghost" onClick={() => setSessionsModalOpen(false)}>
@@ -733,22 +804,22 @@ export default function ProfilePage() {
         </div>
       </Modal>
 
-      {/* 5. Faculty Management Modal */}
+      {/* 5. Team Management Modal */}
       <Modal
         open={facultyModalOpen}
         onClose={() => setFacultyModalOpen(false)}
-        title="Faculty Management"
+        title="Team Management"
       >
         <div className="space-y-4">
           <form onSubmit={handleInviteFaculty} className="space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
-            <p className="text-xs font-semibold text-slate-800">Add Faculty Member</p>
+            <p className="text-xs font-semibold text-slate-800">Add Team Member</p>
             <div className="flex gap-2">
               <input
                 type="email"
                 required
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
-                placeholder="faculty@acropolis.in"
+                placeholder="member@institution.edu"
                 className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-800 focus:border-blue-500 focus:outline-none"
               />
               <select
@@ -756,8 +827,8 @@ export default function ProfilePage() {
                 onChange={(e) => setInviteRole(e.target.value as "admin" | "member")}
                 className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-700 focus:border-blue-500 focus:outline-none"
               >
-                <option value="member">Faculty</option>
-                <option value="admin">HOD/Admin</option>
+                <option value="member">Member</option>
+                <option value="admin">Administrator</option>
               </select>
               <Button type="submit" loading={inviting} className="shrink-0">
                 Add
@@ -769,10 +840,10 @@ export default function ProfilePage() {
           </form>
 
           <div>
-            <p className="mb-2 text-xs font-semibold text-slate-700">Active Department Faculty</p>
+            <p className="mb-2 text-xs font-semibold text-slate-700">Active Team Members</p>
             <div className="max-h-52 overflow-y-auto rounded-xl border border-slate-100 divide-y divide-slate-100">
               {facultyList.length === 0 ? (
-                <p className="p-3 text-xs text-slate-400">No additional faculty members</p>
+                <p className="p-3 text-xs text-slate-400">No additional team members</p>
               ) : (
                 facultyList.map((m) => (
                   <div key={m.email} className="flex items-center justify-between p-2.5 text-xs">
@@ -780,7 +851,7 @@ export default function ProfilePage() {
                       <p className="font-semibold text-slate-800">{m.email}</p>
                       <p className="text-[10px] text-slate-400 uppercase">{m.role}</p>
                     </div>
-                    {m.email !== profile?.email && (
+                    {m.email !== profile.email && (
                       <button
                         type="button"
                         onClick={() => handleRemoveFaculty(m.email)}
@@ -801,26 +872,26 @@ export default function ProfilePage() {
         </div>
       </Modal>
 
-      {/* 6. Transfer HOD Ownership Modal */}
+      {/* 6. Transfer Ownership Modal */}
       <Modal
         open={transferModalOpen}
         onClose={() => setTransferModalOpen(false)}
-        title="Transfer HOD Ownership"
+        title="Transfer Ownership"
       >
         <form onSubmit={handleTransferOwnership} className="space-y-3 text-xs text-slate-600">
           <p className="text-slate-600">
-            Hand over primary administrator and HOD responsibilities to another faculty email address in the department.
+            Hand over primary administrator responsibilities to another team member.
           </p>
           <div>
             <label className="block text-[11px] font-semibold text-slate-700">
-              Recipient Faculty Email
+              Recipient Email
             </label>
             <input
               type="email"
               required
               value={transferTargetEmail}
               onChange={(e) => setTransferTargetEmail(e.target.value)}
-              placeholder="newhod@acropolis.in"
+              placeholder="newadmin@institution.edu"
               className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none"
             />
           </div>
@@ -832,7 +903,7 @@ export default function ProfilePage() {
               Cancel
             </Button>
             <Button type="submit" loading={transferring}>
-              Grant HOD Rights
+              Grant Admin Rights
             </Button>
           </div>
         </form>
@@ -842,26 +913,25 @@ export default function ProfilePage() {
       <Modal
         open={helpModalOpen}
         onClose={() => setHelpModalOpen(false)}
-        title="Mail Automation Help & Guidance"
+        title="Help Center"
       >
         <div className="space-y-3 text-xs text-slate-600">
           <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-3">
             <p className="font-semibold text-blue-900">Email Routing Rules</p>
             <p className="mt-0.5 text-[11px] text-blue-800">
-              Emails containing &ldquo;2027&rdquo; in the subject or body are matched with Batch 2027 recipients.
-              Emails containing &ldquo;2028&rdquo; are matched with Batch 2028 recipients.
+              Configure keyword-based rules in Settings to route incoming emails to the right batch automatically.
             </p>
           </div>
           <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
-            <p className="font-semibold text-slate-900">Department CC Protection</p>
+            <p className="font-semibold text-slate-900">CC Protection</p>
             <p className="mt-0.5 text-[11px] text-slate-500">
-              All outgoing student forwards automatically include the department CC address ({profile?.email}) for archiving.
+              All outgoing forwards can automatically include a CC address for archiving (configure in Settings).
             </p>
           </div>
           <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
-            <p className="font-semibold text-slate-900">Assistance & Support</p>
+            <p className="font-semibold text-slate-900">Assistance &amp; Support</p>
             <p className="mt-0.5 text-[11px] text-slate-500">
-              For system queries or mailbox configuration changes, contact Acropolis IT Administration.
+              For system queries or mailbox configuration changes, contact your IT Administration.
             </p>
           </div>
           <div className="flex justify-end pt-2">
@@ -879,15 +949,11 @@ export default function ProfilePage() {
         <div className="space-y-2.5 text-xs text-slate-600">
           <div className="flex justify-between py-1.5 border-b border-slate-100">
             <span className="text-slate-500">Application:</span>
-            <span className="font-semibold text-slate-800">Acropolis Mail Automation PWA</span>
+            <span className="font-semibold text-slate-800">Mail Automation PWA</span>
           </div>
           <div className="flex justify-between py-1.5 border-b border-slate-100">
             <span className="text-slate-500">Version:</span>
             <span className="font-semibold text-blue-700">v1.0.0 (Production Pilot)</span>
-          </div>
-          <div className="flex justify-between py-1.5 border-b border-slate-100">
-            <span className="text-slate-500">Target Mailbox:</span>
-            <span className="font-semibold text-slate-800">rudraksha240036@acropolis.in</span>
           </div>
           <div className="flex justify-between py-1.5 border-b border-slate-100">
             <span className="text-slate-500">Database Engine:</span>
@@ -895,12 +961,12 @@ export default function ProfilePage() {
           </div>
           <div className="flex justify-between py-1.5 border-b border-slate-100">
             <span className="text-slate-500">Session Status:</span>
-            <span className="font-semibold text-emerald-600">Encrypted & Authenticated</span>
+            <span className="font-semibold text-emerald-600">Encrypted &amp; Authenticated</span>
           </div>
           <div className="flex items-center justify-between py-2 border-t border-slate-100 mt-1">
             <div>
               <span className="block text-[11px] font-medium text-slate-500">Developer:</span>
-              <span className="font-semibold text-slate-800 text-xs">Rudraksh Udiya (IT Dept)</span>
+              <span className="font-semibold text-slate-800 text-xs">Rudraksh Udiya</span>
             </div>
             <button
               type="button"
@@ -926,7 +992,7 @@ export default function ProfilePage() {
         title="Confirm Sign Out"
       >
         <div className="space-y-3 text-xs text-slate-600">
-          <p>Are you sure you want to sign out of the IT Department Mail Automation portal?</p>
+          <p>Are you sure you want to sign out of the Mail Automation portal?</p>
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="ghost" onClick={() => setLogoutModalOpen(false)}>
               Stay Signed In
@@ -943,4 +1009,3 @@ export default function ProfilePage() {
     </AppLayout>
   );
 }
-
