@@ -11,11 +11,11 @@ if (Test-Path $pidFile) {
         $pids = Get-Content $pidFile | ConvertFrom-Json
         if ($pids.backend) {
             Stop-Process -Id $pids.backend -Force -ErrorAction SilentlyContinue
-            Write-Host "✓ Stopped backend process ($($pids.backend))" -ForegroundColor Green
+            Write-Host "[OK] Stopped backend process ($($pids.backend))" -ForegroundColor Green
         }
         if ($pids.frontend) {
             Stop-Process -Id $pids.frontend -Force -ErrorAction SilentlyContinue
-            Write-Host "✓ Stopped frontend process ($($pids.frontend))" -ForegroundColor Green
+            Write-Host "[OK] Stopped frontend process ($($pids.frontend))" -ForegroundColor Green
         }
         Remove-Item $pidFile -Force -ErrorAction SilentlyContinue
     } catch {
@@ -30,7 +30,7 @@ foreach ($p in $ports) {
     foreach ($c in $conns) {
         if ($c.OwningProcess -gt 0) {
             Stop-Process -Id $c.OwningProcess -Force -ErrorAction SilentlyContinue
-            Write-Host "✓ Freed port $p (PID: $($c.OwningProcess))" -ForegroundColor Green
+            Write-Host "[OK] Freed port $p (PID: $($c.OwningProcess))" -ForegroundColor Green
         }
     }
 }

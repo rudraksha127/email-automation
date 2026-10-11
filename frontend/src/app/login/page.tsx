@@ -83,25 +83,25 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-dvh flex-col justify-center bg-slate-50 px-4 py-10">
+    <main className="flex min-h-dvh flex-col justify-center bg-slate-50 px-4 py-3 sm:py-6">
       <InstallPrompt />
 
       <div className="mx-auto w-full max-w-md">
         {/* Brand */}
-        <section className="mb-6 flex flex-col items-center text-center" aria-label="Department">
-          <span className="relative mb-4">
-            <span className="flex h-20 w-20 items-center justify-center rounded-3xl bg-brand-600 text-white shadow-lg shadow-brand-600/25">
-              <GraduationCapIcon className="h-10 w-10" />
+        <section className="mb-3 sm:mb-4 flex flex-col items-center text-center" aria-label="Department">
+          <span className="relative mb-2.5">
+            <span className="flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-2xl sm:rounded-3xl bg-brand-600 text-white shadow-md shadow-brand-600/25">
+              <GraduationCapIcon className="h-7 w-7 sm:h-8 sm:w-8" />
             </span>
-            <span className="absolute -bottom-1.5 -right-1.5 flex h-7 w-7 items-center justify-center rounded-full border-[3px] border-slate-50 bg-emerald-500 text-white">
-              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="white" strokeWidth="3.5">
+            <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-slate-50 bg-emerald-500 text-white">
+              <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="white" strokeWidth="3.5">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             </span>
           </span>
-          <h1 className="text-3xl font-black tracking-tight text-slate-900">IT Department</h1>
-          <p className="mt-1 text-base font-medium text-slate-500">Mail Automation</p>
-          <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-slate-200/70 px-3.5 py-1.5 text-xs font-semibold text-slate-600">
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">IT Department</h1>
+          <p className="mt-0.5 text-sm sm:text-base font-medium text-slate-500">Mail Automation</p>
+          <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-slate-200/70 px-3 py-1 text-[11px] sm:text-xs font-semibold text-slate-600">
             <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
             Academic Session {academicSession()}
             {today ? <span className="text-slate-400">• {today}</span> : null}
@@ -109,8 +109,8 @@ export default function LoginPage() {
         </section>
 
         {/* Login card */}
-        <section className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl shadow-slate-200/50 sm:p-7">
-          <header className="mb-5 flex items-center justify-between">
+        <section className="rounded-2xl sm:rounded-3xl border border-slate-100 bg-white p-5 sm:p-6 shadow-xl shadow-slate-200/50">
+          <header className="mb-3.5 sm:mb-4 flex items-center justify-between">
             <h2 className="text-sm font-medium text-slate-500">Login to continue</h2>
             <span className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-600">
               <ShieldIcon className="h-4 w-4" />
@@ -118,7 +118,7 @@ export default function LoginPage() {
             </span>
           </header>
 
-          <form onSubmit={handleSubmit} noValidate className="space-y-4" aria-label="Sign in">
+          <form onSubmit={handleSubmit} noValidate className="space-y-3 sm:space-y-3.5" aria-label="Sign in">
             <Input
               label="Email Address"
               id="email"
@@ -146,7 +146,7 @@ export default function LoginPage() {
               error={fieldErrors.password}
             />
 
-            <label className="flex cursor-pointer items-center pt-1">
+            <label className="flex cursor-pointer items-center pt-0.5">
               <input
                 type="checkbox"
                 checked={remember}
@@ -159,7 +159,7 @@ export default function LoginPage() {
             {formError ? (
               <div
                 role="alert"
-                className="flex items-start justify-between gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs text-rose-800"
+                className="flex items-start justify-between gap-3 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs text-rose-800"
               >
                 <div className="flex-1">
                   <p className="font-semibold text-rose-900">Sign in failed</p>
@@ -181,7 +181,7 @@ export default function LoginPage() {
               </div>
             ) : null}
 
-            <Button type="submit" fullWidth loading={submitting} className="py-3.5 text-sm">
+            <Button type="submit" fullWidth loading={submitting} className="py-2.5 sm:py-3 text-sm">
               Sign In
               <ArrowRightIcon className="h-4 w-4" />
             </Button>
@@ -189,24 +189,24 @@ export default function LoginPage() {
         </section>
 
         {/* Trust note */}
-        <p className="mt-4 flex items-center gap-3 rounded-2xl bg-brand-50/70 px-4 py-3.5">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-brand-600 shadow-xs">
-            <ShieldIcon className="h-5 w-5" />
+        <p className="mt-2.5 sm:mt-3 flex items-center gap-2.5 rounded-xl sm:rounded-2xl bg-brand-50/70 px-3.5 py-2.5">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg sm:rounded-xl bg-white text-brand-600 shadow-xs">
+            <ShieldIcon className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
           </span>
           <span>
             <span className="block text-xs font-bold text-slate-900">IT Department</span>
-            <span className="block text-xs text-slate-500">Secure institutional network</span>
+            <span className="block text-[11px] sm:text-xs text-slate-500">Secure institutional network</span>
           </span>
         </p>
 
         {/* Footer */}
-        <footer className="mt-8 text-center">
+        <footer className="mt-3 sm:mt-4 text-center">
           <p className="text-[11px] font-bold uppercase tracking-wide text-slate-700">
             Acropolis Institute of Technology and Research Indore
           </p>
-          <p className="mt-1 text-xs text-slate-500">Department of Information Technology</p>
+          <p className="mt-0.5 text-[11px] sm:text-xs text-slate-500">Department of Information Technology</p>
           
-          <div className="mt-4 flex justify-center gap-4 text-xs font-medium text-brand-600">
+          <div className="mt-2 flex justify-center gap-4 text-xs font-medium text-brand-600">
             <a href="/privacy-policy" className="hover:underline">Privacy Policy</a>
             <a href="/terms" className="hover:underline">Terms of Service</a>
           </div>
@@ -214,7 +214,7 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={() => setShowDevModal(true)}
-            className="mt-4 mx-auto w-fit rounded-full bg-slate-200/70 px-3.5 py-1.5 text-[11px] font-semibold text-slate-600 hover:bg-slate-300/70 transition-colors cursor-pointer"
+            className="mt-2 mx-auto w-fit rounded-full bg-slate-200/70 px-3 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-300/70 transition-colors cursor-pointer"
           >
             Developed by Student of IT Department
           </button>

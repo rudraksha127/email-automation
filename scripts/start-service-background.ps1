@@ -14,12 +14,10 @@ Write-Host " Starting Email Automation Platform in 24/7 Background Mode" -Foregr
 Write-Host "==========================================================" -ForegroundColor Cyan
 
 # 1. Start Backend (Express API on Port 3001)
-$backendCmd = "npm --prefix backend run dev"
-$backendProcess = Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"$backendCmd *>> `"$rootDir\logs\backend.log`"`"" -WindowStyle Hidden -PassThru
+$backendProcess = Start-Process powershell -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-NoExit", "-Command", "Set-Location '$rootDir'; npm --prefix backend run dev *> '$rootDir\logs\backend.log'" -WindowStyle Hidden -PassThru
 
 # 2. Start Frontend (Next.js PWA on Port 3002)
-$frontendCmd = "npm --prefix frontend run dev"
-$frontendProcess = Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"$frontendCmd *>> `"$rootDir\logs\frontend.log`"`"" -WindowStyle Hidden -PassThru
+$frontendProcess = Start-Process powershell -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-NoExit", "-Command", "Set-Location '$rootDir'; npm --prefix frontend run dev *> '$rootDir\logs\frontend.log'" -WindowStyle Hidden -PassThru
 
 # Save PIDs
 $pids = @{
@@ -30,8 +28,8 @@ $pids = @{
 
 Set-Content -Path "$rootDir\data\service-pids.json" -Value $pids
 
-Write-Host "✓ Backend running in background (PID: $($backendProcess.Id))" -ForegroundColor Green
-Write-Host "✓ Frontend running in background (PID: $($frontendProcess.Id))" -ForegroundColor Green
-Write-Host "✓ Logs written to $rootDir\logs\" -ForegroundColor Yellow
-Write-Host "✓ 24/7 autonomous background Gmail sync active." -ForegroundColor Green
-Write-Host "You can safely close this terminal window — automation remains active." -ForegroundColor Cyan
+Write-Host "[OK] Backend running in background (PID: $($backendProcess.Id))" -ForegroundColor Green
+Write-Host "[OK] Frontend running in background (PID: $($frontendProcess.Id))" -ForegroundColor Green
+Write-Host "[OK] Logs written to $rootDir\logs\" -ForegroundColor Yellow
+Write-Host "[OK] 24/7 autonomous background Gmail sync active." -ForegroundColor Green
+Write-Host "You can safely close this terminal window - automation remains active." -ForegroundColor Cyan
