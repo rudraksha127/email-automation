@@ -340,22 +340,22 @@ function SettingsInner() {
         {/* Profile Navigation Shortcut Banner */}
         <Link
           href={paths.profile}
-          className="flex items-center justify-between rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50/70 to-indigo-50/50 p-4 shadow-xs transition-all hover:border-blue-200 hover:shadow-sm"
+          className="flex items-center justify-between rounded-2xl border border-primary-fixed/80 bg-surface-container-low/70 p-4 shadow-card transition-all hover:bg-surface-container hover:shadow-xs"
         >
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-xs">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-white shadow-xs">
               <UserIcon className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs font-bold text-slate-900 sm:text-sm">
+              <p className="text-xs font-bold text-on-surface sm:text-sm">
                 Institutional Profile & Account Settings
               </p>
-              <p className="text-[11px] text-slate-500 font-medium">
+              <p className="text-[11px] text-on-surface-variant font-medium">
                 Manage passwords, active sessions, and faculty permissions in the Profile page
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-1 text-xs font-semibold text-blue-700">
+          <div className="flex items-center gap-1 text-xs font-semibold text-primary">
             <span className="hidden sm:inline">Go to Profile</span>
             <ChevronRightIcon className="h-4 w-4" />
           </div>
@@ -363,24 +363,24 @@ function SettingsInner() {
 
         {/* OAuth Feedback Banners */}
         {oauthError && (
-          <div className="rounded-xl border border-rose-200 bg-rose-50/80 p-3.5 text-xs text-rose-800 flex items-center gap-2">
-            <AlertCircleIcon className="h-4 w-4 shrink-0 text-rose-600" />
+          <div className="rounded-xl border border-error/20 bg-error-container p-3.5 text-xs text-on-error-container flex items-center gap-2">
+            <AlertCircleIcon className="h-4 w-4 shrink-0 text-error" />
             <span>Gmail connection could not be completed: {oauthError}</span>
           </div>
         )}
         {oauthConnected && (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50/80 p-3.5 text-xs text-emerald-800 flex items-center gap-2">
-            <CheckCircleIcon className="h-4 w-4 shrink-0 text-emerald-600" />
+          <div className="rounded-xl border border-secondary-container bg-secondary-container/30 p-3.5 text-xs text-on-secondary-container flex items-center gap-2">
+            <CheckCircleIcon className="h-4 w-4 shrink-0 text-secondary" />
             <span>Gmail mailbox connected successfully! Automatic polling is active.</span>
           </div>
         )}
 
         {/* Card 1: Forwarding Automation */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-card">
+          <div className="flex items-center justify-between border-b border-slate-100/90 pb-4">
             <div>
-              <h2 className="text-sm font-bold text-slate-900">Forwarding Engine</h2>
-              <p className="text-[11px] text-slate-500">
+              <h2 className="text-sm font-bold text-on-surface">Forwarding Engine</h2>
+              <p className="text-[11px] text-on-surface-variant">
                 Automated matching of incoming emails to student batches
               </p>
             </div>
@@ -388,7 +388,7 @@ function SettingsInner() {
             <div className="flex items-center gap-3">
               <span
                 className={`text-xs font-semibold ${
-                  s?.autoForwarding ? "text-emerald-700" : "text-slate-400"
+                  s?.autoForwarding ? "text-secondary" : "text-on-surface-variant/70"
                 }`}
               >
                 {s?.autoForwarding ? "Automated" : "Paused"}
@@ -399,12 +399,12 @@ function SettingsInner() {
                 aria-checked={s?.autoForwarding}
                 disabled={!isAdmin || toggling}
                 onClick={handleToggleForwarding}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed ${
-                  s?.autoForwarding ? "bg-emerald-600" : "bg-slate-300"
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed ${
+                  s?.autoForwarding ? "bg-secondary" : "bg-slate-300"
                 }`}
               >
                 <span
-                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
                     s?.autoForwarding ? "translate-x-5" : "translate-x-0"
                   }`}
                 />
@@ -414,15 +414,15 @@ function SettingsInner() {
 
           {/* IT Department CC Email */}
           <form onSubmit={handleSaveCc} className="mt-4 space-y-2">
-            <label htmlFor="cc-input" className="block text-xs font-semibold text-slate-700">
+            <label htmlFor="cc-input" className="block text-xs font-semibold text-on-surface">
               Department CC Email Address
             </label>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-on-surface-variant">
               Added as CC on all outgoing automated forwards for departmental audit and archiving.
             </p>
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-on-surface-variant">
                   <MailIcon className="h-4 w-4" />
                 </div>
                 <input
@@ -434,20 +434,20 @@ function SettingsInner() {
                     setCcSaved(false);
                   }}
                   placeholder="it@acropolis.in"
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2 pl-9 pr-3 text-xs text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none"
+                  className="w-full rounded-xl border border-slate-200/80 bg-surface-container-low py-2 pl-9 pr-3 text-xs text-on-surface placeholder:text-on-surface-variant/70 focus:border-primary focus:bg-white focus:outline-none"
                 />
               </div>
               <Button type="submit" loading={savingCc} disabled={!isAdmin}>
                 Save CC
               </Button>
             </div>
-            {ccError && <p className="text-[11px] font-medium text-rose-600">{ccError}</p>}
-            {ccSaved && <p className="text-[11px] font-medium text-emerald-600">CC email updated successfully</p>}
+            {ccError && <p className="text-[11px] font-medium text-error">{ccError}</p>}
+            {ccSaved && <p className="text-[11px] font-medium text-secondary">CC email updated successfully</p>}
           </form>
         </div>
 
         {/* Card 2: Gmail Mailbox Connection */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-card">
           <div className="flex items-center justify-between border-b border-slate-100 pb-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600">

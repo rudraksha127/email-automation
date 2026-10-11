@@ -286,29 +286,29 @@ export default function ProfilePage() {
     <AppLayout>
       <div className="mx-auto max-w-2xl px-2 py-4 sm:px-4 sm:py-6">
         {/* Profile Card Header */}
-        <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-xs transition-shadow sm:p-6">
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-card transition-shadow sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#0B57D0] text-lg font-bold text-white shadow-sm shadow-blue-600/30">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-white shadow-xs">
                 {initials}
               </div>
               <div>
-                <h1 className="text-base font-bold text-slate-900 sm:text-lg">
+                <h1 className="text-base font-bold text-on-surface sm:text-lg">
                   {profile.name || "New User"}
                 </h1>
-                <p className="text-xs text-slate-500">{profile.email}</p>
+                <p className="text-xs text-on-surface-variant">{profile.email}</p>
                 {profile.employeeId ? (
-                  <p className="text-[11px] font-medium text-slate-400">{profile.employeeId}</p>
+                  <p className="text-[11px] font-medium text-on-surface-variant/70">{profile.employeeId}</p>
                 ) : null}
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   {profile.roleTitle ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200/80 bg-blue-50/80 px-2.5 py-0.5 text-[11px] font-semibold text-blue-700">
-                      <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-primary-fixed bg-primary-fixed/50 px-2.5 py-0.5 text-[11px] font-semibold text-on-primary-fixed-variant">
+                      <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                       {profile.roleTitle}
                     </span>
                   ) : null}
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/80 bg-emerald-50/80 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-secondary-container bg-secondary-container/40 px-2.5 py-0.5 text-[11px] font-semibold text-on-secondary-container">
+                    <span className="h-1.5 w-1.5 rounded-full bg-secondary" />
                     {profile.status || "Active"}
                   </span>
                 </div>
@@ -319,7 +319,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={handleOpenEdit}
-                className="w-full rounded-xl bg-[#0B57D0] px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:w-auto"
+                className="w-full rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/20 sm:w-auto cursor-pointer"
               >
                 Edit Profile
               </button>
@@ -329,21 +329,21 @@ export default function ProfilePage() {
 
         {/* Department Scope & Active Batches Banner */}
         {(profile.departmentScope || profile.activeBatches) && (
-          <div className="my-4 rounded-xl border border-blue-100/80 bg-blue-50/50 p-4 transition-all sm:p-4.5">
+          <div className="my-4 rounded-xl border border-slate-200/80 bg-surface-container-low/70 p-4 transition-all sm:p-4.5">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
                   Department Scope
                 </p>
-                <p className="mt-0.5 text-xs font-bold text-slate-900 sm:text-sm">
+                <p className="mt-0.5 text-xs font-bold text-on-surface sm:text-sm">
                   {profile.departmentScope || "—"}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
                   Active Batches
                 </p>
-                <p className="mt-0.5 text-xs font-bold text-blue-700 sm:text-sm">
+                <p className="mt-0.5 text-xs font-bold text-primary sm:text-sm">
                   {profile.activeBatches || "—"}
                 </p>
               </div>
@@ -352,98 +352,98 @@ export default function ProfilePage() {
         )}
 
         {/* Navigation / Action Rows Card */}
-        <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xs divide-y divide-slate-100">
+        <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-card divide-y divide-slate-100">
           {/* Change Password */}
           <button
             type="button"
             onClick={() => setChangePasswordOpen(true)}
-            className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-slate-50/80"
+            className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-surface-container-low/40 cursor-pointer"
           >
             <div className="flex items-center gap-3.5">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-container text-primary">
                 <KeyIcon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-slate-800 sm:text-sm">Change Password</p>
+                <p className="text-xs font-semibold text-on-surface sm:text-sm">Change Password</p>
               </div>
             </div>
-            <ChevronRightIcon className="h-4 w-4 text-slate-400" />
+            <ChevronRightIcon className="h-4 w-4 text-on-surface-variant/60" />
           </button>
 
           {/* Security Settings */}
           <button
             type="button"
             onClick={() => setSecurityModalOpen(true)}
-            className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-slate-50/80"
+            className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-surface-container-low/40 cursor-pointer"
           >
             <div className="flex items-center gap-3.5">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-container text-primary">
                 <ShieldIcon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-slate-800 sm:text-sm">Security Settings</p>
+                <p className="text-xs font-semibold text-on-surface sm:text-sm">Security Settings</p>
               </div>
             </div>
-            <ChevronRightIcon className="h-4 w-4 text-slate-400" />
+            <ChevronRightIcon className="h-4 w-4 text-on-surface-variant/60" />
           </button>
 
           {/* Manage Sessions */}
           <button
             type="button"
             onClick={() => setSessionsModalOpen(true)}
-            className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-slate-50/80"
+            className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-surface-container-low/40 cursor-pointer"
           >
             <div className="flex items-center gap-3.5">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-container text-primary">
                 <DevicesIcon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-slate-800 sm:text-sm">Manage Sessions</p>
+                <p className="text-xs font-semibold text-on-surface sm:text-sm">Manage Sessions</p>
               </div>
             </div>
-            <ChevronRightIcon className="h-4 w-4 text-slate-400" />
+            <ChevronRightIcon className="h-4 w-4 text-on-surface-variant/60" />
           </button>
 
           {/* Faculty / Team Management */}
           <button
             type="button"
             onClick={() => setFacultyModalOpen(true)}
-            className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-slate-50/80"
+            className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-surface-container-low/40 cursor-pointer"
           >
             <div className="flex items-center gap-3.5">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-container text-primary">
                 <UsersIcon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-slate-800 sm:text-sm">Team Management</p>
-                <p className="text-[11px] font-medium text-slate-400">
+                <p className="text-xs font-semibold text-on-surface sm:text-sm">Team Management</p>
+                <p className="text-[11px] font-medium text-on-surface-variant">
                   Invite teammates and manage access
                 </p>
               </div>
             </div>
-            <ChevronRightIcon className="h-4 w-4 text-slate-400" />
+            <ChevronRightIcon className="h-4 w-4 text-on-surface-variant/60" />
           </button>
 
           {/* Transfer Ownership */}
           <button
             type="button"
             onClick={() => setTransferModalOpen(true)}
-            className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-slate-50/80"
+            className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-surface-container-low/40 cursor-pointer"
           >
             <div className="flex items-center gap-3.5">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-container text-primary">
                 <UserCheckIcon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-slate-800 sm:text-sm">
+                <p className="text-xs font-semibold text-on-surface sm:text-sm">
                   Transfer Ownership
                 </p>
-                <p className="text-[11px] font-medium text-slate-400">
+                <p className="text-[11px] font-medium text-on-surface-variant">
                   Hand over administrator role to another team member
                 </p>
               </div>
             </div>
-            <ChevronRightIcon className="h-4 w-4 text-slate-400" />
+            <ChevronRightIcon className="h-4 w-4 text-on-surface-variant/60" />
           </button>
 
           {/* Help Center */}

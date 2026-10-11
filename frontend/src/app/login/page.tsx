@@ -83,27 +83,27 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-dvh flex-col justify-center bg-slate-50 px-4 py-3 sm:py-6">
+    <main className="flex min-h-dvh flex-col justify-center bg-surface px-4 py-3 sm:py-6">
       <InstallPrompt />
 
       <div className="mx-auto w-full max-w-md">
         {/* Brand */}
         <section className="mb-3.5 sm:mb-4 flex flex-col items-center text-center" aria-label="Department">
           <span className="relative mb-2.5">
-            <span className="flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-2xl sm:rounded-3xl bg-brand-600 text-white shadow-md shadow-brand-600/25">
+            <span className="flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-2xl sm:rounded-3xl bg-primary text-white shadow-xs">
               <GraduationCapIcon className="h-7 w-7 sm:h-8 sm:w-8" />
             </span>
-            <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-slate-50 bg-emerald-500 text-white">
+            <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-surface bg-emerald-500 text-white">
               <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="white" strokeWidth="3.5">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             </span>
           </span>
-          <h1 className="text-2xl sm:text-[26px] font-bold tracking-tight text-slate-900">IT Department</h1>
-          <p className="mt-0.5 text-sm sm:text-base font-medium text-slate-500">Mail Automation</p>
-          <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-slate-200/60 px-3 py-1">
+          <h1 className="text-2xl sm:text-[26px] font-bold tracking-tight text-on-surface">IT Department</h1>
+          <p className="mt-0.5 text-sm sm:text-base font-medium text-on-surface-variant">Mail Automation</p>
+          <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-surface-container px-3 py-1">
             <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
-            <span className="text-[11px] sm:text-xs font-medium text-slate-600">
+            <span className="text-[11px] sm:text-xs font-medium text-on-surface-variant">
               Academic Session {academicSession()}
               {today ? <span className="text-slate-400"> • {today}</span> : null}
             </span>
@@ -111,10 +111,10 @@ export default function LoginPage() {
         </section>
 
         {/* Login card */}
-        <section className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-md shadow-slate-200/40">
+        <section className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-card">
           <header className="mb-3.5 sm:mb-4 flex items-center justify-between">
-            <h2 className="text-xs sm:text-[13px] font-medium text-slate-400">Login to continue</h2>
-            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600">
+            <h2 className="text-xs sm:text-[13px] font-medium text-on-surface-variant/80">Login to continue</h2>
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary">
               <ShieldIcon className="h-4 w-4" />
               Secure Portal
             </span>
@@ -153,19 +153,19 @@ export default function LoginPage() {
                 type="checkbox"
                 checked={remember}
                 onChange={(e) => setRemember(e.target.checked)}
-                className="h-4 w-4 cursor-pointer rounded border-slate-300 text-brand-600 accent-brand-600 focus:ring-brand-500"
+                className="h-4 w-4 cursor-pointer rounded border-slate-300 text-primary accent-primary focus:ring-primary"
               />
-              <span className="text-xs font-medium text-slate-700">Remember me</span>
+              <span className="text-xs font-medium text-on-surface">Remember me</span>
             </label>
 
             {formError ? (
               <div
                 role="alert"
-                className="flex items-start justify-between gap-3 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs text-rose-800"
+                className="flex items-start justify-between gap-3 rounded-xl border border-error/20 bg-error-container px-3.5 py-2.5 text-xs text-on-error-container"
               >
                 <div className="flex-1">
-                  <p className="font-semibold text-rose-900">Sign in failed</p>
-                  <p className="mt-0.5 leading-relaxed text-rose-700">{formError}</p>
+                  <p className="font-semibold text-error">Sign in failed</p>
+                  <p className="mt-0.5 leading-relaxed text-on-error-container/90">{formError}</p>
                 </div>
                 {(formError.includes("unavailable") ||
                   formError.includes("starting up") ||
@@ -175,7 +175,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={(e) => void handleSubmit(e)}
-                    className="shrink-0 rounded-lg bg-rose-100 px-2.5 py-1 text-[11px] font-bold text-rose-800 hover:bg-rose-200 transition-colors cursor-pointer"
+                    className="shrink-0 rounded-lg bg-error/15 px-2.5 py-1 text-[11px] font-bold text-error hover:bg-error/25 transition-colors cursor-pointer"
                   >
                     Retry
                   </button>
@@ -187,7 +187,7 @@ export default function LoginPage() {
               type="submit"
               fullWidth
               loading={submitting}
-              className="mt-1 flex h-11 sm:h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-sm font-semibold text-white shadow-md shadow-brand-600/20 transition-all active:scale-[0.99]"
+              className="mt-1 flex h-11 sm:h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-all active:scale-[0.99]"
             >
               Sign In
               <ArrowRightIcon className="h-4 w-4" />
@@ -196,24 +196,24 @@ export default function LoginPage() {
         </section>
 
         {/* Context note */}
-        <div className="mt-3.5 flex items-center gap-3 rounded-xl bg-slate-100/70 p-3 sm:p-3.5 border border-slate-200/60">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-brand-600 shadow-xs">
+        <div className="mt-3.5 flex items-center gap-3 rounded-xl bg-surface-container-low p-3 sm:p-3.5 border border-slate-200/80">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-primary shadow-xs">
             <ShieldIcon className="h-4.5 w-4.5" />
           </div>
           <div className="min-w-0">
-            <p className="truncate text-xs font-semibold text-slate-900">IT Department</p>
-            <p className="truncate text-[11px] text-slate-500">Secure institutional network</p>
+            <p className="truncate text-xs font-semibold text-on-surface">IT Department</p>
+            <p className="truncate text-[11px] text-on-surface-variant">Secure institutional network</p>
           </div>
         </div>
 
         {/* Footer */}
         <footer className="mt-4 text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-600">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
             Acropolis Institute of Technology and Research Indore
           </p>
-          <p className="mt-0.5 text-xs text-slate-400">Department of Information Technology</p>
+          <p className="mt-0.5 text-xs text-on-surface-variant/80">Department of Information Technology</p>
           
-          <div className="mt-2 flex justify-center gap-4 text-xs font-medium text-brand-600">
+          <div className="mt-2 flex justify-center gap-4 text-xs font-medium text-primary">
             <a href="/privacy-policy" className="hover:underline">Privacy Policy</a>
             <a href="/terms" className="hover:underline">Terms of Service</a>
           </div>
@@ -222,7 +222,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setShowDevModal(true)}
-              className="inline-flex h-8 items-center rounded-lg bg-slate-200/60 px-3 text-xs font-medium text-slate-600 hover:bg-slate-200 hover:text-slate-800 transition-colors cursor-pointer"
+              className="inline-flex h-8 items-center rounded-lg bg-surface-container px-3 text-xs font-medium text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors cursor-pointer"
             >
               Developed by Student of IT Department
             </button>

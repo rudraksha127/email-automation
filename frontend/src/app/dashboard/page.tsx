@@ -1,6 +1,5 @@
 "use client";
 
-
 import Link from "next/link";
 import { paths } from "@/routes/paths";
 import { PageHeading, AppLayout } from "@/components/layout";
@@ -15,10 +14,10 @@ import type { DashboardStats } from "@/types";
 import type { MailSummary } from "@/services/mails/mailsService";
 
 const STAT_META = {
-  newMails: { label: "New Mails", icon: MailIcon, tone: "bg-brand-50 text-brand-600", href: paths.mails },
-  forwardedToday: { label: "Forwarded Today", icon: SendIcon, tone: "bg-emerald-50 text-emerald-600", href: paths.mails },
-  needsReview: { label: "Needs Review", icon: ClockIcon, tone: "bg-amber-50 text-amber-500", href: paths.mails },
-  totalBatches: { label: "Total Batches", icon: UsersIcon, tone: "bg-brand-50 text-brand-600", href: paths.batches },
+  newMails: { label: "New Mails", icon: MailIcon, tone: "bg-primary-fixed text-primary", href: paths.mails },
+  forwardedToday: { label: "Forwarded Today", icon: SendIcon, tone: "bg-secondary-container text-secondary", href: paths.mails },
+  needsReview: { label: "Needs Review", icon: ClockIcon, tone: "bg-amber-100 text-amber-800", href: paths.mails },
+  totalBatches: { label: "Total Batches", icon: UsersIcon, tone: "bg-primary-fixed text-primary", href: paths.batches },
 } as const;
 
 function StatCard({
@@ -34,16 +33,16 @@ function StatCard({
   return (
     <Link
       href={stat.href}
-      className="flex h-[104px] flex-col justify-between rounded-2xl border border-slate-100 bg-white p-3.5 shadow-[0_2px_8px_rgba(0,0,0,0.03)] transition-colors hover:border-slate-200"
+      className="flex h-[104px] flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-card transition-all hover:border-slate-300 hover:shadow-xs"
     >
-      <span className={cn("flex h-7 w-7 items-center justify-center rounded-lg", stat.tone)}>
+      <span className={cn("flex h-7 w-7 items-center justify-center rounded-lg shadow-xs", stat.tone)}>
         <Icon className="h-4 w-4" />
       </span>
       <span>
-        <span className="block text-xl font-bold leading-none tracking-tight text-slate-900">
+        <span className="block text-xl sm:text-2xl font-bold leading-none tracking-tight text-on-surface">
           {loading ? "…" : (value ?? 0)}
         </span>
-        <span className="mt-0.5 block text-[11px] font-semibold text-slate-400">{stat.label}</span>
+        <span className="mt-0.5 block text-[11px] font-semibold text-on-surface-variant">{stat.label}</span>
       </span>
     </Link>
   );
@@ -70,10 +69,10 @@ export default function DashboardPage() {
       {/* Recent emails */}
       <section className="space-y-3 pt-6" aria-label="Recent emails">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold tracking-tight text-slate-900">Recent Emails</h2>
+          <h2 className="text-sm font-bold tracking-tight text-on-surface">Recent Emails</h2>
           <Link
             href={paths.mails}
-            className="flex items-center space-x-0.5 text-xs font-semibold text-brand-600 hover:text-brand-700"
+            className="flex items-center space-x-0.5 text-xs font-semibold text-primary hover:text-primary/80"
           >
             <span>View All</span>
             <ChevronRightIcon className="h-3 w-3" />
@@ -96,19 +95,19 @@ export default function DashboardPage() {
               <Link
                 key={m.id}
                 href={paths.mailDetails(m.id)}
-                className="flex items-start space-x-3 rounded-2xl border border-slate-100 bg-white p-3 shadow-[0_2px_6px_rgba(0,0,0,0.02)] transition-colors hover:border-slate-200"
+                className="flex items-start space-x-3 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-card transition-all hover:border-slate-300 hover:bg-surface-container-low/40"
               >
-                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-700">
+                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-container text-xs font-bold text-on-surface">
                   {avatarInitial(m.sender)}
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="mb-0.5 flex items-baseline justify-between">
-                    <span className="truncate pr-1 text-xs font-bold text-slate-900">{m.sender}</span>
-                    <time className="shrink-0 text-[10px] font-medium text-slate-400">
+                    <span className="truncate pr-1 text-xs font-bold text-on-surface">{m.sender}</span>
+                    <time className="shrink-0 text-[10px] font-medium text-on-surface-variant">
                       {formatRelativeTimestamp(m.receivedAt)}
                     </time>
                   </span>
-                  <span className="mb-2 block truncate text-xs font-medium text-slate-500">
+                  <span className="mb-2 block truncate text-xs font-medium text-on-surface-variant">
                     {m.subject}
                   </span>
                   <span className="flex items-center justify-between">

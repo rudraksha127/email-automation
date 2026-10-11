@@ -118,59 +118,59 @@ export default function MailDetailsPage({ params }: { params: Promise<{ id: stri
       {/* Back */}
       <Link
         href={paths.mails}
-        className="mb-3 inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-700"
+        className="mb-3 inline-flex items-center gap-1.5 text-xs font-semibold text-on-surface-variant hover:text-on-surface"
       >
         <ArrowLeftIcon className="h-4 w-4" />
         Back to Mails
       </Link>
 
       {/* Mail card */}
-      <article className="rounded-2xl border border-slate-100 bg-white shadow-sm">
-        <header className="border-b border-slate-100 px-5 py-4">
-          <h1 className="text-base font-bold leading-snug tracking-tight text-slate-900">
+      <article className="rounded-2xl border border-slate-200/80 bg-white shadow-card">
+        <header className="border-b border-slate-100/90 px-5 py-4">
+          <h1 className="text-base font-bold leading-snug tracking-tight text-on-surface">
             {data.subject}
           </h1>
           <div className="mt-2 flex items-center gap-2.5">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-700">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-container text-xs font-bold text-on-surface">
               {avatarInitial(data.sender)}
             </span>
             <div className="min-w-0">
-              <p className="truncate text-xs font-bold text-slate-900">{data.sender}</p>
-              <p className="text-[11px] text-slate-400">{formatDateTime(data.receivedAt)}</p>
+              <p className="truncate text-xs font-bold text-on-surface">{data.sender}</p>
+              <p className="text-[11px] text-on-surface-variant">{formatDateTime(data.receivedAt)}</p>
             </div>
           </div>
         </header>
 
         {/* Processing info */}
-        <dl className="grid grid-cols-2 gap-x-4 gap-y-3 border-b border-slate-100 px-5 py-4 text-xs">
+        <dl className="grid grid-cols-2 gap-x-4 gap-y-3 border-b border-slate-100/90 px-5 py-4 text-xs">
           <div>
-            <dt className="font-semibold text-slate-400">Status</dt>
+            <dt className="font-semibold text-on-surface-variant">Status</dt>
             <dd className="mt-1">
               <StatusBadge status={forwarded ? "forwarded" : data.status} />
             </dd>
           </div>
           <div>
-            <dt className="font-semibold text-slate-400">Detected Batch</dt>
+            <dt className="font-semibold text-on-surface-variant">Detected Batch</dt>
             <dd className="mt-1">
               <BatchChip label={data.batchName} />
             </dd>
           </div>
           {data.recipientCount != null ? (
             <div>
-              <dt className="font-semibold text-slate-400">Recipients</dt>
-              <dd className="mt-1 font-semibold text-slate-800">{data.recipientCount}</dd>
+              <dt className="font-semibold text-on-surface-variant">Recipients</dt>
+              <dd className="mt-1 font-semibold text-on-surface">{data.recipientCount}</dd>
             </div>
           ) : null}
           {data.ccEmail ? (
             <div>
-              <dt className="font-semibold text-slate-400">CC</dt>
-              <dd className="mt-1 truncate font-medium text-slate-600">{data.ccEmail}</dd>
+              <dt className="font-semibold text-on-surface-variant">CC</dt>
+              <dd className="mt-1 truncate font-medium text-on-surface-variant">{data.ccEmail}</dd>
             </div>
           ) : null}
           {data.forwardedAt ? (
             <div>
-              <dt className="font-semibold text-slate-400">Forwarded At</dt>
-              <dd className="mt-1 font-medium text-slate-600">{formatDateTime(data.forwardedAt)}</dd>
+              <dt className="font-semibold text-on-surface-variant">Forwarded At</dt>
+              <dd className="mt-1 font-medium text-on-surface-variant">{formatDateTime(data.forwardedAt)}</dd>
             </div>
           ) : null}
         </dl>
@@ -178,30 +178,30 @@ export default function MailDetailsPage({ params }: { params: Promise<{ id: stri
         {/* Body */}
         {data.bodyHtml ? (
           <div
-            className="prose max-w-none px-5 py-4 text-sm leading-relaxed text-slate-800 break-words overflow-x-auto"
+            className="prose max-w-none px-5 py-4 text-sm leading-relaxed text-on-surface break-words overflow-x-auto"
             dangerouslySetInnerHTML={{ __html: data.bodyHtml }}
           />
         ) : (
-          <div className="whitespace-pre-line px-5 py-4 text-sm leading-relaxed text-slate-700">
+          <div className="whitespace-pre-line px-5 py-4 text-sm leading-relaxed text-on-surface">
             {data.bodyText}
           </div>
         )}
 
         {/* Attachments */}
         {data.attachments.length > 0 ? (
-          <section className="border-t border-slate-100 px-5 py-3.5" aria-label="Attachments">
-            <h2 className="mb-2 text-xs font-bold text-slate-900">Attachments</h2>
+          <section className="border-t border-slate-100/90 px-5 py-3.5" aria-label="Attachments">
+            <h2 className="mb-2 text-xs font-bold text-on-surface">Attachments</h2>
             <ul className="space-y-1.5">
               {data.attachments.map((a) => (
                 <li
                   key={a.id}
-                  className="flex items-center gap-2.5 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs"
+                  className="flex items-center gap-2.5 rounded-xl border border-slate-200/80 bg-surface-container-low px-3 py-2 text-xs"
                 >
-                  <PaperclipIcon className="h-4 w-4 shrink-0 text-slate-400" />
-                  <span className="min-w-0 flex-1 truncate font-medium text-slate-700">
+                  <PaperclipIcon className="h-4 w-4 shrink-0 text-on-surface-variant" />
+                  <span className="min-w-0 flex-1 truncate font-medium text-on-surface">
                     {a.filename}
                   </span>
-                  <span className="shrink-0 text-[10px] text-slate-400">
+                  <span className="shrink-0 text-[10px] text-on-surface-variant">
                     {formatFileSize(a.sizeBytes)}
                   </span>
                 </li>
@@ -212,13 +212,13 @@ export default function MailDetailsPage({ params }: { params: Promise<{ id: stri
 
         {/* Failure reason */}
         {isFailed && data.failureReason ? (
-          <section className="border-t border-slate-100 px-5 py-3.5">
-            <p className="flex items-start gap-2 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2.5 text-xs font-medium text-rose-700">
+          <section className="border-t border-slate-100/90 px-5 py-3.5">
+            <p className="flex items-start gap-2 rounded-xl border border-error/20 bg-error-container px-3 py-2.5 text-xs font-medium text-on-error-container">
               <AlertCircleIcon className="mt-0.5 h-4 w-4 shrink-0" />
               {data.failureReason}
             </p>
             {retryError ? (
-              <p role="alert" className="mt-2 text-[11px] font-medium text-rose-600">
+              <p role="alert" className="mt-2 text-[11px] font-medium text-error">
                 {retryError}
               </p>
             ) : null}
@@ -226,7 +226,7 @@ export default function MailDetailsPage({ params }: { params: Promise<{ id: stri
         ) : null}
 
         {/* Actions */}
-        <footer className="flex gap-2.5 border-t border-slate-100 px-5 py-4">
+        <footer className="flex gap-2.5 border-t border-slate-100/90 px-5 py-4">
           {isAmbiguous ? (
             <>
               <Button onClick={() => setSelectingBatch(true)} fullWidth>
@@ -250,7 +250,7 @@ export default function MailDetailsPage({ params }: { params: Promise<{ id: stri
             </Button>
           ) : null}
           {data.status === "forwarded" ? (
-            <p className="flex w-full items-center justify-center gap-1.5 text-xs font-semibold text-emerald-600">
+            <p className="flex w-full items-center justify-center gap-1.5 text-xs font-semibold text-secondary">
               <CheckCircleIcon className="h-4 w-4" />
               Forwarded to {data.batchName} ({data.recipientCount} recipients)
             </p>
@@ -290,12 +290,12 @@ export default function MailDetailsPage({ params }: { params: Promise<{ id: stri
         }
       >
         <div className="space-y-2">
-          <p className="text-xs leading-relaxed text-slate-500">
+          <p className="text-xs leading-relaxed text-on-surface-variant">
             This mail could not be assigned automatically. Choose the correct batch, review the
             recipient count, then confirm.
           </p>
           {actionError ? (
-            <p role="alert" className="rounded-xl bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700">
+            <p role="alert" className="rounded-xl border border-error/20 bg-error-container px-3 py-2 text-xs font-medium text-on-error-container">
               {actionError}
             </p>
           ) : null}
@@ -306,8 +306,8 @@ export default function MailDetailsPage({ params }: { params: Promise<{ id: stri
                   className={cn(
                     "flex cursor-pointer items-center justify-between rounded-xl border px-3.5 py-2.5 text-xs transition-colors",
                     selectedBatchId === b.id
-                      ? "border-brand-500 bg-brand-50"
-                      : "border-slate-200 hover:bg-slate-50"
+                      ? "border-primary bg-primary-fixed/40"
+                      : "border-slate-200/80 hover:bg-surface-container-low"
                   )}
                 >
                   <span className="flex items-center gap-2.5">
@@ -317,11 +317,11 @@ export default function MailDetailsPage({ params }: { params: Promise<{ id: stri
                       value={b.id}
                       checked={selectedBatchId === b.id}
                       onChange={() => setSelectedBatchId(b.id)}
-                      className="h-4 w-4 border-slate-300 text-brand-600 focus:ring-brand-500"
+                      className="h-4 w-4 border-slate-300 text-primary focus:ring-primary"
                     />
-                    <span className="font-semibold text-slate-800">{b.name}</span>
+                    <span className="font-semibold text-on-surface">{b.name}</span>
                   </span>
-                  <span className="text-[11px] font-medium text-slate-400">
+                  <span className="text-[11px] font-medium text-on-surface-variant">
                     {b.recipientCount} recipients
                   </span>
                 </label>
@@ -329,7 +329,7 @@ export default function MailDetailsPage({ params }: { params: Promise<{ id: stri
             ))}
           </ul>
           {selectedBatch ? (
-            <p className="rounded-xl bg-brand-50 px-3 py-2 text-[11px] font-medium text-brand-700">
+            <p className="rounded-xl bg-primary-fixed/50 px-3 py-2 text-[11px] font-medium text-on-primary-fixed-variant">
               Forwarding to {selectedBatch.name} → {selectedBatch.recipientCount} recipients
               {selectedBatch.recipientCount === 0 ? " — this batch is empty" : ""}
             </p>
@@ -363,14 +363,14 @@ export default function MailDetailsPage({ params }: { params: Promise<{ id: stri
           </>
         }
       >
-        <p className="text-xs leading-relaxed text-slate-500">
+        <p className="text-xs leading-relaxed text-on-surface-variant">
           This mail will be taken out of the review queue and kept in history as not relevant. You
           can still retry forwarding it later.
         </p>
         {rejectError ? (
           <p
             role="alert"
-            className="mt-2 rounded-xl bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700"
+            className="mt-2 rounded-xl border border-error/20 bg-error-container px-3 py-2 text-xs font-medium text-on-error-container"
           >
             {rejectError}
           </p>
@@ -381,7 +381,7 @@ export default function MailDetailsPage({ params }: { params: Promise<{ id: stri
       {forwarded ? (
         <div
           role="status"
-          className="fixed inset-x-0 bottom-24 z-40 mx-auto flex w-fit items-center gap-2 rounded-full bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white shadow-lg"
+          className="fixed inset-x-0 bottom-24 z-40 mx-auto flex w-fit items-center gap-2 rounded-full bg-inverse-surface px-4 py-2.5 text-xs font-semibold text-inverse-on-surface shadow-dialog"
         >
           <CheckCircleIcon className="h-4 w-4 text-emerald-400" />
           Mail forwarded successfully
@@ -390,4 +390,3 @@ export default function MailDetailsPage({ params }: { params: Promise<{ id: stri
     </AppLayout>
   );
 }
-

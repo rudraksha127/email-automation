@@ -219,7 +219,7 @@ export default function BatchDetailsPage({ params }: { params: Promise<{ id: str
       {importResult ? (
         <p
           role="status"
-          className="mb-3 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-2.5 text-xs font-medium text-emerald-700"
+          className="mb-3 rounded-xl border border-emerald-200/80 bg-emerald-50 px-4 py-2.5 text-xs font-medium text-emerald-700 shadow-xs"
         >
           {importResult}
         </p>
@@ -227,7 +227,7 @@ export default function BatchDetailsPage({ params }: { params: Promise<{ id: str
       {pageError ? (
         <p
           role="alert"
-          className="mb-3 rounded-xl border border-rose-100 bg-rose-50 px-4 py-2.5 text-xs font-medium text-rose-700"
+          className="mb-3 rounded-xl border border-rose-200/80 bg-rose-50 px-4 py-2.5 text-xs font-medium text-rose-700 shadow-xs"
         >
           {pageError}
         </p>
@@ -244,7 +244,7 @@ export default function BatchDetailsPage({ params }: { params: Promise<{ id: str
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by name or email"
           aria-label="Search recipients"
-          className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-600 focus:outline-none"
+          className="w-full rounded-xl border border-slate-200/80 bg-white py-2.5 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 shadow-xs focus:border-primary-500 focus:ring-2 focus:ring-primary-500/10 focus:outline-none"
         />
       </div>
 
@@ -278,7 +278,7 @@ export default function BatchDetailsPage({ params }: { params: Promise<{ id: str
           {filtered.map((r) => (
             <li
               key={r.id}
-              className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-white px-3.5 py-3 shadow-sm"
+              className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white px-3.5 py-3 shadow-card hover:border-slate-300 transition-all"
             >
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-700">
                 {avatarInitial(r.email)}
@@ -336,8 +336,8 @@ export default function BatchDetailsPage({ params }: { params: Promise<{ id: str
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Aarav Sharma"
               aria-invalid={!!fieldErrors.name || undefined}
-              className={`w-full rounded-xl border bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none ${
-                fieldErrors.name ? "border-rose-400" : "border-slate-200 focus:border-brand-600"
+              className={`w-full rounded-xl border bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 shadow-xs focus:outline-none ${
+                fieldErrors.name ? "border-rose-400 focus:ring-2 focus:ring-rose-400/20" : "border-slate-200/80 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/10"
               }`}
             />
             {fieldErrors.name ? (
@@ -357,8 +357,8 @@ export default function BatchDetailsPage({ params }: { params: Promise<{ id: str
               onChange={(e) => setEmail(e.target.value)}
               placeholder="student@example.com"
               aria-invalid={!!fieldErrors.email || undefined}
-              className={`w-full rounded-xl border bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none ${
-                fieldErrors.email ? "border-rose-400" : "border-slate-200 focus:border-brand-600"
+              className={`w-full rounded-xl border bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 shadow-xs focus:outline-none ${
+                fieldErrors.email ? "border-rose-400 focus:ring-2 focus:ring-rose-400/20" : "border-slate-200/80 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/10"
               }`}
             />
             {fieldErrors.email ? (

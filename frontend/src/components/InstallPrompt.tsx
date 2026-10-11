@@ -61,7 +61,7 @@ export function InstallPrompt() {
     <div
       role="status"
       aria-label="Install app prompt"
-      className="fixed inset-x-0 top-3 z-50 mx-auto flex w-[min(92vw,420px)] items-center gap-3 rounded-2xl border border-slate-100 bg-white px-3.5 py-3 shadow-lg"
+      className="fixed inset-x-0 top-3 z-50 mx-auto flex w-[min(92vw,420px)] items-center gap-3 rounded-2xl border border-slate-200/80 bg-white px-3.5 py-3 shadow-card-elevated"
     >
       <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white">
         <span className="text-[13px] font-bold tracking-tight">IT</span>

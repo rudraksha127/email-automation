@@ -3,8 +3,8 @@ import Link from "next/link";
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
-      <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-8 sm:p-12">
+    <div className="min-h-screen bg-surface-lowest py-12 px-4 sm:px-6 lg:px-8 font-sans">
+      <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-card border border-slate-200/80 p-8 sm:p-12">
         <h1 className="text-3xl font-bold text-slate-900 mb-6">Privacy Policy</h1>
         <p className="text-sm text-slate-500 mb-8">Last Updated: October 10, 2026</p>
 
@@ -66,7 +66,7 @@ export default function PrivacyPolicyPage() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-slate-100">
-          <Link href="/login" className="text-brand-600 font-medium hover:text-brand-700 transition-colors">
+          <Link href="/login" className="text-primary-600 font-semibold hover:text-primary-700 transition-colors">
             &larr; Back to Login
           </Link>
         </div>

@@ -132,13 +132,13 @@ export default function HistoryPage() {
       </div>
 
       {syncMsg && (
-        <div className="mb-4 rounded-xl border border-brand-200 bg-brand-50 px-4 py-2.5 text-xs font-semibold text-brand-800">
+        <div className="mb-4 rounded-xl border border-primary-200/80 bg-primary-50 px-4 py-2.5 text-xs font-semibold text-primary-800 shadow-xs">
           {syncMsg}
         </div>
       )}
 
       {/* Filter Control Bar */}
-      <section className="mb-5 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
+      <section className="mb-5 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-card">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {/* Search Box */}
           <div className="relative">
@@ -152,7 +152,7 @@ export default function HistoryPage() {
                 placeholder="Subject or sender…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-brand-500 focus:bg-white focus:outline-none"
+                className="w-full rounded-xl border border-slate-200/80 bg-slate-50/70 py-2 pl-9 pr-3 text-xs font-medium text-slate-800 placeholder-slate-400 shadow-xs focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/10 focus:outline-none"
               />
             </div>
           </div>
@@ -165,7 +165,7 @@ export default function HistoryPage() {
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as StatusFilter)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 focus:border-brand-500 focus:bg-white focus:outline-none"
+              className="w-full rounded-xl border border-slate-200/80 bg-slate-50/70 px-3 py-2 text-xs font-semibold text-slate-700 shadow-xs focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/10 focus:outline-none"
             >
               {STATUS_FILTERS.map((f) => (
                 <option key={f.value} value={f.value}>
@@ -183,7 +183,7 @@ export default function HistoryPage() {
             <select
               value={batchId}
               onChange={(e) => setBatchId(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 focus:border-brand-500 focus:bg-white focus:outline-none"
+              className="w-full rounded-xl border border-slate-200/80 bg-slate-50/70 px-3 py-2 text-xs font-semibold text-slate-700 shadow-xs focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/10 focus:outline-none"
             >
               <option value="all">All Batches</option>
               {(batches.data ?? []).map((b) => (
@@ -202,7 +202,7 @@ export default function HistoryPage() {
             <select
               value={year}
               onChange={(e) => setYear(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 focus:border-brand-500 focus:bg-white focus:outline-none"
+              className="w-full rounded-xl border border-slate-200/80 bg-slate-50/70 px-3 py-2 text-xs font-semibold text-slate-700 shadow-xs focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-500/10 focus:outline-none"
             >
               <option value="all">All Years</option>
               {YEAR_OPTIONS.filter((y) => y !== "all").map((y) => (
@@ -224,8 +224,8 @@ export default function HistoryPage() {
               className={cn(
                 "flex cursor-pointer items-center justify-between rounded-xl border px-3 py-2 text-xs font-semibold transition-colors",
                 selectedDate
-                  ? "border-brand-500 bg-brand-50/60 text-brand-800"
-                  : "border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100"
+                  ? "border-primary-500 bg-primary-50/70 text-primary-900 shadow-xs"
+                  : "border-slate-200/80 bg-slate-50/70 text-slate-600 hover:bg-slate-100 shadow-xs"
               )}
             >
               <span className="flex items-center gap-1.5 truncate">
@@ -256,7 +256,7 @@ export default function HistoryPage() {
             {/* Mini Calendar Popup */}
             {calendarOpen && (
               <div
-                className="absolute right-0 top-full z-40 mt-1 w-64 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl"
+                className="absolute right-0 top-full z-40 mt-1 w-64 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-card-elevated"
                 onMouseLeave={() => setCalendarOpen(false)}
               >
                 <div className="mb-2 flex items-center justify-between border-b border-slate-100 pb-2">
@@ -368,7 +368,7 @@ export default function HistoryPage() {
               return (
                 <li
                   key={m.id}
-                  className="group relative rounded-2xl border border-slate-200/70 bg-white p-4 shadow-xs transition-all hover:border-brand-300 hover:shadow-md"
+                  className="group relative rounded-2xl border border-slate-200/80 bg-white p-4 shadow-card transition-all hover:border-slate-300 hover:shadow-card-elevated"
                 >
                   <Link href={paths.mailDetails(m.id)} className="block">
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
