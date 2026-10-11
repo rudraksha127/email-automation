@@ -189,24 +189,26 @@ export default function LoginPage() {
         </section>
 
         {/* Trust note */}
-        <p className="mt-2.5 sm:mt-3 flex items-center gap-2.5 rounded-xl sm:rounded-2xl bg-brand-50/70 px-3.5 py-2.5">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg sm:rounded-xl bg-white text-brand-600 shadow-xs">
+        <p className="mt-3 sm:mt-3.5 flex items-center gap-3 rounded-xl sm:rounded-2xl bg-brand-50/70 px-4 py-2.5 sm:py-3">
+          <span className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg sm:rounded-xl bg-white text-brand-600 shadow-xs">
             <ShieldIcon className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
           </span>
-          <span>
+          <span className="leading-snug">
             <span className="block text-xs font-bold text-slate-900">IT Department</span>
-            <span className="block text-[11px] sm:text-xs text-slate-500">Secure institutional network</span>
+            <span className="block text-[11px] sm:text-xs text-slate-500 mt-0.5">Secure institutional network</span>
           </span>
         </p>
 
         {/* Footer */}
-        <footer className="mt-3 sm:mt-4 text-center">
-          <p className="text-[11px] font-bold uppercase tracking-wide text-slate-700">
+        <footer className="mt-4 sm:mt-5 text-center">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-700 leading-normal">
             Acropolis Institute of Technology and Research Indore
           </p>
-          <p className="mt-0.5 text-[11px] sm:text-xs text-slate-500">Department of Information Technology</p>
+          <p className="mt-1 text-[11px] sm:text-xs text-slate-500 leading-normal">
+            Department of Information Technology
+          </p>
           
-          <div className="mt-2 flex justify-center gap-4 text-xs font-medium text-brand-600">
+          <div className="mt-2.5 flex justify-center gap-5 text-xs font-medium text-brand-600">
             <a href="/privacy-policy" className="hover:underline">Privacy Policy</a>
             <a href="/terms" className="hover:underline">Terms of Service</a>
           </div>
@@ -214,7 +216,7 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={() => setShowDevModal(true)}
-            className="mt-2 mx-auto w-fit rounded-full bg-slate-200/70 px-3 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-300/70 transition-colors cursor-pointer"
+            className="mt-2.5 sm:mt-3 mx-auto w-fit rounded-full bg-slate-200/70 px-3.5 py-1.5 text-[11px] font-semibold text-slate-600 hover:bg-slate-300/70 transition-colors cursor-pointer"
           >
             Developed by Student of IT Department
           </button>
