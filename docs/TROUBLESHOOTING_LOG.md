@@ -5,6 +5,41 @@ Latest entries first. Append new entries below the heading — keep the format c
 
 ---
 
+## 2026-10-11 — Portal generalized for Prof. Kapil Sahu (Placement Coordinator) + first-login self-setup
+
+### Request
+- Portal is built for the **Placement Coordinator** (Prof. Kapil Sahu) — remove everything hardcoded to the old HOD identity ("Prof. (Dr.) Prashant Lakkadwala", "Role: HOD", "HOD-IT-001", hardcoded institution).
+- Generalize labels (no "HOD" wording) — editable fields stay editable; users type their own values.
+- A brand-new login should show "New User" style defaults and get a setup prompt to enter name/role right after signing in.
+
+### Changes
+1. **`frontend/src/app/api/auth/profile/route.ts`** — profile API now returns neutral defaults:
+   - `roleTitle`: "Placement Coordinator", `employeeId`: "EMP-001", `departmentScope`: "Placement Cell"
+   - `institution`/`department`/`activeBatches`/`academicSession` default to blank (persisted per workspace in `settings`, editable in UI or PATCH).
+   - Name comes from the `admins` row; seeded "Department Admin" shows as blank until the user sets their own name.
+   - PATCH now also accepts `status`, `institution`, `department`, `academicSession` updates.
+2. **`frontend/src/app/profile/page.tsx`** — UI generalized:
+   - "Faculty Management" → "Team Management", "Transfer HOD Ownership" → "Transfer Ownership", "Grant HOD Rights" → "Grant Admin Rights", "HOD/Admin" option → "Administrator".
+   - Blocks rendering only when data exists (no fake institutional footer, no fake "Role: HOD" chip, initials fall back to "U").
+   - **First-login setup:** when the profile name is blank, the Edit Modal auto-opens with a Welcome prompt; the user enters name+role themselves.
+   - Header placeholder name for blank profile: "New User".
+3. **`frontend/tests/api.test.ts`** — profile test updated to assert the new neutral defaults (`EMP-001`, `Placement Cell`) instead of the removed hardcoded HOD values.
+
+### Auto-created credentials for invited members (existing behavior, kept)
+- POST `/api/organizations/members` already auto-creates the login: stores the admin with name derived from the email and the workspace's default temporary password (`Acropolis@2026` in the pilot workspace) — the new user can sign in immediately with that email, then change name/role/password themselves.
+
+### Verification
+- Typecheck: 0 errors.
+- `tests/api.test.ts`: **15/15 passed** (after updating defaults assertions).
+- Full frontend suite: same 4 pre-existing failures only (tenants/pilot/rules backend tests — unrelated, confirmed pre-existing earlier today).
+- Pushed: `17ce274..aad13bb main -> main`.
+
+### Notes / Follow-ups
+- Existing DBs with old seeded values ("HOD-IT-001", "Role: HOD") will show those values until the user edits them (values live per-workspace in `settings`, PATCH updates them).
+- Existing logged-in sessions will keep seeing the old name until `admins.name` is updated via the profile editor.
+
+---
+
 ## 2026-10-11 — Shared-account changes not visible to the other user in real time
 
 ### Symptoms
