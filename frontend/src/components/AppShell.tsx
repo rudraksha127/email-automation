@@ -13,6 +13,7 @@ import {
   InboxIcon,
   ClockIcon,
   SettingsIcon,
+  UserIcon,
   LogoutIcon,
   MenuIcon,
   XIcon,
@@ -25,13 +26,26 @@ function useIsClient() {
   return useSyncExternalStore(emptySubscribe, () => true, () => false);
 }
 
-export const NAV_ITEMS = [
+/** Full navigation items for desktop sidebar rail and mobile drawer. */
+export const SIDEBAR_NAV_ITEMS = [
+  { href: paths.dashboard, label: "Dashboard", icon: HomeIcon },
+  { href: paths.mails, label: "Mails", icon: MailIcon },
+  { href: paths.batches, label: "Batches", icon: InboxIcon },
+  { href: paths.history, label: "History", icon: ClockIcon },
+  { href: paths.settings, label: "Settings", icon: SettingsIcon },
+  { href: paths.profile, label: "Profile", icon: UserIcon },
+] as const;
+
+/** Strictly 5 items for mobile bottom tab bar footer (excludes Profile). */
+export const BOTTOM_NAV_ITEMS = [
   { href: paths.dashboard, label: "Dashboard", icon: HomeIcon },
   { href: paths.mails, label: "Mails", icon: MailIcon },
   { href: paths.batches, label: "Batches", icon: InboxIcon },
   { href: paths.history, label: "History", icon: ClockIcon },
   { href: paths.settings, label: "Settings", icon: SettingsIcon },
 ] as const;
+
+export const NAV_ITEMS = SIDEBAR_NAV_ITEMS;
 
 /** Top brand bar shared by all authenticated screens (incl. workspace switcher & mobile menu trigger). */
 export function AppHeader({ onOpenMobileMenu }: { onOpenMobileMenu?: () => void }) {
@@ -182,7 +196,7 @@ export function AppNav({
             {/* Nav items list */}
             <nav className="flex-1 overflow-y-auto px-4 py-4">
               <ul className="space-y-1.5">
-                {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+                {SIDEBAR_NAV_ITEMS.map(({ href, label, icon: Icon }) => {
                   const active = isActive(href);
                   return (
                     <li key={href}>
@@ -248,7 +262,7 @@ export function AppNav({
         className="sticky bottom-0 z-30 shrink-0 border-t border-slate-100 bg-white/95 px-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-2 backdrop-blur-md lg:hidden"
       >
         <ul className="flex items-center justify-around">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+          {BOTTOM_NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const active = isActive(href);
             return (
               <li key={href}>
@@ -293,7 +307,7 @@ export function AppNav({
           </span>
         </Link>
         <ul className="flex-1 space-y-1">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+          {SIDEBAR_NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const active = isActive(href);
             return (
               <li key={href}>
