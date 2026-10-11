@@ -13,7 +13,6 @@ import {
   InboxIcon,
   ClockIcon,
   SettingsIcon,
-  UserIcon,
   LogoutIcon,
   MenuIcon,
   XIcon,
@@ -32,7 +31,6 @@ export const NAV_ITEMS = [
   { href: paths.batches, label: "Batches", icon: InboxIcon },
   { href: paths.history, label: "History", icon: ClockIcon },
   { href: paths.settings, label: "Settings", icon: SettingsIcon },
-  { href: paths.profile, label: "Profile", icon: UserIcon },
 ] as const;
 
 /** Top brand bar shared by all authenticated screens (incl. workspace switcher & mobile menu trigger). */
