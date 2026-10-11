@@ -58,11 +58,41 @@ email-automation/
 │   ├── seed.sql            Initial default seeds and demo fixtures
 │   └── policies/           Supabase Row-Level Security (RLS) policies
 │
-├── qa/                     ➔ QA Automation & Test Reports
+├── docs/                   ➔ Centralized Operations, Architecture & Release Documentation
+│   ├── RUNBOOK.md          24/7 background service operations, disaster recovery & secret rotation
+│   ├── CHANGELOG.md        v1.0.0 release changelog and semantic version history
+│   ├── DEPLOYMENT.md       Production & staging deployment instructions (Vercel & Render)
+│   ├── ENV_VARS.md         Complete sanitized environment variable configuration reference
+│   ├── RELEASE_REPORT.md   Release audit report, latency benchmarks and security evidence
+│   ├── RELEASE_STATE.md    Production release checklist and gate status
+│   ├── ENVIRONMENT_SETUP.md Local development and credential guide
+│   └── TROUBLESHOOTING_LOG.md Operational troubleshooting and resolutions
+│
+├── qa/                     ➔ QA Automation & Benchmark Scripts
 │   └── qa_comprehensive_suite.mjs  Senior QA CLI test runner
+│
+├── scripts/                ➔ Service Automation & Daemon Controls
+│   ├── start-service-background.ps1 / .bat
+│   └── stop-service-background.ps1 / .bat
 │
 └── tests/e2e/              ➔ Playwright End-to-End User Journey Tests
 ```
+
+---
+
+## 📚 Documentation Index
+
+All technical, operational, and architectural documentation is organized inside the [`docs/`](docs/) directory:
+
+| Document | Purpose | Description |
+| :--- | :--- | :--- |
+| [**RUNBOOK.md**](docs/RUNBOOK.md) | Operations & DR | 24/7 daemon management, health monitoring, disaster recovery, secret rotation |
+| [**CHANGELOG.md**](docs/CHANGELOG.md) | Release Notes | Complete v1.0.0 release log and feature history |
+| [**ENV_VARS.md**](docs/ENV_VARS.md) | Configuration | Comprehensive reference for frontend & backend environment variables |
+| [**DEPLOYMENT.md**](docs/DEPLOYMENT.md) | Cloud Hosting | Vercel, Render, and Supabase deployment setup |
+| [**RELEASE_REPORT.md**](docs/RELEASE_REPORT.md) | Release Audit | Latency benchmarks, quality gates, and security scan evidence |
+| [**ENVIRONMENT_SETUP.md**](docs/ENVIRONMENT_SETUP.md) | Developer Setup | Prerequisites, local dependencies, and database initialization |
+| [**TROUBLESHOOTING_LOG.md**](docs/TROUBLESHOOTING_LOG.md) | Debugging | Common issues, root causes, and resolutions |
 
 ---
 

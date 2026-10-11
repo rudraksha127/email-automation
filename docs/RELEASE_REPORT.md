@@ -36,7 +36,7 @@ The system has fully migrated from pilot to production. Redundant scratch docume
 | Gate | Category | Status | Verified Evidence & Output |
 |:---:|---|:---:|---|
 | **0** | **Recon & Rollback Anchor** | **PASS** | Baseline commit recorded (`fb98039`), branch `release/2026-10-11` created, tag `pre-release` established. Stack verified on Node 22/24 native `node:sqlite`. |
-| **1** | **Repository & Hygiene** | **PASS** | `.gitignore` strictly covers all `.env*`, `.db`, `data/`, and build artifacts. 0 secrets in git history. `npm audit --omit=dev`: 0 vulnerabilities. [`ENV_VARS.md`](file:///c:/Users/lucky/email-automation/ENV_VARS.md) created without secrets. Redundant scratch docs removed. |
+| **1** | **Repository & Hygiene** | **PASS** | `.gitignore` strictly covers all `.env*`, `.db`, `data/`, and build artifacts. 0 secrets in git history. `npm audit --omit=dev`: 0 vulnerabilities. [`ENV_VARS.md`](file:///c:/Users/lucky/email-automation/docs/ENV_VARS.md) created without secrets. Redundant scratch docs removed. |
 | **2** | **Production Build & Tests** | **PASS** | `vitest run`: 8 test suites, 109 passed (100%). `next build`: 37 pages statically optimized and dynamically generated with 0 errors. `tsc --noEmit`: 0 type errors across frontend and backend. |
 | **3** | **Security & Production Config** | **PASS** | Unauthenticated route protection returns 401; logout invalidates sessions; rate limiting verified (8 per account, 30 per IP per 10m on login; 5 on register). Passwords hashed using scrypt with unique salts. No secrets in API responses. |
 | **4** | **Database Readiness & Recovery** | **PASS** | Database backup created at `data/pilot.db.prod-deploy-backup-*` (229,376 bytes). Automated restore test verified: 17 SQLite tables intact with 100% schema consistency. |
@@ -44,7 +44,7 @@ The system has fully migrated from pilot to production. Redundant scratch docume
 | **6** | **Release Gate Decision** | **PASS** | Explicit human approval received to proceed with production deploy and cleanup. |
 | **7** | **Production Deploy & Credential Rotation** | **PASS** | Rotated primary admin account to `placementit@acropolis.in` via scrypt key derivation. Outdated active sessions invalidated. Password never logged or exposed. |
 | **8** | **Post-Deploy Verification** | **PASS** | Verified POST `/api/auth/login` for `placementit@acropolis.in`: 200 OK with session cookie; wrong password returns 401. Verified GET `/api/health`: 200 OK with active poller. |
-| **9** | **Operational Runbook & Signoff** | **PASS** | Created [`RUNBOOK.md`](file:///c:/Users/lucky/email-automation/RUNBOOK.md) and [`CHANGELOG.md`](file:///c:/Users/lucky/email-automation/CHANGELOG.md); version bumped to `1.0.0`; clean git structure. |
+| **9** | **Operational Runbook & Signoff** | **PASS** | Created [`RUNBOOK.md`](file:///c:/Users/lucky/email-automation/docs/RUNBOOK.md) and [`CHANGELOG.md`](file:///c:/Users/lucky/email-automation/docs/CHANGELOG.md); version bumped to `1.0.0`; clean git structure. |
 
 ---
 
