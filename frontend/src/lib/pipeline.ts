@@ -326,14 +326,18 @@ function reserveDelivery(orgId: string, gmailId: string, mailId: string, batchId
 }
 
 /**
- * Strips "Fwd:", "FWD:", "Fw:", "Re:", etc. from email subject so it looks like
- * an original, official institutional email.
+ * Strips "Fwd:", "Fw:", "Re:", "[Fwd:]", etc. from the beginning of a subject line,
+ * ensuring the recipient receives an email that looks 100% like a direct announcement.
  */
 export function cleanSubject(subject: string): string {
   if (!subject) return "";
   let s = subject.trim();
-  while (/^(fwd|fw|re)\s*:\s*/i.test(s)) {
-    s = s.replace(/^(fwd|fw|re)\s*:\s*/i, "").trim();
+  while (/^(?:\[?\s*(?:fwd|fw|re)\s*\]?\s*:\s*)+/i.test(s)) {
+    const hadBracket = s.startsWith("[");
+    s = s.replace(/^(?:\[?\s*(?:fwd|fw|re)\s*\]?\s*:\s*)+/i, "").trim();
+    if (hadBracket && s.endsWith("]")) {
+      s = s.slice(0, -1).trim();
+    }
   }
   return s || subject.trim();
 }
@@ -342,72 +346,110 @@ export function cleanSubject(subject: string): string {
  * Strips synthetic or mail-client forwarded header blocks from plain text body:
  * - "---------- Forwarded message ---------"
  * - "-----Original Message-----"
- * - "From: ... \nDate: ... \nSubject: ... \nTo: ..."
+ * - "Begin forwarded message:"
+ * - "From: ... \nDate: ... \nSubject: ... \nTo: ..." (including folded lines and multi-forwards)
  */
 export function cleanBodyText(text: string): string {
   if (!text) return "";
-  const lines = text.split(/\r?\n/);
+  let lines = text.split(/\r?\n/);
 
-  let idx = 0;
-  while (idx < lines.length && !lines[idx]!.trim()) idx++;
+  const isBanner = (line: string): boolean => {
+    const trimmed = line.trim();
+    if (!trimmed) return false;
+    return (
+      /^[-—–]{2,}\s*(?:Forwarded message|Original Message).*?[-—–]{2,}$/i.test(trimmed) ||
+      /^Begin forwarded message:?$/i.test(trimmed) ||
+      /^_{5,}$/.test(trimmed) ||
+      /^[-—–]{5,}$/.test(trimmed)
+    );
+  };
 
-  // Check if first non-blank line is a forwarded banner
-  if (
-    idx < lines.length &&
-    /^-{2,}\s*(?:Forwarded message|Original Message)\s*-{2,}$/i.test(lines[idx]!.trim())
-  ) {
-    idx++;
+  const isHeaderStart = (line: string): boolean => {
+    return /^(?:From|Date|Sent|Subject|To|Cc|Bcc|De|Fecha|Enviado|Asunto|Para|Von|Datum|Betreff|An):\s*/i.test(line.trim());
+  };
+
+  let changed = true;
+  while (changed) {
+    changed = false;
+    let idx = 0;
     while (idx < lines.length && !lines[idx]!.trim()) idx++;
-  }
 
-  // Check if lines are email headers: From:, Date:, Sent:, Subject:, To:, Cc:
-  const headerPrefixRegex = /^(?:From|Date|Sent|Subject|To|Cc):\s*/i;
-  if (idx < lines.length && headerPrefixRegex.test(lines[idx]!.trim())) {
-    while (idx < lines.length) {
-      const line = lines[idx]!.trim();
-      if (headerPrefixRegex.test(line)) {
-        idx++;
-      } else if (line === "") {
-        idx++;
-        if (idx < lines.length && !headerPrefixRegex.test(lines[idx]!.trim())) {
-          break;
+    if (idx < lines.length && isBanner(lines[idx]!)) {
+      idx++;
+      while (idx < lines.length && !lines[idx]!.trim()) idx++;
+      changed = true;
+    }
+
+    if (idx < lines.length && isHeaderStart(lines[idx]!)) {
+      changed = true;
+      let inHeaderBlock = true;
+      while (idx < lines.length && inHeaderBlock) {
+        const line = lines[idx]!;
+        const trimmed = line.trim();
+        if (isHeaderStart(trimmed)) {
+          idx++;
+        } else if (trimmed.startsWith("<") && trimmed.includes("@")) {
+          idx++;
+        } else if (/^\s+/.test(line) && trimmed.length > 0) {
+          idx++;
+        } else if (trimmed === "") {
+          idx++;
+          let lookahead = idx;
+          while (lookahead < lines.length && !lines[lookahead]!.trim()) lookahead++;
+          if (lookahead < lines.length && (isHeaderStart(lines[lookahead]!) || isBanner(lines[lookahead]))) {
+            idx = lookahead;
+          } else {
+            inHeaderBlock = false;
+          }
+        } else {
+          inHeaderBlock = false;
         }
-      } else {
-        break;
       }
+    }
+
+    if (changed) {
+      lines = lines.slice(idx);
     }
   }
 
-  return lines.slice(idx).join("\n").trimStart();
+  return lines.join("\n").trimStart();
 }
 
 /**
  * Strips forwarded header blocks and quote wrappers from HTML body so the message
  * renders as a direct, top-level email rather than a forwarded quote.
+ * Handles:
+ * - Outlook top-border containers
+ * - Gmail attribution divs/spans (<div class="gmail_attr">, <span class="gmail_attr">)
+ * - Dashed banners in HTML
+ * - Header blocks with tags (<b>From:</b>, <strong>Date:</strong>, etc.)
+ * - Quote wrappers (<div class="gmail_quote">, <blockquote>)
  */
 export function cleanBodyHtml(html?: string): string | undefined {
   if (!html) return undefined;
   let cleaned = html;
 
-  // 1. Remove gmail_attr or quote attribution divs (Gmail's forwarded header wrapper)
-  cleaned = cleaned.replace(/<div[^>]*class=["'][^"']*gmail_attr[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, "");
+  // 1. Remove Outlook style top-border header container
+  cleaned = cleaned.replace(/<div[^>]*style=["'][^"']*border-top:[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, "");
 
-  // 2. Remove gmail_quote wrappers (unwrap them so text is not styled as a quote)
+  // 2. Remove Gmail attribution divs and spans
+  cleaned = cleaned.replace(/<div[^>]*class=["'][^"']*gmail_attr[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, "");
+  cleaned = cleaned.replace(/<span[^>]*class=["'][^"']*gmail_attr[^"']*["'][^>]*>[\s\S]*?<\/span>/gi, "");
+
+  // 3. Remove dashed banners in HTML
+  cleaned = cleaned.replace(/[-—–]{2,}\s*(?:Forwarded message|Original Message).*?[-—–]{2,}\s*(?:<br\s*\/?>)?/gi, "");
+  cleaned = cleaned.replace(/Begin forwarded message:?\s*(?:<br\s*\/?>)?/gi, "");
+
+  // 4. Remove header blocks (From:, Date:, Sent:, Subject:, To:, Cc:) even if wrapped in <b>, <strong>, <span>, <p>, etc.
+  const headerBlockRegex = /(?:<p[^>]*>|<div[^>]*>)?\s*(?:(?:<[^>]+>)*\s*(?:From|Date|Sent|Subject|To|Cc|Bcc|De|Fecha|Enviado|Asunto|Para|Von|Datum|Betreff|An):\s*(?:<\/[^>]+>)*\s*[\s\S]*?(?:<br\s*\/?>|<\/p>|<\/div>|\r?\n))+\s*(?:<\/p>|<\/div>)?/gi;
+  cleaned = cleaned.replace(headerBlockRegex, "");
+
+  // 5. Unwrap gmail_quote and blockquote
   cleaned = cleaned.replace(/<div[^>]*class=["'][^"']*gmail_quote[^"']*["'][^>]*>/gi, "<div>");
-  cleaned = cleaned.replace(/<blockquote[^>]*class=["'][^"']*gmail_quote[^"']*["'][^>]*>/gi, "<div>");
+  cleaned = cleaned.replace(/<blockquote[^>]*>/gi, "<div>");
   cleaned = cleaned.replace(/<\/blockquote>/gi, "</div>");
 
-  // 3. Remove dashed Forwarded message text in HTML
-  cleaned = cleaned.replace(/-{2,}\s*Forwarded message\s*-{2,}\s*(?:<br\s*\/?>)?/gi, "");
-  cleaned = cleaned.replace(/-{2,}\s*Original Message\s*-{2,}\s*(?:<br\s*\/?>)?/gi, "");
-
-  // 4. Remove any inline From: ... Date: ... Subject: ... To: blocks in HTML
-  cleaned = cleaned.replace(
-    /(?:<p[^>]*>|<div[^>]*>)?\s*(?:(?:From|Date|Sent|Subject|To|Cc):\s*[\s\S]*?(?:<br\s*\/?>|<\/p>|<\/div>|\r?\n))+\s*/i,
-    ""
-  );
-
-  // 5. Clean leading breaks, empty divs, empty paragraphs
+  // 6. Clean leading breaks and empty tags
   cleaned = cleaned.replace(/^(\s*<br\s*\/?>|\s*<p>\s*(?:<br\s*\/?>)?\s*<\/p>|\s*<div>\s*(?:<br\s*\/?>)?\s*<\/div>)+/gi, "");
   cleaned = cleaned.replace(/<div>\s*(?:<br\s*\/?>)+\s*/gi, "<div>");
 

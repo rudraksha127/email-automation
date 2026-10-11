@@ -215,4 +215,40 @@ Please find below details...`;
     expect(cleaned).not.toContain("tpo@example.com");
     expect(cleaned).toContain("Dear Students");
   });
+
+  it("strips multi-line folded headers and nested banners from plain text", () => {
+    const raw = `
+---------- Forwarded message ---------
+From: Training & Placement Cell
+ <luckyudiya@gmail.com>
+Date: Mon, Oct 12, 2026 at 4:30 AM
+Subject: TCS NQT Registration
+To: IT Dept
+ <rudraksha240036@acropolis.in>
+
+Dear Students,
+Please find attached.`;
+
+    const cleaned = cleanBodyText(raw);
+    expect(cleaned).not.toContain("Forwarded message");
+    expect(cleaned).not.toContain("luckyudiya@gmail.com");
+    expect(cleaned).not.toContain("TCS NQT Registration");
+    expect(cleaned.startsWith("Dear Students,")).toBe(true);
+  });
+
+  it("strips HTML headers wrapped in bold tags and Outlook containers", () => {
+    const htmlBold = `<div>---------- Forwarded message ---------<br><b>From:</b> Training Cell &lt;luckyudiya@gmail.com&gt;<br><b>Date:</b> Mon, Oct 12, 2026<br><b>Subject:</b> Campus Drive<br><b>To:</b> IT Dept<br><br><p>Dear Students,</p><p>Drive details.</p></div>`;
+    const cleanedBold = cleanBodyHtml(htmlBold);
+    expect(cleanedBold).not.toContain("Forwarded message");
+    expect(cleanedBold).not.toContain("luckyudiya@gmail.com");
+    expect(cleanedBold).not.toContain("Campus Drive");
+    expect(cleanedBold).toContain("Dear Students");
+
+    const htmlOutlook = `<div style="border:none;border-top:solid #E1E1E1 1.0pt;padding:3.0pt 0in 0in 0in"><p class="MsoNormal"><b>From:</b> Training Cell<br><b>Sent:</b> Oct 12, 2026<br><b>To:</b> Students<br><b>Subject:</b> Important</p></div><p>Dear Students,</p>`;
+    const cleanedOutlook = cleanBodyHtml(htmlOutlook);
+    expect(cleanedOutlook).not.toContain("Training Cell");
+    expect(cleanedOutlook).not.toContain("border-top");
+    expect(cleanedOutlook).toContain("Dear Students");
+  });
 });
+
