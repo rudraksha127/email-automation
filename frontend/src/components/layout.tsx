@@ -11,7 +11,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-slate-50">
+    <div className="flex min-h-dvh flex-col bg-surface">
       <AppHeader onOpenMobileMenu={() => setMobileMenuOpen(true)} />
       <div className="flex flex-1 lg:pl-64">
         <main className="mx-auto w-full px-5 pb-6 pt-4 lg:px-6 lg:pt-6">{children}</main>
@@ -21,12 +21,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
   );
 }
 
-/** Standard page heading block: title + contextual subtitle. */
+/** Standard page heading block: title + contextual subtitle matching reference. */
 export function PageHeading({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <section className="mb-4">
-      <h1 className="text-xl font-bold tracking-tight text-slate-900">{title}</h1>
-      <p className="mt-0.5 text-xs font-medium text-slate-400">{subtitle}</p>
+      <h1 className="text-xl sm:text-[22px] font-bold tracking-tight text-on-surface">{title}</h1>
+      <p className="mt-0.5 text-xs font-medium text-on-surface-variant">{subtitle}</p>
     </section>
   );
 }

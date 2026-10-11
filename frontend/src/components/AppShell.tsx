@@ -68,7 +68,7 @@ export function AppHeader({ onOpenMobileMenu }: { onOpenMobileMenu?: () => void 
   }
 
   return (
-    <header className="sticky top-0 z-30 shrink-0 border-b border-slate-200 bg-white px-4 py-3 shadow-xs lg:px-6 lg:py-2.5">
+    <header className="sticky top-0 z-30 shrink-0 border-b border-slate-200/80 bg-white/95 px-4 py-2.5 shadow-xs backdrop-blur-xl lg:px-6">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           {/* Mobile hamburger menu toggle */}
@@ -77,21 +77,21 @@ export function AppHeader({ onOpenMobileMenu }: { onOpenMobileMenu?: () => void 
               type="button"
               onClick={onOpenMobileMenu}
               aria-label="Open mobile navigation"
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100 active:scale-95 lg:hidden"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-surface-container text-on-surface-variant transition hover:bg-surface-container-high active:scale-95 lg:hidden cursor-pointer"
             >
               <MenuIcon className="h-5 w-5" />
             </button>
           ) : null}
 
           <Link href={paths.dashboard} className="flex min-w-0 items-center space-x-2.5">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white shadow-sm shadow-brand-600/20">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-white shadow-xs">
               <GraduationCapIcon className="h-5 w-5" />
             </span>
             <span className="min-w-0">
-              <span className="block truncate text-xs font-bold uppercase tracking-tight text-slate-900">
+              <span className="block truncate text-xs font-bold uppercase tracking-tight text-on-surface">
                 IT Department
               </span>
-              <span className="block truncate text-[11px] font-medium leading-tight text-slate-400">
+              <span className="block truncate text-[11px] font-medium leading-tight text-on-surface-variant">
                 Mail Automation
               </span>
             </span>
@@ -104,7 +104,7 @@ export function AppHeader({ onOpenMobileMenu }: { onOpenMobileMenu?: () => void 
               aria-label="Active workspace"
               value={orgId ?? ""}
               onChange={(e) => handleSwitch(e.target.value)}
-              className="max-w-[132px] truncate rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-[11px] font-semibold text-slate-700 focus:border-brand-500 focus:outline-none sm:max-w-[180px]"
+              className="max-w-[132px] truncate rounded-xl border border-slate-200/80 bg-surface-container-low px-2.5 py-1.5 text-[11px] font-semibold text-on-surface focus:border-primary focus:outline-none sm:max-w-[180px]"
             >
               {orgs.map((o) => (
                 <option key={o.orgId} value={o.orgId}>
@@ -119,7 +119,7 @@ export function AppHeader({ onOpenMobileMenu }: { onOpenMobileMenu?: () => void 
             href={paths.profile}
             title="Institutional Profile & Settings"
             aria-label="Open Profile"
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-700 text-xs font-bold text-white shadow-sm shadow-brand-700/20 transition-transform hover:scale-105 active:scale-95 cursor-pointer"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-xs font-bold text-white shadow-xs transition-transform hover:scale-105 active:scale-95 cursor-pointer"
           >
             {initials}
           </Link>
@@ -173,21 +173,21 @@ export function AppNav({
             {/* Header with branding and close icon */}
             <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
               <div className="flex items-center gap-2.5">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-white shadow-sm">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white shadow-xs">
                   <GraduationCapIcon className="h-5 w-5" />
                 </span>
                 <div>
-                  <h2 className="text-xs font-bold uppercase tracking-tight text-slate-900">
+                  <h2 className="text-xs font-bold uppercase tracking-tight text-on-surface">
                     IT Department
                   </h2>
-                  <p className="text-[11px] font-medium text-slate-400">Mail Automation</p>
+                  <p className="text-[11px] font-medium text-on-surface-variant">Mail Automation</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={onCloseMobile}
                 aria-label="Close navigation"
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
               >
                 <XIcon className="h-5 w-5" />
               </button>
@@ -206,8 +206,8 @@ export function AppNav({
                         className={cn(
                           "flex items-center gap-3.5 rounded-xl px-3.5 py-3 text-sm transition-all",
                           active
-                            ? "bg-brand-600 font-bold text-white shadow-sm shadow-brand-600/30"
-                            : "font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                            ? "bg-primary-container font-semibold text-on-primary-container shadow-xs"
+                            : "font-medium text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
                         )}
                       >
                         <Icon className="h-5 w-5" strokeWidth={active ? 2.3 : 1.8} />
@@ -227,7 +227,7 @@ export function AppNav({
                   onCloseMobile?.();
                   void logout().then(() => router.replace(paths.login));
                 }}
-                className="flex w-full items-center gap-3 rounded-xl px-2 py-2.5 text-sm font-bold text-rose-600 transition-colors hover:bg-rose-50"
+                className="flex w-full items-center gap-3 rounded-xl px-2 py-2.5 text-sm font-semibold text-error transition-colors hover:bg-error-container/40 cursor-pointer"
               >
                 <LogoutIcon className="h-5 w-5" strokeWidth={2.2} />
                 <span>Logout</span>
@@ -236,18 +236,18 @@ export function AppNav({
               <Link
                 href={paths.profile}
                 onClick={onCloseMobile}
-                className="mt-2.5 block rounded-2xl border border-brand-100 bg-brand-50/70 p-3.5 shadow-xs transition-colors hover:bg-brand-50"
+                className="mt-2.5 block rounded-2xl border border-slate-200/80 bg-surface-container-low p-3.5 shadow-xs transition-colors hover:bg-surface-container"
               >
-                <p className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wider text-brand-700">
+                <p className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wider text-primary">
                   SIMPLE DATA. BETTER INSIGHTS.
                 </p>
-                <p className="mt-1 truncate text-xs font-bold text-slate-900" title={displayName}>
+                <p className="mt-1 truncate text-xs font-bold text-on-surface" title={displayName}>
                   {displayName}
                 </p>
-                <p className="mt-0.5 truncate text-[11px] font-medium text-slate-700" title={displayRole}>
+                <p className="mt-0.5 truncate text-[11px] font-medium text-on-surface-variant" title={displayRole}>
                   {displayRole}
                 </p>
-                <p className="mt-0.5 truncate text-left text-[11px] font-medium text-slate-500" title={displayDept}>
+                <p className="mt-0.5 truncate text-left text-[11px] font-medium text-on-surface-variant/80" title={displayDept}>
                   • {displayDept}
                 </p>
               </Link>
@@ -259,7 +259,7 @@ export function AppNav({
       {/* Mobile: bottom tab bar */}
       <nav
         aria-label="Primary"
-        className="sticky bottom-0 z-30 shrink-0 border-t border-slate-100 bg-white/95 px-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-2 backdrop-blur-md lg:hidden"
+        className="sticky bottom-0 z-30 shrink-0 border-t border-slate-100/90 bg-white/95 px-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-2 backdrop-blur-md lg:hidden"
       >
         <ul className="flex items-center justify-around">
           {BOTTOM_NAV_ITEMS.map(({ href, label, icon: Icon }) => {
@@ -271,7 +271,7 @@ export function AppNav({
                   aria-current={active ? "page" : undefined}
                   className={cn(
                     "flex flex-col items-center rounded-lg px-2 py-1 transition-colors",
-                    active ? "text-brand-600" : "text-slate-400 hover:text-slate-600"
+                    active ? "text-primary" : "text-on-surface-variant/70 hover:text-on-surface"
                   )}
                 >
                   <Icon className="mb-0.5 h-5 w-5" strokeWidth={active ? 2.2 : 1.8} />
@@ -293,17 +293,17 @@ export function AppNav({
       {/* Desktop: left sidebar rail (w-64) */}
       <nav
         aria-label="Primary"
-        className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-200 bg-white px-4 py-5 lg:flex"
+        className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-200/80 bg-white px-4 py-5 lg:flex"
       >
         <Link href={paths.dashboard} className="mb-8 flex items-center space-x-2.5 px-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-white shadow-sm shadow-brand-600/20">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white shadow-xs">
             <GraduationCapIcon className="h-5 w-5" />
           </span>
           <span>
-            <span className="block text-xs font-bold uppercase tracking-tight text-slate-900">
+            <span className="block text-xs font-bold uppercase tracking-tight text-on-surface">
               IT Department
             </span>
-            <span className="block text-[11px] font-medium text-slate-400">Mail Automation</span>
+            <span className="block text-[11px] font-medium text-on-surface-variant">Mail Automation</span>
           </span>
         </Link>
         <ul className="flex-1 space-y-1">
@@ -317,8 +317,8 @@ export function AppNav({
                   className={cn(
                     "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors",
                     active
-                      ? "bg-brand-50 font-semibold text-brand-700"
-                      : "font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                      ? "bg-primary-fixed/50 font-semibold text-on-primary-fixed-variant"
+                      : "font-medium text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface"
                   )}
                 >
                   <Icon className="h-5 w-5" strokeWidth={active ? 2.2 : 1.8} />
@@ -368,7 +368,7 @@ function UserCard({ onLogout }: { onLogout: () => void }) {
         title="Sign out"
         aria-label="Logout"
         data-testid="sidebar-logout"
-        className="group flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-sm font-bold text-rose-600 transition-colors hover:bg-rose-50"
+        className="group flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-sm font-semibold text-error transition-colors hover:bg-error-container/40 cursor-pointer"
       >
         <LogoutIcon className="h-5 w-5 transition-transform group-hover:translate-x-0.5" strokeWidth={2.2} />
         <span>Logout</span>
@@ -377,18 +377,18 @@ function UserCard({ onLogout }: { onLogout: () => void }) {
       {/* Identity card matching reference image */}
       <Link
         href={paths.profile}
-        className="mt-2 block rounded-2xl border border-brand-100 bg-brand-50/70 p-3.5 shadow-xs transition-all hover:bg-brand-50 hover:border-brand-200"
+        className="mt-2 block rounded-2xl border border-slate-200/80 bg-surface-container-low p-3.5 shadow-xs transition-all hover:bg-surface-container hover:border-slate-300"
       >
-        <p className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wider text-brand-700">
+        <p className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wider text-primary">
           SIMPLE DATA. BETTER INSIGHTS.
         </p>
-        <p className="mt-1 truncate text-xs font-bold text-slate-900" title={displayName}>
+        <p className="mt-1 truncate text-xs font-bold text-on-surface" title={displayName}>
           {displayName}
         </p>
-        <p className="mt-0.5 truncate text-[11px] font-medium text-slate-700" title={displayRole}>
+        <p className="mt-0.5 truncate text-[11px] font-medium text-on-surface-variant" title={displayRole}>
           {displayRole}
         </p>
-        <p className="mt-0.5 truncate text-left text-[11px] font-medium text-slate-500" title={displayDept}>
+        <p className="mt-0.5 truncate text-left text-[11px] font-medium text-on-surface-variant/80" title={displayDept}>
           • {displayDept}
         </p>
       </Link>
