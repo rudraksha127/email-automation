@@ -14,7 +14,6 @@ import {
   UsersIcon,
   ArrowRightIcon,
   MailIcon,
-  CheckIcon,
 } from "@/components/icons";
 import { useAsync } from "@/hooks/useAsync";
 import { useDebounced } from "@/hooks/useDebounced";

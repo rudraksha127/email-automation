@@ -1,5 +1,5 @@
 import { err, json, sessionState } from "@/lib/auth";
-import { getDb, getSetting, setSetting, audit, listUserOrgs } from "@/lib/db";
+import { getDb, getSetting, setSetting, audit } from "@/lib/db";
 
 export interface ProfileResponse {
   name: string;

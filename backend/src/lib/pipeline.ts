@@ -155,8 +155,10 @@ export function alreadyDelivered(orgId: string, gmailMessageId: string): boolean
 function setMail(id: string, patch: Record<string, unknown>): void {
   const keys = Object.keys(patch);
   if (keys.length === 0) return;
-  (getDb().prepare(`UPDATE mails SET ${keys.map((k) => `${k}=?`).join(",")},updated_at=? WHERE id=?`) as any)
-    .run(...keys.map((k) => patch[k]), nowIso(), id);
+  const stmt = getDb().prepare(
+    `UPDATE mails SET ${keys.map((k) => `${k}=?`).join(",")},updated_at=? WHERE id=?`
+  ) as { run: (...args: unknown[]) => unknown };
+  stmt.run(...keys.map((k) => patch[k]), nowIso(), id);
 }
 
 /** Send via Gmail API (MIME) using the ORGANIZATION's connection. */

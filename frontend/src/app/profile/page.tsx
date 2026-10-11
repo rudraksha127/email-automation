@@ -117,7 +117,9 @@ export default function ProfilePage() {
   // own name and role — nothing about them is assumed from code.
   useEffect(() => {
     if (needsSetup && profileState.data != null) {
-      setEditProfileOpen(true);
+      queueMicrotask(() => {
+        setEditProfileOpen(true);
+      });
     }
     // Only trigger once per page load.
     // eslint-disable-next-line react-hooks/exhaustive-deps

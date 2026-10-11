@@ -10,7 +10,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<HttpResult<
       credentials: "same-origin",
       ...init,
     });
-  } catch (_netErr) {
+  } catch {
     const error = new Error(
       "Unable to connect to the server. Please check your internet connection."
     ) as Error & { status: number };

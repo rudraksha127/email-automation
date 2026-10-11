@@ -39,7 +39,7 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="text-xl font-semibold text-slate-900 mb-3">4. Google API Services User Data Policy</h2>
             <p>
-              Our application's use and transfer of information received from Google APIs to any other app will adhere to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer" className="text-brand-600 hover:underline">Google API Services User Data Policy</a>, including the Limited Use requirements. We do not use your Google data for any purpose other than providing the email automation features you explicitly configure.
+              Our application&apos;s use and transfer of information received from Google APIs to any other app will adhere to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer" className="text-brand-600 hover:underline">Google API Services User Data Policy</a>, including the Limited Use requirements. We do not use your Google data for any purpose other than providing the email automation features you explicitly configure.
             </p>
           </section>
 
@@ -53,7 +53,7 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="text-xl font-semibold text-slate-900 mb-3">6. Your Rights and Choices</h2>
             <p>
-              You have the right to access, update, or delete your personal information. You can revoke our application's access to your Google account at any time through your Google Account Security settings. Doing so will immediately stop all email automation activities associated with your account.
+              You have the right to access, update, or delete your personal information. You can revoke our application&apos;s access to your Google account at any time through your Google Account Security settings. Doing so will immediately stop all email automation activities associated with your account.
             </p>
           </section>
 

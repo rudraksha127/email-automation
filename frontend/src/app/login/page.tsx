@@ -53,7 +53,9 @@ export default function LoginPage() {
       const params = new URLSearchParams(window.location.search);
       const err = params.get("error");
       if (err) {
-        setFormError(err);
+        queueMicrotask(() => {
+          setFormError(err);
+        });
         window.history.replaceState({}, "", "/login");
       }
     }
@@ -196,6 +198,7 @@ export default function LoginPage() {
               fullWidth
               className="py-3.5 text-sm"
               onClick={() => {
+                // eslint-disable-next-line @next/next/no-location-assign-relative-destination
                 window.location.href = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/auth/google`;
               }}
             >

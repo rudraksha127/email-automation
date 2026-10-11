@@ -8,7 +8,7 @@ export interface BulkBatchRow {
   Email: string;
 }
 
-interface RawBulkRow {
+export interface RawBulkRow {
   "Batch Name"?: string;
   "Description"?: string;
   "Student Name"?: string;
