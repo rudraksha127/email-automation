@@ -15,7 +15,7 @@ An enterprise-grade, secure, multi-tenant email automation and intelligent distr
 ### ✉️ Gmail Integration & Clean Forwarding
 - **OAuth 2.0 Integration:** Secure connection using Google OAuth 2.0 with offline access and automatic token refresh.
 - **24/7 Background Poller:** Continuous daemon process polling messages via Gmail API with incremental sync and delivery guards.
-- **Native Gmail Formatting:** Formats forwarded messages using standard Gmail inline quoted headers (`From`, `Date`, `Subject`, `To`) without unwanted banner artifacts.
+- **Clean Message Forwarding:** Forwards incoming emails directly with the clean original message body, eliminating synthetic forwarded header lines and empty `To:` fields.
 - **Attachment Preservation:** Full MIME multipart handling, preserving PDFs, spreadsheets, and document attachments up to Gmail API limits.
 
 ### 👥 Batch Management & Bulk CSV Importer
