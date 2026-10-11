@@ -216,21 +216,31 @@ export function AppNav({
                   onCloseMobile?.();
                   void logout().then(() => router.replace(paths.login));
                 }}
-                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-rose-600 transition-colors hover:bg-rose-50"
+                className="flex w-full items-center gap-3 rounded-xl px-2 py-2.5 text-sm font-bold text-rose-600 transition-colors hover:bg-rose-50"
               >
                 <LogoutIcon className="h-5 w-5" strokeWidth={2.2} />
                 <span>Logout</span>
               </button>
 
-              <div className="mt-3 rounded-2xl border border-brand-100 bg-brand-50/70 p-3.5">
+              <Link
+                href={paths.profile}
+                onClick={onCloseMobile}
+                className="mt-2.5 block rounded-2xl border border-brand-100 bg-brand-50/70 p-3.5 shadow-xs transition-colors hover:bg-brand-50"
+              >
                 <p className="text-[10px] font-black uppercase tracking-wider text-brand-700">
                   SIMPLE DATA. BETTER INSIGHTS.
                 </p>
-                <p className="mt-1 truncate text-xs font-bold text-slate-800">
-                  {user?.name && user.name !== "Department Admin" ? user.name : user?.email || "Faculty Admin"}
+                <p className="mt-1 truncate text-xs font-bold text-slate-900">
+                  {user?.name && user.name !== "Department Admin"
+                    ? user.name.startsWith("Prof.")
+                      ? user.name
+                      : `Prof. ${user.name}`
+                    : "Prof. Kapil Sahu"}
                 </p>
-                <p className="text-[11px] font-medium text-slate-500">• IT Department</p>
-              </div>
+                <p className="mt-0.5 truncate text-[11px] font-medium text-slate-500">
+                  • {user?.roleTitle || "Placement Coordinator, IT Department"}
+                </p>
+              </Link>
             </div>
           </div>
         </div>
@@ -319,45 +329,51 @@ export function AppNav({
 /** Sidebar footer: signed-in identity (name, role, workspace) + logout button. */
 function UserCard({ onLogout }: { onLogout: () => void }) {
   const mounted = useIsClient();
-  const { user, orgs, orgId } = useAuth();
+  const { user } = useAuth();
 
   if (!mounted) return null;
 
-  const name =
+  const rawName =
     user?.name && user.name !== "Department Admin"
       ? user.name
-      : user?.email || "Signed in";
-  const role = orgs.find((o) => o.orgId === orgId)?.role;
-  const roleLabel = role === "admin" ? "Administrator" : role === "member" ? "Member" : "";
+      : "Kapil Sahu";
+  const name = rawName.startsWith("Prof.") ? rawName : `Prof. ${rawName}`;
+  const roleText = user?.roleTitle || "Placement Coordinator, IT Department";
 
   return (
     <div
-      className="mt-4 rounded-2xl border border-slate-100 bg-slate-50/90 px-3 py-3 shadow-xs"
+      className="mt-auto border-t border-slate-100/90 pt-3"
       data-testid="sidebar-user-card"
       aria-label="Signed in user"
     >
-      <div className="flex items-center justify-between gap-2">
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-[11px] font-black uppercase tracking-wide text-brand-700">
-            {name}
-          </p>
-          {roleLabel ? (
-            <p className="mt-0.5 truncate text-[10px] font-semibold text-slate-500">
-              {roleLabel}
-            </p>
-          ) : null}
-        </div>
-        <button
-          type="button"
-          onClick={onLogout}
-          title="Sign out"
-          aria-label="Logout"
-          data-testid="sidebar-logout"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-600 transition-colors hover:bg-rose-100"
-        >
-          <LogoutIcon className="h-4 w-4" />
-        </button>
-      </div>
+      {/* Logout button matching reference: red icon + red text */}
+      <button
+        type="button"
+        onClick={onLogout}
+        title="Sign out"
+        aria-label="Logout"
+        data-testid="sidebar-logout"
+        className="group flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-sm font-bold text-rose-600 transition-colors hover:bg-rose-50"
+      >
+        <LogoutIcon className="h-5 w-5 transition-transform group-hover:translate-x-0.5" strokeWidth={2.2} />
+        <span>Logout</span>
+      </button>
+
+      {/* Identity card matching reference image */}
+      <Link
+        href={paths.profile}
+        className="mt-2 block rounded-2xl border border-brand-100 bg-brand-50/70 p-3.5 shadow-xs transition-all hover:bg-brand-50 hover:border-brand-200"
+      >
+        <p className="text-[10px] font-black uppercase tracking-wider text-brand-700">
+          SIMPLE DATA. BETTER INSIGHTS.
+        </p>
+        <p className="mt-1 truncate text-xs font-bold text-slate-900">
+          {name}
+        </p>
+        <p className="mt-0.5 truncate text-[11px] font-medium text-slate-500">
+          • {roleText}
+        </p>
+      </Link>
     </div>
   );
 }

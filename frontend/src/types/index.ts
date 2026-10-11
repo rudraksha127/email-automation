@@ -54,6 +54,7 @@ export interface Recipient {
 export interface AdminUser {
   email: string;
   name: string;
+  roleTitle?: string;
 }
 
 export interface AppSettings {

@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { randomBytes } from "node:crypto";
 import {
-  getDb, listUserOrgs, membershipOf, nowIso, verifyPassword, hashPassword, type Membership,
+  getDb, listUserOrgs, membershipOf, nowIso, verifyPassword, hashPassword, getSetting, type Membership,
 } from "./db";
 
 const COOKIE = "ma_session";
@@ -116,15 +116,18 @@ export async function requireOrg(adminRequired = false): Promise<OrgAuth> {
 
 /** Workspace/session payload for the client (never exposes tokens/secrets). */
 export async function sessionState(): Promise<{
-  user: SessionUser | null;
+  user: (SessionUser & { roleTitle?: string }) | null;
   orgId: string | null;
   orgs: Membership[];
 }> {
   const row = await sessionRow();
   if (!row) return { user: null, orgId: null, orgs: [] };
+  const admin = getDb().prepare("SELECT name FROM admins WHERE email=?").get(row.email) as { name: string } | undefined;
+  const name = admin?.name || row.name;
   const orgs = listUserOrgs(row.email);
   const orgId = row.org_id && orgs.some((o) => o.orgId === row.org_id) ? row.org_id : null;
-  return { user: { email: row.email, name: row.name }, orgId, orgs };
+  const roleTitle = getSetting(orgId ?? "org_default", "profile_role_title", "Placement Coordinator, IT Department");
+  return { user: { email: row.email, name, roleTitle }, orgId, orgs };
 }
 
 /** Bind the current session to a workspace the user is a member of. */

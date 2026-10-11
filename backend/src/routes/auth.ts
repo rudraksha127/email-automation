@@ -98,9 +98,10 @@ router.post("/logout", (req, res) => {
 router.get("/session", requireAuth, (req, res) => {
   const user = req.user!;
   const adminRow = getDb().prepare("SELECT name FROM admins WHERE email=?").get(user.email) as { name: string } | undefined;
-  const freshUser = { ...user, name: adminRow?.name || user.name };
   const orgs = listUserOrgs(user.email);
-  const orgId = req.orgAuth?.ok ? req.orgAuth.orgId : (orgs.length === 1 ? orgs[0]!.orgId : null);
+  const orgId = req.orgAuth?.ok ? req.orgAuth.orgId : (orgs.length === 1 ? orgs[0]!.orgId : (orgs[0]?.orgId ?? "org_default"));
+  const roleTitle = getSetting(orgId, "profile_role_title", "Placement Coordinator, IT Department");
+  const freshUser = { ...user, name: adminRow?.name || user.name, roleTitle };
   res.json({ user: freshUser, orgId, orgs });
 });
 
