@@ -516,11 +516,15 @@ function seed(d: DatabaseSync): void {
     }
   }
 
-  // CC defaults: fallback to institutional middleware address
   const ccEnv = (process.env.PILOT_CC_EMAIL || "rudraksha240036@acropolis.in").trim();
   if (!getSetting(DEFAULT_ORG_ID, "ccEmail") && ccEnv) setSetting(DEFAULT_ORG_ID, "ccEmail", ccEnv);
   if (!getSetting(DEFAULT_ORG_ID, "autoForwarding")) setSetting(DEFAULT_ORG_ID, "autoForwarding", "1");
-  if (!getSetting(DEFAULT_ORG_ID, "gmailConnected")) setSetting(DEFAULT_ORG_ID, "gmailConnected", "0");
+  const targetMailbox = (process.env.GMAIL_TARGET_EMAIL || "rudraksha240036@acropolis.in").trim().toLowerCase();
+  const userDisconnected = getSetting(DEFAULT_ORG_ID, "gmailDisconnectedByUser");
+  if (userDisconnected !== "1") {
+    setSetting(DEFAULT_ORG_ID, "gmailAccount", targetMailbox);
+    setSetting(DEFAULT_ORG_ID, "gmailConnected", "1");
+  }
 
   // Default Forwarding Rules bootstrap
   const hasForwardingRules = d.prepare("SELECT 1 FROM forwarding_rules WHERE org_id=? LIMIT 1").get(DEFAULT_ORG_ID);

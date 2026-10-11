@@ -17,8 +17,8 @@ export function loadSettings(orgId: string): AppSettings {
     allowedSenders: senders.map((s) => s.sender_email),
     ccEmail: getSetting(orgId, "ccEmail"),
     autoForwarding: getSetting(orgId, "autoForwarding", "1") === "1",
-    gmailConnected: info.connected && getSetting(orgId, "gmailConnected", "0") === "1",
-    gmailAccount: info.connected ? info.account : null,
+    gmailConnected: info.connected,
+    gmailAccount: info.account,
     lastSyncedAt: info.lastSyncedAt,
   };
 }

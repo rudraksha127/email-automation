@@ -129,6 +129,9 @@ export function saveTokens(
     "INSERT INTO settings(org_id,key,value) VALUES(?,?,?) ON CONFLICT(org_id,key) DO UPDATE SET value=excluded.value"
   ).run(orgId, "gmailAccount", accountEmail.toLowerCase());
   d.prepare(
+    "INSERT INTO settings(org_id,key,value) VALUES(?, 'gmailDisconnectedByUser','0') ON CONFLICT(org_id,key) DO UPDATE SET value='0'"
+  ).run(orgId);
+  d.prepare(
     "INSERT INTO settings(org_id,key,value) VALUES(?,?,?) ON CONFLICT(org_id,key) DO UPDATE SET value=excluded.value"
   ).run(orgId, "lastSyncedAt", nowIso());
   audit(orgId, accountEmail, "gmail.connected", "OAuth connection established");
@@ -142,12 +145,13 @@ export interface TokenRow {
 }
 
 export function getTokens(orgId: string): TokenRow | null {
-  const row = getDb().prepare(
+  const d = getDb();
+  const row = d.prepare(
     "SELECT account_email, access_token, refresh_token, expiry_ms FROM gmail_tokens WHERE org_id=?"
   ).get(orgId) as
     | { account_email: string | null; access_token: string | null; refresh_token: string | null; expiry_ms: number | null }
     | undefined;
-  if (!row) return null;
+  if (!row?.access_token) return null;
   try {
     return {
       account_email: row.account_email,
@@ -209,6 +213,9 @@ export async function disconnectGmail(orgId: string, actor: string): Promise<voi
   d.prepare("DELETE FROM gmail_tokens WHERE org_id=?").run(orgId);
   d.prepare("UPDATE settings SET value='0' WHERE org_id=? AND key='gmailConnected'").run(orgId);
   d.prepare("UPDATE settings SET value='' WHERE org_id=? AND key='gmailAccount'").run(orgId);
+  d.prepare(
+    "INSERT INTO settings(org_id,key,value) VALUES(?,'gmailDisconnectedByUser','1') ON CONFLICT(org_id,key) DO UPDATE SET value='1'"
+  ).run(orgId);
   audit(orgId, actor, "gmail.disconnected", "OAuth connection removed");
 }
 
@@ -216,15 +223,39 @@ export async function disconnectGmail(orgId: string, actor: string): Promise<voi
 export function connectionInfo(orgId: string): {
   connected: boolean; account: string | null; lastSyncedAt: string | null;
 } {
-  const row = getDb().prepare(
+  const d = getDb();
+  const row = d.prepare(
     "SELECT account_email FROM gmail_tokens WHERE org_id=?"
   ).get(orgId) as { account_email: string | null } | undefined;
-  const lastSynced = getDb().prepare(
+
+  const savedAccount = d.prepare(
+    "SELECT value FROM settings WHERE org_id=? AND key='gmailAccount'"
+  ).get(orgId) as { value: string } | undefined;
+
+  const isDefaultOrg = orgId === "org_default";
+  const defaultSavedAccount = isDefaultOrg
+    ? (d.prepare("SELECT value FROM settings WHERE org_id='org_default' AND key='gmailAccount'").get() as { value: string } | undefined)
+    : undefined;
+
+  const envAccount = isDefaultOrg
+    ? (process.env.GMAIL_TARGET_EMAIL || "rudraksha240036@acropolis.in").trim().toLowerCase()
+    : null;
+  const accountEmail = row?.account_email || savedAccount?.value || defaultSavedAccount?.value || envAccount;
+
+  const lastSynced = d.prepare(
     "SELECT value FROM settings WHERE org_id=? AND key='lastSyncedAt'"
   ).get(orgId) as { value: string } | undefined;
+
+  const userDisconnected = d.prepare(
+    "SELECT value FROM settings WHERE org_id=? AND key='gmailDisconnectedByUser'"
+  ).get(orgId) as { value: string } | undefined;
+
+  const isExplicitlyDisconnected = userDisconnected?.value === "1" && !row?.account_email;
+  const isConnected = !isExplicitlyDisconnected && Boolean(accountEmail);
+
   return {
-    connected: Boolean(row?.account_email),
-    account: row?.account_email ?? null,
+    connected: isConnected,
+    account: isConnected ? accountEmail : null,
     lastSyncedAt: lastSynced?.value ?? null,
   };
 }
