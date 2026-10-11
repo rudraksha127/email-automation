@@ -17,6 +17,8 @@ import {
   LogoutIcon,
   ChevronRightIcon,
   BuildingIcon,
+  EyeIcon,
+  EyeOffIcon,
 } from "@/components/icons";
 import { useAuth } from "@/hooks/AuthContext";
 import { useAsync } from "@/hooks/useAsync";
@@ -125,6 +127,9 @@ export default function ProfilePage() {
   const [currentPw, setCurrentPw] = useState("");
   const [nextPw, setNextPw] = useState("");
   const [confirmPw, setConfirmPw] = useState("");
+  const [showCurrentPw, setShowCurrentPw] = useState(false);
+  const [showNextPw, setShowNextPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
   const [pwErrors, setPwErrors] = useState<Record<string, string | undefined>>({});
   const [pwApiError, setPwApiError] = useState<string | null>(null);
   const [savingPw, setSavingPw] = useState(false);
@@ -192,6 +197,9 @@ export default function ProfilePage() {
       setTimeout(() => {
         setChangePasswordOpen(false);
         setPwSaved(false);
+        setShowCurrentPw(false);
+        setShowNextPw(false);
+        setShowConfirmPw(false);
       }, 1200);
     } catch (err) {
       setPwApiError(err instanceof Error ? err.message : "Password update failed.");
@@ -670,20 +678,37 @@ export default function ProfilePage() {
       {/* 2. Change Password Modal */}
       <Modal
         open={changePasswordOpen}
-        onClose={() => setChangePasswordOpen(false)}
+        onClose={() => {
+          setChangePasswordOpen(false);
+          setShowCurrentPw(false);
+          setShowNextPw(false);
+          setShowConfirmPw(false);
+        }}
         title="Change Password"
       >
-        <form onSubmit={handleChangePassword} className="space-y-3">
+        <form onSubmit={handleChangePassword} className="space-y-3.5">
           <div>
             <label className="block text-[11px] font-semibold text-slate-700">
               Current Password
             </label>
-            <input
-              type="password"
-              value={currentPw}
-              onChange={(e) => setCurrentPw(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none"
-            />
+            <div className="relative mt-1">
+              <input
+                type={showCurrentPw ? "text" : "password"}
+                value={currentPw}
+                onChange={(e) => setCurrentPw(e.target.value)}
+                placeholder="Enter current password"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 pr-10 text-xs text-slate-800 placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:outline-none transition-colors"
+              />
+              <button
+                type="button"
+                tabIndex={-1}
+                onClick={() => setShowCurrentPw((s) => !s)}
+                aria-label={showCurrentPw ? "Hide password" : "Show password"}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                {showCurrentPw ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+              </button>
+            </div>
             {(pwErrors.currentPassword || pwErrors.current) && (
               <p className="mt-1 text-[11px] text-rose-600">
                 {pwErrors.currentPassword || pwErrors.current}
@@ -695,12 +720,24 @@ export default function ProfilePage() {
             <label className="block text-[11px] font-semibold text-slate-700">
               New Password
             </label>
-            <input
-              type="password"
-              value={nextPw}
-              onChange={(e) => setNextPw(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none"
-            />
+            <div className="relative mt-1">
+              <input
+                type={showNextPw ? "text" : "password"}
+                value={nextPw}
+                onChange={(e) => setNextPw(e.target.value)}
+                placeholder="Enter new password (min. 8 characters)"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 pr-10 text-xs text-slate-800 placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:outline-none transition-colors"
+              />
+              <button
+                type="button"
+                tabIndex={-1}
+                onClick={() => setShowNextPw((s) => !s)}
+                aria-label={showNextPw ? "Hide password" : "Show password"}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                {showNextPw ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+              </button>
+            </div>
             {(pwErrors.newPassword || pwErrors.next) && (
               <p className="mt-1 text-[11px] text-rose-600">
                 {pwErrors.newPassword || pwErrors.next}
@@ -712,12 +749,24 @@ export default function ProfilePage() {
             <label className="block text-[11px] font-semibold text-slate-700">
               Confirm New Password
             </label>
-            <input
-              type="password"
-              value={confirmPw}
-              onChange={(e) => setConfirmPw(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none"
-            />
+            <div className="relative mt-1">
+              <input
+                type={showConfirmPw ? "text" : "password"}
+                value={confirmPw}
+                onChange={(e) => setConfirmPw(e.target.value)}
+                placeholder="Re-enter new password"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 pr-10 text-xs text-slate-800 placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:outline-none transition-colors"
+              />
+              <button
+                type="button"
+                tabIndex={-1}
+                onClick={() => setShowConfirmPw((s) => !s)}
+                aria-label={showConfirmPw ? "Hide password" : "Show password"}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                {showConfirmPw ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+              </button>
+            </div>
             {(pwErrors.confirmPassword || pwErrors.confirm) && (
               <p className="mt-1 text-[11px] text-rose-600">
                 {pwErrors.confirmPassword || pwErrors.confirm}
