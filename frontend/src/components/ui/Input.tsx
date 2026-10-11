@@ -37,8 +37,10 @@ export const Input = forwardRef<HTMLInputElement, TextFieldProps>(function Input
       </label>
       <div
         className={cn(
-          "relative rounded-xl border bg-white shadow-xs transition-colors",
-          error ? "border-rose-400" : "border-slate-200 focus-within:border-brand-600"
+          "relative flex items-center rounded-xl border bg-white shadow-xs transition-all",
+          error
+            ? "border-rose-400 ring-2 ring-rose-400/10"
+            : "border-slate-200/90 focus-within:border-brand-600 focus-within:ring-2 focus-within:ring-brand-500/15"
         )}
       >
         {icon ? (

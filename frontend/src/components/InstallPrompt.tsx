@@ -64,7 +64,7 @@ export function InstallPrompt() {
       className="fixed inset-x-0 top-3 z-50 mx-auto flex w-[min(92vw,420px)] items-center gap-3 rounded-2xl border border-slate-100 bg-white px-3.5 py-3 shadow-lg"
     >
       <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white">
-        <span className="text-[13px] font-black tracking-tight">IT</span>
+        <span className="text-[13px] font-bold tracking-tight">IT</span>
         <span className="absolute -bottom-1 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full border-2 border-white bg-emerald-500">
           <svg viewBox="0 0 24 24" className="h-2.5 w-2.5" fill="none" stroke="white" strokeWidth="4">
             <polyline points="20 6 9 17 4 12" />

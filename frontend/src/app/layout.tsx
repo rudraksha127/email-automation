@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
-import { Inter } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/hooks/AuthContext";
 import { AuthGuard, GuestGuard } from "@/routes/guards";
@@ -8,10 +8,11 @@ import { LoadingState } from "@/components/ui/EmptyState";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { MailNotificationListener } from "@/components/MailNotificationListener";
 
-/** Desktop Stitch reference font (mobile falls back to the system stack). */
-const inter = Inter({
+/** Plus Jakarta Sans — matching the institutional HOD Web typography reference. */
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-jakarta",
   display: "swap",
   fallback: ["-apple-system", "Segoe UI", "Roboto", "Helvetica", "Arial", "sans-serif"],
 });
@@ -45,8 +46,8 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`h-full antialiased ${inter.variable}`}>
-      <body className="min-h-full bg-slate-50 text-slate-800">
+    <html lang="en" className={`h-full antialiased ${jakarta.variable}`}>
+      <body className="min-h-full bg-slate-50 text-slate-800 font-sans">
         <ServiceWorkerRegister />
         <AuthProvider>
           <MailNotificationListener />

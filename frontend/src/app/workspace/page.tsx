@@ -76,7 +76,7 @@ export default function WorkspacePage() {
       </section>
 
       <section className="mb-6">
-        <h1 className="mb-1.5 text-[28px] font-black tracking-tight text-slate-900">
+        <h1 className="mb-1.5 text-2xl sm:text-[26px] font-bold tracking-tight text-slate-900">
           Choose a Workspace
         </h1>
         <p className="text-sm leading-relaxed text-slate-500">

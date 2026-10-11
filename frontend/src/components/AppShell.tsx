@@ -177,7 +177,7 @@ export function AppNav({
                   <GraduationCapIcon className="h-5 w-5" />
                 </span>
                 <div>
-                  <h2 className="text-xs font-black uppercase tracking-tight text-slate-900">
+                  <h2 className="text-xs font-bold uppercase tracking-tight text-slate-900">
                     IT Department
                   </h2>
                   <p className="text-[11px] font-medium text-slate-400">Mail Automation</p>
@@ -238,7 +238,7 @@ export function AppNav({
                 onClick={onCloseMobile}
                 className="mt-2.5 block rounded-2xl border border-brand-100 bg-brand-50/70 p-3.5 shadow-xs transition-colors hover:bg-brand-50"
               >
-                <p className="whitespace-nowrap text-[10px] font-black uppercase tracking-tight text-brand-700">
+                <p className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wider text-brand-700">
                   SIMPLE DATA. BETTER INSIGHTS.
                 </p>
                 <p className="mt-1 truncate text-xs font-bold text-slate-900" title={displayName}>
@@ -379,7 +379,7 @@ function UserCard({ onLogout }: { onLogout: () => void }) {
         href={paths.profile}
         className="mt-2 block rounded-2xl border border-brand-100 bg-brand-50/70 p-3.5 shadow-xs transition-all hover:bg-brand-50 hover:border-brand-200"
       >
-        <p className="whitespace-nowrap text-[10px] font-black uppercase tracking-tight text-brand-700">
+        <p className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wider text-brand-700">
           SIMPLE DATA. BETTER INSIGHTS.
         </p>
         <p className="mt-1 truncate text-xs font-bold text-slate-900" title={displayName}>

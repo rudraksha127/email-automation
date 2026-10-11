@@ -40,7 +40,7 @@ function StatCard({
         <Icon className="h-4 w-4" />
       </span>
       <span>
-        <span className="block text-xl font-black leading-none tracking-tight text-slate-900">
+        <span className="block text-xl font-bold leading-none tracking-tight text-slate-900">
           {loading ? "…" : (value ?? 0)}
         </span>
         <span className="mt-0.5 block text-[11px] font-semibold text-slate-400">{stat.label}</span>

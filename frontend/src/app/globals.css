@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 /*
- * Design tokens — extracted from the approved UI mockups (source of truth).
- * Do NOT change these values without a design review.
+ * Design tokens — aligned with the institutional Plus Jakarta Sans typography
+ * and formatting system from hod-web reference.
  */
 @theme {
   --color-brand-50: #eff6ff;
@@ -13,31 +13,70 @@
   --color-brand-700: #1d4ed8;
   --color-brand-800: #1e40af;
 
-  /* Desktop Stitch references specify Inter; mobile approved design keeps
-     the native system stack as fallback for identical rendering offline. */
-  --font-sans: var(--font-inter, -apple-system), -apple-system, BlinkMacSystemFont,
-    "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-sans: var(--font-jakarta), "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 @layer base {
   html {
+    min-height: 100%;
+    min-height: 100dvh;
+    -webkit-text-size-adjust: 100%;
+    -webkit-overflow-scrolling: touch;
     -webkit-tap-highlight-color: transparent;
   }
 
   body {
     background-color: var(--color-slate-50);
     color: var(--color-slate-800);
-    /* --font-inter is injected by next/font (layout.tsx) — the Stitch-approved
-     * desktop typeface, self-hosted with display:swap. System stack is the
-     * instant fallback, so first paint never blocks on the font file. */
-    font-family: var(--font-inter), var(--font-sans);
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Prevent 300ms touch delay on buttons and links */
+  a,
+  button,
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
+  }
+
+  /*
+   * Autofill styling matching hod-web: prevents harsh yellow/blue unclipped background
+   */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+    box-shadow: 0 0 0 1000px #ffffff inset !important;
+    -webkit-text-fill-color: #0f172a !important;
+    caret-color: #0f172a !important;
+    border-radius: inherit !important;
+    transition:
+      background-color 999999s step-end 0s,
+      color 999999s step-end 0s;
   }
 
   /* Visible focus states for keyboard navigation (accessibility) */
   :focus-visible {
     outline: 2px solid var(--color-brand-600);
     outline-offset: 2px;
+  }
+
+  /* Custom subtle scrollbars */
+  ::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+  }
+  ::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background-color: #cbd5e1;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
   }
 }
 
