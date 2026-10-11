@@ -116,7 +116,7 @@ export async function requireOrg(adminRequired = false): Promise<OrgAuth> {
 
 /** Workspace/session payload for the client (never exposes tokens/secrets). */
 export async function sessionState(): Promise<{
-  user: (SessionUser & { roleTitle?: string }) | null;
+  user: (SessionUser & { roleTitle?: string; department?: string; institution?: string }) | null;
   orgId: string | null;
   orgs: Membership[];
 }> {
@@ -126,8 +126,10 @@ export async function sessionState(): Promise<{
   const name = admin?.name || row.name;
   const orgs = listUserOrgs(row.email);
   const orgId = row.org_id && orgs.some((o) => o.orgId === row.org_id) ? row.org_id : null;
-  const roleTitle = getSetting(orgId ?? "org_default", "profile_role_title", "Placement Coordinator, IT Department");
-  return { user: { email: row.email, name, roleTitle }, orgId, orgs };
+  const roleTitle = getSetting(orgId ?? "org_default", "profile_role_title", "Placement Coordinator");
+  const department = getSetting(orgId ?? "org_default", "profile_department", "IT Department");
+  const institution = getSetting(orgId ?? "org_default", "profile_institution", "Acropolis Institute of Technology And Research Indore");
+  return { user: { email: row.email, name, roleTitle, department, institution }, orgId, orgs };
 }
 
 /** Bind the current session to a workspace the user is a member of. */

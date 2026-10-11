@@ -55,6 +55,8 @@ export interface AdminUser {
   email: string;
   name: string;
   roleTitle?: string;
+  department?: string;
+  institution?: string;
 }
 
 export interface AppSettings {

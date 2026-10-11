@@ -28,7 +28,7 @@ import { formatDateTime } from "@/utils/format";
 import { validateCcEmail } from "@/utils/validation";
 
 function SettingsInner() {
-  const { role } = useAuth();
+  const { user, role } = useAuth();
   const isAdmin = role === "admin";
   const oauthParams = useSearchParams();
 
@@ -412,7 +412,7 @@ function SettingsInner() {
                 <p className="text-[11px] text-slate-500">
                   Target mailbox:{" "}
                   <span className="font-semibold text-slate-700">
-                    {s?.gmailAccount || "rudraksha240036@acropolis.in"}
+                    {user?.email || s?.gmailAccount || "rudraksha240036@acropolis.in"}
                   </span>
                 </p>
               </div>

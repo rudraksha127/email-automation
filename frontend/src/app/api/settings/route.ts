@@ -7,7 +7,7 @@ import type { AppSettings } from "@/types";
 export async function GET(): Promise<Response> {
   const auth = await requireOrg();
   if (!auth.ok) return err(auth.message, auth.status);
-  return json(loadSettings(auth.orgId));
+  return json(loadSettings(auth.orgId, auth.email));
 }
 
 /**
@@ -59,5 +59,5 @@ export async function PUT(req: Request): Promise<Response> {
   }
 
   setSetting(auth.orgId, "updatedAt", nowIso());
-  return json(loadSettings(auth.orgId));
+  return json(loadSettings(auth.orgId, auth.email));
 }

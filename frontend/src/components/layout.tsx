@@ -5,7 +5,7 @@ import { AppHeader, AppNav } from "@/components/AppShell";
 
 /**
  * Shell for authenticated screens: sticky brand header, content area and
- * bottom tabs + mobile drawer (mobile) / w-60 sidebar rail (desktop).
+ * bottom tabs + mobile drawer (mobile) / w-64 sidebar rail (desktop).
  */
 export function AppLayout({ children }: { children: ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -13,7 +13,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col bg-slate-50">
       <AppHeader onOpenMobileMenu={() => setMobileMenuOpen(true)} />
-      <div className="flex flex-1 lg:pl-60">
+      <div className="flex flex-1 lg:pl-64">
         <main className="mx-auto w-full px-5 pb-6 pt-4 lg:px-6 lg:pt-6">{children}</main>
       </div>
       <AppNav mobileOpen={mobileMenuOpen} onCloseMobile={() => setMobileMenuOpen(false)} />

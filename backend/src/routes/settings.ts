@@ -13,7 +13,7 @@ router.get("/", requireWorkspace(false), (req, res) => {
     res.status(auth.status).json({ error: auth.message });
     return;
   }
-  res.json(loadSettings(auth.orgId));
+  res.json(loadSettings(auth.orgId, auth.email));
 });
 
 /** PUT /api/settings or PATCH /api/settings */
@@ -82,7 +82,7 @@ const updateSettingsHandler = (req: any, res: any) => {
   }
 
   setSetting(auth.orgId, "updatedAt", nowIso());
-  res.json(loadSettings(auth.orgId));
+  res.json(loadSettings(auth.orgId, auth.email));
 };
 
 router.put("/", requireWorkspace(true), updateSettingsHandler);

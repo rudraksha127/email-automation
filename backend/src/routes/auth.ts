@@ -75,6 +75,13 @@ router.post("/login", (req, res) => {
   const token = createSessionToken(admin.email);
   setSessionCookie(res, token);
 
+  const orgs = listUserOrgs(admin.email);
+  const activeOrgId = orgs[0]?.orgId || "org_default";
+  setSetting(activeOrgId, "gmailAccount", admin.email.toLowerCase());
+  if (activeOrgId !== "org_default") {
+    setSetting("org_default", "gmailAccount", admin.email.toLowerCase());
+  }
+
   // The token stays in the httpOnly cookie. Returning it would expose a
   // bearer credential to browser JavaScript and any XSS on the frontend.
   res.json({ user: admin });
@@ -100,8 +107,10 @@ router.get("/session", requireAuth, (req, res) => {
   const adminRow = getDb().prepare("SELECT name FROM admins WHERE email=?").get(user.email) as { name: string } | undefined;
   const orgs = listUserOrgs(user.email);
   const orgId = req.orgAuth?.ok ? req.orgAuth.orgId : (orgs.length === 1 ? orgs[0]!.orgId : (orgs[0]?.orgId ?? "org_default"));
-  const roleTitle = getSetting(orgId, "profile_role_title", "Placement Coordinator, IT Department");
-  const freshUser = { ...user, name: adminRow?.name || user.name, roleTitle };
+  const roleTitle = getSetting(orgId, "profile_role_title", "Placement Coordinator");
+  const department = getSetting(orgId, "profile_department", "IT Department");
+  const institution = getSetting(orgId, "profile_institution", "Acropolis Institute of Technology And Research Indore");
+  const freshUser = { ...user, name: adminRow?.name || user.name, roleTitle, department, institution };
   res.json({ user: freshUser, orgId, orgs });
 });
 
@@ -109,17 +118,21 @@ router.get("/session", requireAuth, (req, res) => {
 router.get("/profile", requireAuth, (req, res) => {
   const user = req.user!;
   const orgId = req.orgAuth?.ok ? req.orgAuth.orgId : "org_default";
+  const adminRow = getDb().prepare("SELECT name FROM admins WHERE email=?").get(user.email) as { name: string } | undefined;
 
   const name =
-    user.name && user.name !== "Department Admin"
-      ? user.name
-      : "Prof. (Dr.) Prashant Lakkadwala";
+    adminRow?.name && adminRow.name !== "Department Admin"
+      ? adminRow.name
+      : (user.name && user.name !== "Department Admin" ? user.name : "Prof. Kapil Sahu");
 
-  const employeeId = getSetting(orgId, "profile_employee_id", "HOD-IT-001");
-  const roleTitle = getSetting(orgId, "profile_role_title", "Role: HOD");
+  const employeeId = getSetting(orgId, "profile_employee_id", "EMP-001");
+  const roleTitle = getSetting(orgId, "profile_role_title", "Placement Coordinator");
   const status = getSetting(orgId, "profile_status", "Active");
-  const departmentScope = getSetting(orgId, "profile_department_scope", "IT & CSE-DS");
+  const departmentScope = getSetting(orgId, "profile_department_scope", "Placement Cell");
   const activeBatches = getSetting(orgId, "profile_active_batches", "2nd, 3rd & 4th Year");
+  const institution = getSetting(orgId, "profile_institution", "Acropolis Institute of Technology And Research Indore");
+  const department = getSetting(orgId, "profile_department", "IT Department");
+  const academicSession = getSetting(orgId, "profile_academic_session", "Academic Session 2026–27");
 
   res.json({
     name,
@@ -129,9 +142,9 @@ router.get("/profile", requireAuth, (req, res) => {
     status,
     departmentScope,
     activeBatches,
-    institution: "Acropolis Institute of Technology And Research Indore",
-    department: "IT Department",
-    academicSession: "Academic Session 2026–27",
+    institution,
+    department,
+    academicSession,
   });
 });
 
@@ -161,6 +174,18 @@ router.patch("/profile", requireAuth, (req, res) => {
   if (typeof body.roleTitle === "string") {
     setSetting(orgId, "profile_role_title", body.roleTitle.trim());
   }
+  if (typeof body.department === "string") {
+    setSetting(orgId, "profile_department", body.department.trim());
+  }
+  if (typeof body.institution === "string") {
+    setSetting(orgId, "profile_institution", body.institution.trim());
+  }
+  if (typeof body.academicSession === "string") {
+    setSetting(orgId, "profile_academic_session", body.academicSession.trim());
+  }
+  if (typeof body.status === "string") {
+    setSetting(orgId, "profile_status", body.status.trim());
+  }
 
   audit(orgId, user.email, "profile.updated", "User updated institutional profile");
 
@@ -172,14 +197,14 @@ router.patch("/profile", requireAuth, (req, res) => {
   res.json({
     name: updatedName,
     email: user.email,
-    employeeId: getSetting(orgId, "profile_employee_id", "HOD-IT-001"),
-    roleTitle: getSetting(orgId, "profile_role_title", "Role: HOD"),
+    employeeId: getSetting(orgId, "profile_employee_id", "EMP-001"),
+    roleTitle: getSetting(orgId, "profile_role_title", "Placement Coordinator"),
     status: getSetting(orgId, "profile_status", "Active"),
-    departmentScope: getSetting(orgId, "profile_department_scope", "IT & CSE-DS"),
+    departmentScope: getSetting(orgId, "profile_department_scope", "Placement Cell"),
     activeBatches: getSetting(orgId, "profile_active_batches", "2nd, 3rd & 4th Year"),
-    institution: "Acropolis Institute of Technology And Research Indore",
-    department: "IT Department",
-    academicSession: "Academic Session 2026–27",
+    institution: getSetting(orgId, "profile_institution", "Acropolis Institute of Technology And Research Indore"),
+    department: getSetting(orgId, "profile_department", "IT Department"),
+    academicSession: getSetting(orgId, "profile_academic_session", "Academic Session 2026–27"),
   });
 });
 

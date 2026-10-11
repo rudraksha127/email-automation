@@ -14,6 +14,14 @@ export function ServiceWorkerRegister() {
     navigator.serviceWorker.register("/sw.js").catch(() => {
       /* installability is best-effort — never break the app over it */
     });
+
+    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "default") {
+      const handleUserInteraction = () => {
+        Notification.requestPermission().catch(() => {});
+        window.removeEventListener("click", handleUserInteraction);
+      };
+      window.addEventListener("click", handleUserInteraction, { once: true });
+    }
   }, []);
 
   return null;

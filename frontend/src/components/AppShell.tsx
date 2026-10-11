@@ -130,7 +130,7 @@ export function AppHeader({ onOpenMobileMenu }: { onOpenMobileMenu?: () => void 
   );
 }
 
-/** Mobile slide-over drawer + bottom tab bar + desktop left sidebar rail (w-60). */
+/** Mobile slide-over drawer + bottom tab bar + desktop left sidebar rail (w-64). */
 export function AppNav({
   mobileOpen = false,
   onCloseMobile,
@@ -141,6 +141,18 @@ export function AppNav({
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
+
+  const displayName =
+    user?.name && user.name.trim() && user.name !== "Department Admin"
+      ? user.name.trim()
+      : "Prof. Kapil Sahu";
+
+  const rawRole = user?.roleTitle?.trim() || "Placement Coordinator";
+  const displayRole = rawRole.includes(",") ? rawRole.split(",")[0].trim() : rawRole;
+
+  const displayDept =
+    user?.department?.trim() ||
+    (rawRole.includes(",") ? rawRole.split(",")[1].trim() : "IT Department");
 
   const isActive = (href: string) =>
     pathname === href || (href !== paths.dashboard && pathname.startsWith(`${href}/`));
@@ -227,21 +239,17 @@ export function AppNav({
                 onClick={onCloseMobile}
                 className="mt-2.5 block rounded-2xl border border-brand-100 bg-brand-50/70 p-3.5 shadow-xs transition-colors hover:bg-brand-50"
               >
-                <p className="text-[10px] font-black uppercase tracking-wider text-brand-700">
+                <p className="whitespace-nowrap text-[10px] font-black uppercase tracking-tight text-brand-700">
                   SIMPLE DATA. BETTER INSIGHTS.
                 </p>
-                <p className="mt-1 truncate text-xs font-bold text-slate-900">
-                  {user?.name && user.name !== "Department Admin"
-                    ? user.name.startsWith("Prof.")
-                      ? user.name
-                      : `Prof. ${user.name}`
-                    : "Prof. Kapil Sahu"}
+                <p className="mt-1 truncate text-xs font-bold text-slate-900" title={displayName}>
+                  {displayName}
                 </p>
-                <p className="mt-0.5 truncate text-[11px] font-medium text-slate-700">
-                  {(user?.roleTitle || "Placement Coordinator, IT Department").split(",")[0]?.trim() || "Placement Coordinator"}
+                <p className="mt-0.5 truncate text-[11px] font-medium text-slate-700" title={displayRole}>
+                  {displayRole}
                 </p>
-                <p className="truncate text-[11px] font-medium text-slate-500">
-                  • {((user?.roleTitle || "Placement Coordinator, IT Department").split(",")[1]?.trim()) || "IT Department"}
+                <p className="mt-0.5 truncate text-center text-[11px] font-medium text-slate-500" title={displayDept}>
+                  • {displayDept}
                 </p>
               </Link>
             </div>
@@ -283,10 +291,10 @@ export function AppNav({
         </ul>
       </nav>
 
-      {/* Desktop: left sidebar rail (w-60 per Stitch web reference) */}
+      {/* Desktop: left sidebar rail (w-64) */}
       <nav
         aria-label="Primary"
-        className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-slate-200 bg-white px-4 py-5 lg:flex"
+        className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-200 bg-white px-4 py-5 lg:flex"
       >
         <Link href={paths.dashboard} className="mb-8 flex items-center space-x-2.5 px-2">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-white shadow-sm shadow-brand-600/20">
@@ -336,15 +344,17 @@ function UserCard({ onLogout }: { onLogout: () => void }) {
 
   if (!mounted) return null;
 
-  const rawName =
-    user?.name && user.name !== "Department Admin"
-      ? user.name
-      : "Kapil Sahu";
-  const name = rawName.startsWith("Prof.") ? rawName : `Prof. ${rawName}`;
-  const roleTitle = user?.roleTitle || "Placement Coordinator, IT Department";
-  const [rolePrimary, roleSecondary] = roleTitle.includes(",")
-    ? roleTitle.split(",").map((s) => s.trim())
-    : [roleTitle, "IT Department"];
+  const displayName =
+    user?.name && user.name.trim() && user.name !== "Department Admin"
+      ? user.name.trim()
+      : "Prof. Kapil Sahu";
+
+  const rawRole = user?.roleTitle?.trim() || "Placement Coordinator";
+  const displayRole = rawRole.includes(",") ? rawRole.split(",")[0].trim() : rawRole;
+
+  const displayDept =
+    user?.department?.trim() ||
+    (rawRole.includes(",") ? rawRole.split(",")[1].trim() : "IT Department");
 
   return (
     <div
@@ -370,17 +380,17 @@ function UserCard({ onLogout }: { onLogout: () => void }) {
         href={paths.profile}
         className="mt-2 block rounded-2xl border border-brand-100 bg-brand-50/70 p-3.5 shadow-xs transition-all hover:bg-brand-50 hover:border-brand-200"
       >
-        <p className="text-[10px] font-black uppercase tracking-wider text-brand-700">
+        <p className="whitespace-nowrap text-[10px] font-black uppercase tracking-tight text-brand-700">
           SIMPLE DATA. BETTER INSIGHTS.
         </p>
-        <p className="mt-1 truncate text-xs font-bold text-slate-900">
-          {name}
+        <p className="mt-1 truncate text-xs font-bold text-slate-900" title={displayName}>
+          {displayName}
         </p>
-        <p className="mt-0.5 truncate text-[11px] font-medium text-slate-700">
-          {rolePrimary}
+        <p className="mt-0.5 truncate text-[11px] font-medium text-slate-700" title={displayRole}>
+          {displayRole}
         </p>
-        <p className="truncate text-[11px] font-medium text-slate-500">
-          • {roleSecondary || "IT Department"}
+        <p className="mt-0.5 truncate text-center text-[11px] font-medium text-slate-500" title={displayDept}>
+          • {displayDept}
         </p>
       </Link>
     </div>

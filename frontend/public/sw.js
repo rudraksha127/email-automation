@@ -81,3 +81,42 @@ self.addEventListener("fetch", (event) => {
     )
   );
 });
+
+// Push notification received
+self.addEventListener("push", (event) => {
+  let data = { title: "IT Dept Mail Automation", body: "New placement mail processed" };
+  try {
+    if (event.data) {
+      data = event.data.json();
+    }
+  } catch {
+    if (event.data) data.body = event.data.text();
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title || "IT Dept Mail Automation", {
+      body: data.body || "New placement email received & processed",
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+      vibrate: [200, 100, 200],
+      tag: "mail-alert",
+      data: { url: "/mails" },
+    })
+  );
+});
+
+// Notification click to open or focus the app
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const urlToOpen = event.notification.data?.url || "/mails";
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
+      for (const client of windowClients) {
+        if (client.url.includes(urlToOpen) && "focus" in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) return clients.openWindow(urlToOpen);
+    })
+  );
+});
+

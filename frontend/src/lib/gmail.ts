@@ -220,7 +220,7 @@ export async function disconnectGmail(orgId: string, actor: string): Promise<voi
 }
 
 /** Connected-mailbox metadata for the UI — NEVER tokens. */
-export function connectionInfo(orgId: string): {
+export function connectionInfo(orgId: string, currentUserEmail?: string): {
   connected: boolean; account: string | null; lastSyncedAt: string | null;
 } {
   const d = getDb();
@@ -240,7 +240,9 @@ export function connectionInfo(orgId: string): {
   const envAccount = isDefaultOrg
     ? (process.env.GMAIL_TARGET_EMAIL || "rudraksha240036@acropolis.in").trim().toLowerCase()
     : null;
-  const accountEmail = row?.account_email || savedAccount?.value || defaultSavedAccount?.value || envAccount;
+
+  const userEmail = currentUserEmail?.trim().toLowerCase();
+  const accountEmail = userEmail || row?.account_email || savedAccount?.value || defaultSavedAccount?.value || envAccount;
 
   const lastSynced = d.prepare(
     "SELECT value FROM settings WHERE org_id=? AND key='lastSyncedAt'"

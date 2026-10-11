@@ -5,8 +5,8 @@ import type { AppSettings } from "@/types";
 export { setSetting };
 
 /** Server-managed connection settings + org-editable values, scoped to one org. */
-export function loadSettings(orgId: string): AppSettings {
-  const info = connectionInfo(orgId);
+export function loadSettings(orgId: string, currentUserEmail?: string): AppSettings {
+  const info = connectionInfo(orgId, currentUserEmail);
   const org = getDb().prepare("SELECT name FROM organizations WHERE id=?").get(orgId) as
     | { name: string } | undefined;
   const senders = getDb().prepare(

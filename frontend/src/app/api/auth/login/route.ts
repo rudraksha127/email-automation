@@ -1,5 +1,6 @@
 import { checkLogin, createSession, err, json, requireUser } from "@/lib/auth";
 import { clientIp, rateLimit, rateLimitReset } from "@/lib/rateLimit";
+import { listUserOrgs, setSetting } from "@/lib/db";
 
 export async function POST(req: Request): Promise<Response> {
   const body = (await req.json().catch(() => null)) as { email?: string; password?: string } | null;
@@ -25,6 +26,14 @@ export async function POST(req: Request): Promise<Response> {
   if (!admin) return err("Invalid email or password", 401);
   rateLimitReset(emailKey); // successful login clears the account window
   await createSession(admin.email);
+
+  const orgs = listUserOrgs(admin.email);
+  const activeOrgId = orgs[0]?.orgId || "org_default";
+  setSetting(activeOrgId, "gmailAccount", admin.email.toLowerCase());
+  if (activeOrgId !== "org_default") {
+    setSetting("org_default", "gmailAccount", admin.email.toLowerCase());
+  }
+
   return json({ user: admin });
 }
 
