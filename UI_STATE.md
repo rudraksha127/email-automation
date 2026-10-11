@@ -36,14 +36,20 @@
   - Component map complete
   - Layout map per screen complete
   - Zero content/data change contract established
-  - Status: **PAUSED (Awaiting User Approval to Build)**
+  - Status: **APPROVED & COMPLETED** (committed in `aa76d77`)
 
-- [ ] **Phase 5: Implementation (One commit per step)**
-  - [ ] Step 5.1: Tokens & Theme CSS
-  - [ ] Step 5.2: Base Primitives (`Button`, `Input`, `Badge`, `Modal`)
-  - [ ] Step 5.3: AppShell & Navigation (Header, Sidebar, Drawer, Bottom Bar)
-  - [ ] Step 5.4: Screens (Login, Dashboard, Mails, Batches, Settings, Profile)
-  - [ ] Step 5.5: Freeze Check validation on all screens
+- [x] **Phase 5: Implementation (One commit per step)**
+  - [x] Step 5.1: Tokens & Theme CSS (`6dd39df`)
+  - [x] Step 5.2: Base Primitives (`Button`, `Input`, `Badge`, `Modal`, `EmptyState`) (`6a601b3`)
+  - [x] Step 5.3: AppShell & Navigation (Header, Sidebar, Drawer, UserCard, PageHeading) (`a1f5374`)
+  - [x] Step 5.4: Screens (Login, Dashboard, Workspace, Mails, Mail Details, Batches, Batch Details, Settings, Profile, History, Privacy Policy, Terms) (`60f86f8`)
+  - [x] Step 5.5: PWA visual settings, InstallPrompt, and root surface tokens (`a8b0fcc`)
 
-- [ ] **Phase 6: Final Verification & Evidence**
-- [ ] **Phase 7: UI Report (`UI_REPORT.md`)**
+- [x] **Phase 6: Final Verification & Evidence**
+  - Content Freeze Check: 0 violations across all 14 screens (`node scripts/verify-freeze.mjs`)
+  - TypeScript Typecheck: 0 errors across frontend and backend (`npm run typecheck`)
+  - Test Suite: 109/109 Vitest tests passing (`npm test`)
+  - Production Build: 37/37 routes compiled cleanly (`npm run build`)
+
+- [x] **Phase 7: UI Report (`UI_REPORT.md`)**
+  - Detailed report compiled with token map, component mappings, freeze verification evidence, and rollback instructions.
