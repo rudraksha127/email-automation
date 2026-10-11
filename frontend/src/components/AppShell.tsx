@@ -237,8 +237,11 @@ export function AppNav({
                       : `Prof. ${user.name}`
                     : "Prof. Kapil Sahu"}
                 </p>
-                <p className="mt-0.5 truncate text-[11px] font-medium text-slate-500">
-                  • {user?.roleTitle || "Placement Coordinator, IT Department"}
+                <p className="mt-0.5 truncate text-[11px] font-medium text-slate-700">
+                  {(user?.roleTitle || "Placement Coordinator, IT Department").split(",")[0]?.trim() || "Placement Coordinator"}
+                </p>
+                <p className="truncate text-[11px] font-medium text-slate-500">
+                  • {((user?.roleTitle || "Placement Coordinator, IT Department").split(",")[1]?.trim()) || "IT Department"}
                 </p>
               </Link>
             </div>
@@ -338,7 +341,10 @@ function UserCard({ onLogout }: { onLogout: () => void }) {
       ? user.name
       : "Kapil Sahu";
   const name = rawName.startsWith("Prof.") ? rawName : `Prof. ${rawName}`;
-  const roleText = user?.roleTitle || "Placement Coordinator, IT Department";
+  const roleTitle = user?.roleTitle || "Placement Coordinator, IT Department";
+  const [rolePrimary, roleSecondary] = roleTitle.includes(",")
+    ? roleTitle.split(",").map((s) => s.trim())
+    : [roleTitle, "IT Department"];
 
   return (
     <div
@@ -370,8 +376,11 @@ function UserCard({ onLogout }: { onLogout: () => void }) {
         <p className="mt-1 truncate text-xs font-bold text-slate-900">
           {name}
         </p>
-        <p className="mt-0.5 truncate text-[11px] font-medium text-slate-500">
-          • {roleText}
+        <p className="mt-0.5 truncate text-[11px] font-medium text-slate-700">
+          {rolePrimary}
+        </p>
+        <p className="truncate text-[11px] font-medium text-slate-500">
+          • {roleSecondary || "IT Department"}
         </p>
       </Link>
     </div>
