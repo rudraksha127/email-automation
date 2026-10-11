@@ -325,6 +325,95 @@ function reserveDelivery(orgId: string, gmailId: string, mailId: string, batchId
   }
 }
 
+/**
+ * Strips "Fwd:", "FWD:", "Fw:", "Re:", etc. from email subject so it looks like
+ * an original, official institutional email.
+ */
+export function cleanSubject(subject: string): string {
+  if (!subject) return "";
+  let s = subject.trim();
+  while (/^(fwd|fw|re)\s*:\s*/i.test(s)) {
+    s = s.replace(/^(fwd|fw|re)\s*:\s*/i, "").trim();
+  }
+  return s || subject.trim();
+}
+
+/**
+ * Strips synthetic or mail-client forwarded header blocks from plain text body:
+ * - "---------- Forwarded message ---------"
+ * - "-----Original Message-----"
+ * - "From: ... \nDate: ... \nSubject: ... \nTo: ..."
+ */
+export function cleanBodyText(text: string): string {
+  if (!text) return "";
+  const lines = text.split(/\r?\n/);
+
+  let idx = 0;
+  while (idx < lines.length && !lines[idx]!.trim()) idx++;
+
+  // Check if first non-blank line is a forwarded banner
+  if (
+    idx < lines.length &&
+    /^-{2,}\s*(?:Forwarded message|Original Message)\s*-{2,}$/i.test(lines[idx]!.trim())
+  ) {
+    idx++;
+    while (idx < lines.length && !lines[idx]!.trim()) idx++;
+  }
+
+  // Check if lines are email headers: From:, Date:, Sent:, Subject:, To:, Cc:
+  const headerPrefixRegex = /^(?:From|Date|Sent|Subject|To|Cc):\s*/i;
+  if (idx < lines.length && headerPrefixRegex.test(lines[idx]!.trim())) {
+    while (idx < lines.length) {
+      const line = lines[idx]!.trim();
+      if (headerPrefixRegex.test(line)) {
+        idx++;
+      } else if (line === "") {
+        idx++;
+        if (idx < lines.length && !headerPrefixRegex.test(lines[idx]!.trim())) {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+  }
+
+  return lines.slice(idx).join("\n").trimStart();
+}
+
+/**
+ * Strips forwarded header blocks and quote wrappers from HTML body so the message
+ * renders as a direct, top-level email rather than a forwarded quote.
+ */
+export function cleanBodyHtml(html?: string): string | undefined {
+  if (!html) return undefined;
+  let cleaned = html;
+
+  // 1. Remove gmail_attr or quote attribution divs (Gmail's forwarded header wrapper)
+  cleaned = cleaned.replace(/<div[^>]*class=["'][^"']*gmail_attr[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, "");
+
+  // 2. Remove gmail_quote wrappers (unwrap them so text is not styled as a quote)
+  cleaned = cleaned.replace(/<div[^>]*class=["'][^"']*gmail_quote[^"']*["'][^>]*>/gi, "<div>");
+  cleaned = cleaned.replace(/<blockquote[^>]*class=["'][^"']*gmail_quote[^"']*["'][^>]*>/gi, "<div>");
+  cleaned = cleaned.replace(/<\/blockquote>/gi, "</div>");
+
+  // 3. Remove dashed Forwarded message text in HTML
+  cleaned = cleaned.replace(/-{2,}\s*Forwarded message\s*-{2,}\s*(?:<br\s*\/?>)?/gi, "");
+  cleaned = cleaned.replace(/-{2,}\s*Original Message\s*-{2,}\s*(?:<br\s*\/?>)?/gi, "");
+
+  // 4. Remove any inline From: ... Date: ... Subject: ... To: blocks in HTML
+  cleaned = cleaned.replace(
+    /(?:<p[^>]*>|<div[^>]*>)?\s*(?:(?:From|Date|Sent|Subject|To|Cc):\s*[\s\S]*?(?:<br\s*\/?>|<\/p>|<\/div>|\r?\n))+\s*/i,
+    ""
+  );
+
+  // 5. Clean leading breaks, empty divs, empty paragraphs
+  cleaned = cleaned.replace(/^(\s*<br\s*\/?>|\s*<p>\s*(?:<br\s*\/?>)?\s*<\/p>|\s*<div>\s*(?:<br\s*\/?>)?\s*<\/div>)+/gi, "");
+  cleaned = cleaned.replace(/<div>\s*(?:<br\s*\/?>)+\s*/gi, "<div>");
+
+  return cleaned.trim();
+}
+
 /** Deliver a stored mail row to one or multiple batches. Idempotent via forward_logs. */
 export async function deliverStoredMail(
   row: Record<string, unknown>, batchIdOrIds: string | string[], manual = false
@@ -412,10 +501,13 @@ export async function deliverStoredMail(
   };
   try {
     const rawSubject = String(row.subject ?? "");
-    const subject = rawSubject.toLowerCase().startsWith("fwd:") ? rawSubject : `Fwd: ${rawSubject}`;
+    const subject = cleanSubject(rawSubject);
 
-    const bodyText = String(row.body_text ?? "");
-    const bodyHtml = row.body_html ? String(row.body_html) : undefined;
+    const rawBodyText = String(row.body_text ?? "");
+    const bodyText = cleanBodyText(rawBodyText);
+
+    const rawBodyHtml = row.body_html ? String(row.body_html) : undefined;
+    const bodyHtml = cleanBodyHtml(rawBodyHtml);
 
     await sendViaGmail(orgId, {
       to: to.map((r) => r.email),

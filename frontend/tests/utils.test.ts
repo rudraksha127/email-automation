@@ -14,6 +14,7 @@ import {
   avatarInitial,
   getUserInitials,
 } from "@/utils/format";
+import { cleanSubject, cleanBodyText, cleanBodyHtml } from "@/lib/pipeline";
 
 describe("isValidEmail", () => {
   it("accepts valid emails", () => {
@@ -161,5 +162,57 @@ describe("format utilities", () => {
     expect(getUserInitials("Department Admin")).toBe("KS");
     expect(getUserInitials("")).toBe("KS");
     expect(getUserInitials(undefined, "admin@institution.edu")).toBe("KS");
+  });
+});
+
+describe("cleanSubject and cleanBody utilities", () => {
+  it("strips Fwd:, FW:, Re: prefixes from subject line", () => {
+    expect(cleanSubject("Fwd: Campus Placement Drive 2026")).toBe("Campus Placement Drive 2026");
+    expect(cleanSubject("FWD: Fwd: Important Update")).toBe("Important Update");
+    expect(cleanSubject("Fw: Re: Circular for Batch 2027")).toBe("Circular for Batch 2027");
+    expect(cleanSubject("Campus Placement Drive 2026")).toBe("Campus Placement Drive 2026");
+  });
+
+  it("strips forwarded message headers from plain text body", () => {
+    const raw = `From: Training & Placement Cell <luckyudiya@gmail.com>
+Date: Sun, Oct 11, 2026, 11:18 PM
+Subject: Campus Placement Drive 2026 - Eligibility & Registration Guidelines
+To:
+
+Dear Students,
+
+Please review all guidelines.
+
+Regards,
+Placement Officer`;
+
+    const cleaned = cleanBodyText(raw);
+    expect(cleaned).not.toContain("From: Training & Placement Cell");
+    expect(cleaned).not.toContain("Subject: Campus Placement Drive");
+    expect(cleaned.startsWith("Dear Students,")).toBe(true);
+  });
+
+  it("strips dashed Forwarded message banner from plain text body", () => {
+    const raw = `---------- Forwarded message ---------
+From: Rudraksh Udiya <luckyudiya@gmail.com>
+Date: Sun, Oct 11, 2026 at 10:51 PM
+Subject: Fwd: Payzoplus Internship
+To: <placementit@acropolis.in>
+
+Dear Students,
+Please find below details...`;
+
+    const cleaned = cleanBodyText(raw);
+    expect(cleaned).not.toContain("Forwarded message");
+    expect(cleaned).not.toContain("From: Rudraksh Udiya");
+    expect(cleaned.startsWith("Dear Students,")).toBe(true);
+  });
+
+  it("strips gmail_attr and unquotes HTML body", () => {
+    const html = `<div class="gmail_quote"><div dir="ltr" class="gmail_attr">From: <b class="gmail_sendername" dir="auto">TPO</b> &lt;<a href="mailto:tpo@example.com">tpo@example.com</a>&gt;<br>Date: Sun, Oct 11, 2026<br>Subject: Drive<br>To: <br></div><br><br><div>Dear Students,<br><br>Placement drive info.</div></div>`;
+    const cleaned = cleanBodyHtml(html);
+    expect(cleaned).not.toContain("gmail_attr");
+    expect(cleaned).not.toContain("tpo@example.com");
+    expect(cleaned).toContain("Dear Students");
   });
 });
