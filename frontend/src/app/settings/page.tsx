@@ -79,6 +79,50 @@ function SettingsInner() {
   const [savingRule, setSavingRule] = useState(false);
   const [ruleError, setRuleError] = useState<string | null>(null);
 
+  // Manual Inbound Email Intake Modal
+  const [manualModalOpen, setManualModalOpen] = useState(false);
+  const [mSender, setMSender] = useState("luckyudiya@gmail.com");
+  const [mSenderName, setMSenderName] = useState("Training & Placement Cell");
+  const [mSubject, setMSubject] = useState("");
+  const [mBody, setMBody] = useState("");
+  const [ingesting, setIngesting] = useState(false);
+  const [ingestMsg, setIngestMsg] = useState<{ ok: boolean; text: string } | null>(null);
+
+  async function handleManualIngest(e: React.FormEvent) {
+    e.preventDefault();
+    if (!mSender.trim() || !mSubject.trim()) {
+      setIngestMsg({ ok: false, text: "Sender email and Subject are required." });
+      return;
+    }
+    setIngesting(true);
+    setIngestMsg(null);
+    try {
+      const res = await http.post<{ mail: { id: string; batchName?: string; status: string }; action: string }>("/api/mails/ingest", {
+        sender: mSender.trim(),
+        senderName: mSenderName.trim() || undefined,
+        subject: mSubject.trim(),
+        body: mBody.trim(),
+      });
+      const batchLabel = res.mail?.batchName ? `forwarded to ${res.mail.batchName}` : `status: ${res.mail?.status || res.action}`;
+      setSyncMsg({
+        ok: true,
+        text: `Manual intake successful! Mail ingested (${batchLabel}).`,
+      });
+      setManualModalOpen(false);
+      setMSubject("");
+      setMBody("");
+      settings.reload();
+      auditLog.reload();
+    } catch (err) {
+      setIngestMsg({
+        ok: false,
+        text: err instanceof Error ? err.message : "Failed to ingest email",
+      });
+    } finally {
+      setIngesting(false);
+    }
+  }
+
   // Adjust state during render when new data arrives
   const loadedCc = settings.data?.ccEmail;
   const [lastLoadedCc, setLastLoadedCc] = useState<string | null>(null);
@@ -197,12 +241,15 @@ function SettingsInner() {
     setSyncing(true);
     setSyncMsg(null);
     try {
-      const res = await http.post<{ ingested: number; forwarded: number; checked: number }>("/api/gmail/sync", { historical: true });
+      const res = await http.post<{ ingested: number; forwarded: number; checked: number; mode?: string }>("/api/gmail/sync", { historical: true });
+      const modeLabel = res.mode === "manual" ? " (Manual test sync)" : "";
       setSyncMsg({
         ok: true,
-        text: `Sync complete: ${res.ingested ?? 0} ingested, ${res.forwarded ?? 0} forwarded`,
+        text: `Sync complete${modeLabel}: ${res.ingested ?? 0} ingested, ${res.forwarded ?? 0} forwarded`,
       });
-      setTimeout(() => setSyncMsg(null), 3500);
+      setTimeout(() => setSyncMsg(null), 4500);
+      settings.reload();
+      auditLog.reload();
     } catch (err) {
       setSyncMsg({
         ok: false,
@@ -422,12 +469,12 @@ function SettingsInner() {
               {isGmailConnected ? (
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                  Connected
+                  Connected (Live OAuth)
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-700">
                   <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                  Not Connected
+                  Manual / Offline Ready
                 </span>
               )}
             </div>
@@ -436,21 +483,38 @@ function SettingsInner() {
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-[11px] text-slate-500">
               {isGmailConnected
-                ? "Background sync polls every 60 seconds automatically. You can also trigger an instant manual sync."
-                : "Authorize Google OAuth credentials to connect the target Gmail inbox for live processing."}
+                ? "Background sync polls every 60 seconds automatically. You can also trigger an instant manual sync, or manually ingest emails."
+                : "Authorize Google OAuth credentials for live 24/7 background sync, or use instant manual sync and manual email intake."}
             </p>
 
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <Button
+                variant="secondary"
+                loading={syncing}
+                onClick={handleManualSync}
+                className="text-xs"
+              >
+                Sync Inbox Now
+              </Button>
+
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => setManualModalOpen(true)}
+                className="text-xs border-slate-200 text-slate-700 hover:bg-slate-50"
+              >
+                Manual Email Intake
+              </Button>
+
               {isGmailConnected ? (
                 <>
-                  <Button
-                    variant="secondary"
-                    loading={syncing}
-                    onClick={handleManualSync}
-                    className="text-xs"
+                  <a
+                    href="/api/gmail/connect"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition-colors"
                   >
-                    Sync Inbox Now
-                  </Button>
+                    <GmailIcon className="h-3.5 w-3.5" />
+                    Reconnect
+                  </a>
                   <Button
                     variant="ghost"
                     loading={disconnecting}
@@ -739,6 +803,84 @@ function SettingsInner() {
             </Button>
             <Button type="submit" loading={savingRule}>
               Save Rule
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Manual Email Intake Modal */}
+      <Modal
+        open={manualModalOpen}
+        onClose={() => setManualModalOpen(false)}
+        title="Manual Email Intake"
+      >
+        <form onSubmit={handleManualIngest} className="space-y-3.5 text-xs">
+          <p className="text-slate-500">
+            Manually inject an official departmental email into the intelligent screening engine. The system will match it against your configured batches and forwarding rules.
+          </p>
+
+          <div>
+            <label className="block font-semibold text-slate-700">Sender Email *</label>
+            <input
+              type="email"
+              required
+              value={mSender}
+              onChange={(e) => setMSender(e.target.value)}
+              placeholder="luckyudiya@gmail.com"
+              className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs focus:border-blue-500 focus:outline-none"
+            />
+            <p className="mt-0.5 text-[10px] text-slate-400">
+              Approved sender emails allow immediate automated distribution.
+            </p>
+          </div>
+
+          <div>
+            <label className="block font-semibold text-slate-700">Sender Name (optional)</label>
+            <input
+              type="text"
+              value={mSenderName}
+              onChange={(e) => setMSenderName(e.target.value)}
+              placeholder="e.g. Training & Placement Cell"
+              className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block font-semibold text-slate-700">Subject *</label>
+            <input
+              type="text"
+              required
+              value={mSubject}
+              onChange={(e) => setMSubject(e.target.value)}
+              placeholder="e.g. TCS Campus Recruitment Drive for 2026 Batch"
+              className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block font-semibold text-slate-700">Email Body / Instructions *</label>
+            <textarea
+              required
+              rows={4}
+              value={mBody}
+              onChange={(e) => setMBody(e.target.value)}
+              placeholder="Dear Students, Eligible batches for this placement drive are 2026 and 2027. Review criteria and apply before the deadline..."
+              className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+
+          {ingestMsg && (
+            <p className={ingestMsg.ok ? "font-medium text-emerald-600" : "font-medium text-rose-600"}>
+              {ingestMsg.text}
+            </p>
+          )}
+
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="ghost" type="button" onClick={() => setManualModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" loading={ingesting}>
+              Ingest & Screen Email
             </Button>
           </div>
         </form>

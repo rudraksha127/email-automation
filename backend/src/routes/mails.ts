@@ -6,6 +6,7 @@ import {
   deliverStoredMail,
   getOrgMailRow,
   mailToApi,
+  ingestMessage,
 } from "../lib/pipeline";
 import type { MailStatus } from "../types/shared";
 
@@ -194,6 +195,40 @@ router.post("/:id/reject", requireWorkspace(false), (req, res) => {
   ).run("Marked as not relevant by admin", nowIso(), id, auth.orgId);
   audit(auth.orgId, auth.email, "mail.rejected", `mail=${id}`);
   res.json(mailToApi(getOrgMailRow(auth.orgId, id)!));
+});
+
+/** POST /api/mails/ingest — manually ingest an inbound email into the screening pipeline */
+router.post("/ingest", requireWorkspace(false), async (req, res) => {
+  const auth = req.orgAuth!;
+  if (!auth.ok) {
+    res.status(auth.status).json({ error: auth.message });
+    return;
+  }
+  const sender = typeof req.body?.sender === "string" ? req.body.sender.trim() : "";
+  const subject = typeof req.body?.subject === "string" ? req.body.subject.trim() : "";
+  const body = typeof req.body?.body === "string" ? req.body.body.trim() : "";
+  const senderName = typeof req.body?.senderName === "string" ? req.body.senderName.trim() : null;
+
+  if (!sender || !subject) {
+    res.status(400).json({ error: "Sender email and Subject are required" });
+    return;
+  }
+
+  const gmailMsgId = `manual_inbound_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+  try {
+    const outcome = await ingestMessage(auth.orgId, {
+      gmailMessageId: gmailMsgId,
+      sender,
+      senderName,
+      subject,
+      body,
+      receivedAt: nowIso(),
+    });
+    audit(auth.orgId, auth.email, "mail.manual_ingest", `Ingested manual mail id=${outcome.mail.id}`);
+    res.json(outcome);
+  } catch (e) {
+    res.status(500).json({ error: e instanceof Error ? e.message : "Failed to ingest email" });
+  }
 });
 
 export default router;

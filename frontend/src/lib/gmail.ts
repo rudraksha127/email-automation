@@ -252,12 +252,13 @@ export function connectionInfo(orgId: string, currentUserEmail?: string): {
     "SELECT value FROM settings WHERE org_id=? AND key='gmailDisconnectedByUser'"
   ).get(orgId) as { value: string } | undefined;
 
-  const isExplicitlyDisconnected = userDisconnected?.value === "1" && !row?.account_email;
-  const isConnected = !isExplicitlyDisconnected && Boolean(accountEmail);
+  const hasLiveTokens = Boolean(row?.account_email);
+  const isExplicitlyDisconnected = userDisconnected?.value === "1";
+  const isConnected = !isExplicitlyDisconnected && hasLiveTokens;
 
   return {
     connected: isConnected,
-    account: isConnected ? accountEmail : null,
+    account: isConnected ? row?.account_email ?? accountEmail : accountEmail,
     lastSyncedAt: lastSynced?.value ?? null,
   };
 }
