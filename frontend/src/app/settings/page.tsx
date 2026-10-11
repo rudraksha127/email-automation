@@ -80,49 +80,6 @@ function SettingsInner() {
   const [savingRule, setSavingRule] = useState(false);
   const [ruleError, setRuleError] = useState<string | null>(null);
 
-  // Manual Inbound Email Intake Modal
-  const [manualModalOpen, setManualModalOpen] = useState(false);
-  const [mSender, setMSender] = useState("luckyudiya@gmail.com");
-  const [mSenderName, setMSenderName] = useState("Training & Placement Cell");
-  const [mSubject, setMSubject] = useState("");
-  const [mBody, setMBody] = useState("");
-  const [ingesting, setIngesting] = useState(false);
-  const [ingestMsg, setIngestMsg] = useState<{ ok: boolean; text: string } | null>(null);
-
-  async function handleManualIngest(e: React.FormEvent) {
-    e.preventDefault();
-    if (!mSender.trim() || !mSubject.trim()) {
-      setIngestMsg({ ok: false, text: "Sender email and Subject are required." });
-      return;
-    }
-    setIngesting(true);
-    setIngestMsg(null);
-    try {
-      const res = await http.post<{ mail: { id: string; batchName?: string; status: string }; action: string }>("/api/mails/ingest", {
-        sender: mSender.trim(),
-        senderName: mSenderName.trim() || undefined,
-        subject: mSubject.trim(),
-        body: mBody.trim(),
-      });
-      const batchLabel = res.mail?.batchName ? `forwarded to ${res.mail.batchName}` : `status: ${res.mail?.status || res.action}`;
-      setSyncMsg({
-        ok: true,
-        text: `Manual intake successful! Mail ingested (${batchLabel}).`,
-      });
-      setManualModalOpen(false);
-      setMSubject("");
-      setMBody("");
-      settings.reload();
-      auditLog.reload();
-    } catch (err) {
-      setIngestMsg({
-        ok: false,
-        text: err instanceof Error ? err.message : "Failed to ingest email",
-      });
-    } finally {
-      setIngesting(false);
-    }
-  }
 
   // Real-Time PWA Notification State
   const [notifState, setNotifState] = useState<string>(() => {
@@ -525,8 +482,8 @@ function SettingsInner() {
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-[11px] text-slate-500">
               {isGmailConnected
-                ? "Background sync polls every 60 seconds automatically. You can also trigger an instant manual sync, or manually ingest emails."
-                : "Authorize Google OAuth credentials for live 24/7 background sync, or use instant manual sync and manual email intake."}
+                ? "Background sync polls every 60 seconds automatically. You can also trigger an instant manual sync."
+                : "Authorize Google OAuth credentials for live 24/7 background sync, or trigger an instant manual sync."}
             </p>
 
             <div className="flex flex-wrap items-center gap-2 shrink-0">
@@ -537,15 +494,6 @@ function SettingsInner() {
                 className="text-xs"
               >
                 Sync Inbox Now
-              </Button>
-
-              <Button
-                variant="secondary"
-                type="button"
-                onClick={() => setManualModalOpen(true)}
-                className="text-xs border-slate-200 text-slate-700 hover:bg-slate-50"
-              >
-                Manual Email Intake
               </Button>
 
               {isGmailConnected ? (
@@ -904,83 +852,6 @@ function SettingsInner() {
         </form>
       </Modal>
 
-      {/* Manual Email Intake Modal */}
-      <Modal
-        open={manualModalOpen}
-        onClose={() => setManualModalOpen(false)}
-        title="Manual Email Intake"
-      >
-        <form onSubmit={handleManualIngest} className="space-y-3.5 text-xs">
-          <p className="text-slate-500">
-            Manually inject an official departmental email into the intelligent screening engine. The system will match it against your configured batches and forwarding rules.
-          </p>
-
-          <div>
-            <label className="block font-semibold text-slate-700">Sender Email *</label>
-            <input
-              type="email"
-              required
-              value={mSender}
-              onChange={(e) => setMSender(e.target.value)}
-              placeholder="luckyudiya@gmail.com"
-              className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs focus:border-blue-500 focus:outline-none"
-            />
-            <p className="mt-0.5 text-[10px] text-slate-400">
-              Approved sender emails allow immediate automated distribution.
-            </p>
-          </div>
-
-          <div>
-            <label className="block font-semibold text-slate-700">Sender Name (optional)</label>
-            <input
-              type="text"
-              value={mSenderName}
-              onChange={(e) => setMSenderName(e.target.value)}
-              placeholder="e.g. Training & Placement Cell"
-              className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs focus:border-blue-500 focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block font-semibold text-slate-700">Subject *</label>
-            <input
-              type="text"
-              required
-              value={mSubject}
-              onChange={(e) => setMSubject(e.target.value)}
-              placeholder="e.g. TCS Campus Recruitment Drive for 2026 Batch"
-              className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs focus:border-blue-500 focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block font-semibold text-slate-700">Email Body / Instructions *</label>
-            <textarea
-              required
-              rows={4}
-              value={mBody}
-              onChange={(e) => setMBody(e.target.value)}
-              placeholder="Dear Students, Eligible batches for this placement drive are 2026 and 2027. Review criteria and apply before the deadline..."
-              className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs focus:border-blue-500 focus:outline-none"
-            />
-          </div>
-
-          {ingestMsg && (
-            <p className={ingestMsg.ok ? "font-medium text-emerald-600" : "font-medium text-rose-600"}>
-              {ingestMsg.text}
-            </p>
-          )}
-
-          <div className="flex justify-end gap-2 pt-2">
-            <Button variant="ghost" type="button" onClick={() => setManualModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" loading={ingesting}>
-              Ingest & Screen Email
-            </Button>
-          </div>
-        </form>
-      </Modal>
     </AppLayout>
   );
 }
