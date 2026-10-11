@@ -5,6 +5,36 @@ Latest entries first. Append new entries below the heading — keep the format c
 
 ---
 
+## 2026-10-11 — Full QA loop (master prompt): BUG-001 CORS critical found & fixed; production build green
+
+### What ran
+- Autonomous TEST→FIX→VERIFY loop on local stacks [:3002 Next.js + :3001 Express] with a real browser session (agent-browser).
+- Full 8-slice sweep (auth/dashboard/batches/mails/settings/profile/nav/bulk-upload), API latency benchmarks, and a production build.
+
+### Bugs & Fixes
+1. **BUG-001 (Critical, FIXED):** Login from any frontend port except :3000 failed with **"Origin is not allowed"** — CORS allowlist had only `http://localhost:3000` while the QA/dev frontend ran on :3002. `backend/.env.local` updated to `CORS_ORIGIN=http://localhost:3000,http://localhost:3002` and `FRONTEND_URL=http://localhost:3002`; backend restarted; verified OPTIONS preflight → 204 + correct ACAO header, then browser login flows passed.
+2. **BUG-002 (Low, document only):** any non-3000 dev port silently breaks auth — fix is env-side; production unaffected.
+3. **BUG-003 (perf):** API p95 = 1.2–1.8ms on health/batches/session — target ≤300ms passed with huge headroom; no optimization needed.
+
+### Regression net added
+- New vitest case in `frontend/tests/api.test.ts`: **bulk batch import** — creates missing batches, reuses existing ones case-insensitively, deduplicates emails per batch (even case variations), counts invalid rows, and is **idempotent** on re-import. `api.test.ts` now **16/16 passing**.
+
+### Verification
+- Full browser smoke re-run (login → dashboard → batches → profile) — all green.
+- `npx next build` (production build): exit 0, **zero errors/warnings**; 20 routes prerendered (static) + 25 dynamic API functions; bundle output at `.next/` ~266MB (dev+prod combined artifacts on disk).
+- Backend typecheck 0 errors; frontend typecheck 0 errors.
+
+### Commits (pushed to origin/main)
+- `cc50bf4` test: regression for bulk batch import + QA loop artifacts (qa/TEST_PLAN.md, qa/BUGS.md, qa/PERF_LOG.md, qa/LOOP_STATE.md, qa/REPORT.md)
+- Test QA data cleanup confirmed: 0 QA_TEST_ batches/recipients left; invited-member record removed.
+
+### Open items for the user
+- **3 pre-existing backend pipeline tests fail** (tenants/test\.ts, pilot/test\.ts, rules/test\.ts) — failing before today's session. Decision needed: update tests to current pipeline semantics, or revert pipeline behaviors these tests assert (auto-forward vs. hold-for-review, CC-required, tenant-scope assertions).
+- Lighthouse mobile audit still UNAVAILABLE locally (headless constraints) — recommended on the production build next.
+- Real Gmail OAuth consent E2E needs a staging Google redirect URI + a throwaway Google account to click through consent.
+
+---
+
 ## 2026-10-11 — Bulk upload for Batches (CSV template download + import)
 
 ### Request
