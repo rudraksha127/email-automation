@@ -5,6 +5,40 @@ Latest entries first. Append new entries below the heading — keep the format c
 
 ---
 
+## 2026-10-11 — Shared-account changes not visible to the other user in real time
+
+### Symptoms
+- Two people share the same login (`admin@institution.edu`). When one changes the profile name (or any settings/batches/rules data), the other user's open pagekept showing stale values until they manually refreshed or navigated.
+
+### Root Cause
+- Backend is a live Express API — no server-side caching, data was always persisted correctly.
+- But the frontend `useAsync` hook fetched data **only on mount** (and after explicit mutations). A page left open never re-fetched, so the second viewer saw stale data indefinitely.
+
+### Fix Applied
+- Upgraded `frontend/src/hooks/useAsync.ts`:
+  - **Background polling every 25s** (`refreshMs`, configurable, `0` disables) for every screen using the hook — dashboard, mails, batches, settings, profile.
+  - **Refresh when the tab regains focus** (`visibilitychange` + `focus`), so returning to the app syncs immediately.
+  - **Silent background refreshes** keep the last good data and never flip `loading`, so the UI doesn't flicker; failed polls don't wipe the screen.
+- Every `useAsync` consumer gets this automatically — no per-page changes needed.
+
+### Verification
+- `frontend` typecheck: 0 errors.
+- Frontend test suite: 88 passed / 15 skipped; 4 failures across 3 files (tenants/pilot/rules) confirmed **pre-existing** via `git stash` baseline — identical failures before this change, unrelated to it (backend pipeline tests).
+
+### Notes
+- Data now propagates within ≤25s (or instantly on tab focus) — appropriate for a shared-pilot app. For true push-style realtime, a WebSocket/SSE channel (Supabase Realtime is already a dependency) can be added later.
+- Render free tier still sleeps the backend after 15 min idle; first poll after sleep shows the stale sync delay (~1 min cold start), then data catches up.
+
+---
+
+## 2026-10-11 — Render server wake-up + live links
+
+- Woke the Render backend via `GET /api/health` (~14s cold start). Verified production: health 200 (db ok, gmailConfigured, supabaseConfigured), password login 200, Google OAuth entry 302, Vercel frontend 200.
+- **Links:** App → https://email-automation-it.vercel.app/login · API → https://email-automation-api-c7fp.onrender.com · Health → https://email-automation-api-c7fp.onrender.com/api/health
+- Reminder: free tier sleeps after 15 min inactivity; first request back can fail — retry once.
+
+---
+
 ## 2026-10-11 — Login "Sign in failed: service temporarily unavailable" + Google sign-in broken
 
 ### Symptoms
