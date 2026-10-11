@@ -97,19 +97,36 @@ export function parseBulkBatchesCsv(
   return { rows, invalid };
 }
 
-/** Generates and downloads the bulk upload CSV template. */
+/** Generates and downloads the bulk upload CSV template for batches. */
 export function downloadBulkBatchesTemplate(): void {
   const lines = [
     "Batch Name,Description,Student Name,Email",
-    'Batch 2027,Pilot batch 2027,Rahul Sharma,rahul.sharma@example.test',
-    'Batch 2027,Pilot batch 2027,Priya Verma,priya.verma@example.test',
-    'Batch 2028,Pilot batch 2028,Aman Patel,aman.patel@example.test',
+    "Batch 2027,Pilot batch 2027,Rahul Sharma,rahul.sharma@example.test",
+    "Batch 2027,Pilot batch 2027,Priya Verma,priya.verma@example.test",
+    "Batch 2028,Pilot batch 2028,Aman Patel,aman.patel@example.test",
   ];
   const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "bulk-batches-template.csv";
+  a.download = "batches-template.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/** Generates and downloads the recipient CSV template for single batch view. */
+export function downloadRecipientsTemplate(): void {
+  const lines = [
+    "Name,Email",
+    "Rahul Sharma,rahul.sharma@example.test",
+    "Priya Verma,priya.verma@example.test",
+    "Aman Patel,aman.patel@example.test",
+  ];
+  const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "recipients-template.csv";
   a.click();
   URL.revokeObjectURL(url);
 }

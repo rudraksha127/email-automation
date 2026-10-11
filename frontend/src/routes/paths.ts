@@ -7,6 +7,7 @@ export const paths = {
   mailDetails: (id: string) => `/mails/${id}`,
   batches: "/batches",
   batchDetails: (id: string) => `/batches/${id}`,
+  history: "/history",
   settings: "/settings",
   profile: "/profile",
 } as const;
@@ -16,6 +17,7 @@ export const PROTECTED_PATHS = [
   paths.dashboard,
   paths.mails,
   paths.batches,
+  paths.history,
   paths.settings,
   paths.profile,
 ] as const;

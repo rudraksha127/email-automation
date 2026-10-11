@@ -168,9 +168,10 @@ router.post("/sync", requireWorkspace(false), async (req, res) => {
     res.status(409).json({ error: "No Gmail account is connected for this workspace" });
     return;
   }
+  const isHistorical = req.body?.historical === true || req.query.historical === "true";
   syncInProgress = true;
   try {
-    const result = await syncGmailInbox(auth.orgId);
+    const result = await syncGmailInbox(auth.orgId, isHistorical ? 100 : 25, isHistorical);
     res.json(result);
   } catch (e) {
     res.status(502).json({ error: e instanceof Error ? e.message : "Sync failed" });

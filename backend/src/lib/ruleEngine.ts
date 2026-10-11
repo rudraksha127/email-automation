@@ -46,6 +46,7 @@ export interface DetectionRule {
 
 export type DetectionOutcome =
   | { kind: "single"; batchId: string; matchedBy: "rule" | "name" }
+  | { kind: "multi"; batchIds: string[]; matchedBy: "name" | "rule" }
   | { kind: "none" }
   | { kind: "ambiguous"; reason: string; candidates: string[] };
 
@@ -67,31 +68,68 @@ export function groupNamePattern(name: string): RegExp | null {
   return new RegExp(`(?<![\\w])${body}(?![\\w])`, "i");
 }
 
-/** Distinct configured group ids mentioned anywhere in subject+body. */
+/** Distinct configured group ids mentioned anywhere in subject+body.
+ *  Prioritizes subject matches; checks academic batch contexts in body. */
 export function findMentionedGroups(
   subject: string,
   body: string,
   groups: DetectionGroup[]
 ): string[] {
-  const haystack = `${subject ?? ""}\n${body ?? ""}`;
-  const found = new Set<string>();
+  const subj = subject ?? "";
+  const bod = body ?? "";
+  const haystack = `${subj}\n${bod}`;
+
+  // 1. Check explicit group mentions in SUBJECT first
+  const subjectFound = new Set<string>();
   for (const g of groups) {
     const re = groupNamePattern(g.name);
-    if (re && re.test(haystack)) {
-      found.add(g.id);
+    if (re && re.test(subj)) {
+      subjectFound.add(g.id);
       continue;
     }
-    // Also detect 4-digit batch/graduation year in group name (e.g. "Batch 2027" -> 2027)
     const yearMatch = g.name.match(/\b(20\d{2})\b/);
     if (yearMatch) {
       const year = yearMatch[1];
       const yearRegex = new RegExp(`(?<!\\w)${year}(?!\\w)`, "i");
-      if (yearRegex.test(haystack)) {
-        found.add(g.id);
+      if (yearRegex.test(subj)) {
+        subjectFound.add(g.id);
       }
     }
   }
-  return [...found];
+
+  if (subjectFound.size > 0) {
+    return [...subjectFound];
+  }
+
+  // 2. Check BODY with contextual academic batch patterns
+  const bodyFound = new Set<string>();
+  for (const g of groups) {
+    const re = groupNamePattern(g.name);
+    if (re && re.test(haystack)) {
+      bodyFound.add(g.id);
+      continue;
+    }
+    const yearMatch = g.name.match(/\b(20\d{2})\b/);
+    if (yearMatch) {
+      const year = yearMatch[1];
+      // Academic batch context regex
+      const batchContextRegex = new RegExp(
+        `(?:` +
+        `\\b(?:batch|passout|passing\\s*out|graduating|class|students)\\s*(?:of\\s*)?:?\\s*${year}\\b|` +
+        `\\b${year}\\s*(?:batch|passout|passing\\s*out|graduating|pass-out|students)\\b|` +
+        `\\b(?:for|eligible)\\s*(?:the\\s*)?${year}\\b|` +
+        `\\b${year}\\s*(?:&|and|,|\\/)\\s*20\\d{2}\\b|` +
+        `\\b20\\d{2}\\s*(?:&|and|,|\\/)\\s*${year}\\b` +
+        `)`,
+        "i"
+      );
+      if (batchContextRegex.test(haystack)) {
+        bodyFound.add(g.id);
+      }
+    }
+  }
+
+  return [...bodyFound];
 }
 
 function keywordsHit(keywords: string[], text: string): boolean {
@@ -110,15 +148,15 @@ export function matchingRules(
   body: string
 ): DetectionRule[] {
   const senderLower = (sender ?? "").trim().toLowerCase();
-  const haystack = `${subject ?? ""}\n${body ?? ""}`;
   return rules.filter((r) => {
     if (!r.active || !r.targetBatchId) return false;
     if (r.senderPattern && r.senderPattern.trim().toLowerCase() !== senderLower) return false;
     const subj = r.subjectKeywords.filter((k) => k.trim());
     const bod = r.bodyKeywords.filter((k) => k.trim());
     if (subj.length === 0 && bod.length === 0) return false; // invalid rule
-    const allKeywords = [...subj, ...bod];
-    return keywordsHit(allKeywords, haystack);
+    if (subj.length > 0 && !keywordsHit(subj, subject ?? "")) return false;
+    if (bod.length > 0 && !keywordsHit(bod, body ?? "")) return false;
+    return true;
   });
 }
 
@@ -162,7 +200,7 @@ export function detectTarget(opts: {
   if (mentioned.length > 1) {
     return {
       kind: "ambiguous",
-      reason: `Multiple groups mentioned (${mentioned.length})`,
+      reason: `Multiple groups (${mentioned.length}) mentioned in message`,
       candidates: mentioned,
     };
   }

@@ -197,10 +197,10 @@ function SettingsInner() {
     setSyncing(true);
     setSyncMsg(null);
     try {
-      const res = await http.post<{ newCount: number; forwardedCount: number }>("/api/gmail/sync", {});
+      const res = await http.post<{ ingested: number; forwarded: number; checked: number }>("/api/gmail/sync", { historical: true });
       setSyncMsg({
         ok: true,
-        text: `Sync complete: ${res.newCount} new, ${res.forwardedCount} forwarded`,
+        text: `Sync complete: ${res.ingested ?? 0} ingested, ${res.forwarded ?? 0} forwarded`,
       });
       setTimeout(() => setSyncMsg(null), 3500);
     } catch (err) {

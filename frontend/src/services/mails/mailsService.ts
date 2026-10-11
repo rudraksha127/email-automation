@@ -3,11 +3,15 @@ import type { Mail, MailListFilters, MailStatus } from "@/types";
 export interface MailSummary {
   id: string;
   sender: string;
+  senderName?: string | null;
   subject: string;
   receivedAt: string;
   batchId: string | null;
   batchName: string | null;
   status: MailStatus;
+  recipientCount?: number | null;
+  forwardedAt?: string | null;
+  failureReason?: string | null;
 }
 
 export interface MailsService {

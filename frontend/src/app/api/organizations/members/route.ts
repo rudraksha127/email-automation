@@ -1,12 +1,12 @@
-import { err, json, sessionState } from "@/lib/auth";
+import { err, json, requireOrg, sessionState } from "@/lib/auth";
 import { adminCount, getDb, removeMember, audit, hashPassword, nowIso } from "@/lib/db";
 import { isValidEmail } from "@/utils/validation";
 
 /** GET /api/organizations/members — members of the active workspace. */
 export async function GET(): Promise<Response> {
-  const state = await sessionState();
-  if (!state.user) return err("Unauthorized", 401);
-  const orgId = state.orgId ?? state.orgs[0]?.orgId ?? "org_default";
+  const auth = await requireOrg(false);
+  if (!auth.ok) return err(auth.message, auth.status);
+  const orgId = auth.orgId;
 
   const rows = getDb().prepare(
     `SELECT m.admin_email AS email, m.role, a.name FROM organization_members m
@@ -19,9 +19,9 @@ export async function GET(): Promise<Response> {
  * POST /api/organizations/members — invite or update member role in workspace.
  */
 export async function POST(req: Request): Promise<Response> {
-  const state = await sessionState();
-  if (!state.user) return err("Unauthorized", 401);
-  const orgId = state.orgId ?? state.orgs[0]?.orgId ?? "org_default";
+  const auth = await requireOrg(true);
+  if (!auth.ok) return err(auth.message, auth.status);
+  const orgId = auth.orgId;
 
   const body = (await req.json().catch(() => null)) as { email?: string; role?: string } | null;
   const email = String(body?.email ?? "").trim().toLowerCase();
@@ -45,19 +45,19 @@ export async function POST(req: Request): Promise<Response> {
      ON CONFLICT(org_id,admin_email) DO UPDATE SET role=excluded.role`
   ).run(orgId, email, role, nowIso());
 
-  audit(orgId, state.user.email, "member.added", `${email} (${role})`);
+  audit(orgId, auth.email, "member.added", `${email} (${role})`);
   return json({ email, role }, 201);
 }
 
 /** DELETE /api/organizations/members?email=… — remove a member (admin only). */
 export async function DELETE(req: Request): Promise<Response> {
-  const state = await sessionState();
-  if (!state.user) return err("Unauthorized", 401);
-  const orgId = state.orgId ?? state.orgs[0]?.orgId ?? "org_default";
+  const auth = await requireOrg(true);
+  if (!auth.ok) return err(auth.message, auth.status);
+  const orgId = auth.orgId;
 
   const email = new URL(req.url).searchParams.get("email")?.trim().toLowerCase();
   if (!email) return err("email query parameter is required", 400);
-  if (email === state.user.email.toLowerCase()) return err("You cannot remove yourself from the workspace", 400);
+  if (email === auth.email.toLowerCase()) return err("You cannot remove yourself from the workspace", 400);
 
   const d = getDb();
   const member = d.prepare(
@@ -68,7 +68,7 @@ export async function DELETE(req: Request): Promise<Response> {
     return err("The workspace must keep at least one administrator", 400);
   }
   removeMember(orgId, email);
-  audit(orgId, state.user.email, "member.removed", email);
+  audit(orgId, auth.email, "member.removed", email);
   return json({ ok: true });
 }
 

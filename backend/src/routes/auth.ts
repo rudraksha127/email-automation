@@ -97,9 +97,11 @@ router.post("/logout", (req, res) => {
 /** GET /api/auth/session — returns current user + workspaces */
 router.get("/session", requireAuth, (req, res) => {
   const user = req.user!;
+  const adminRow = getDb().prepare("SELECT name FROM admins WHERE email=?").get(user.email) as { name: string } | undefined;
+  const freshUser = { ...user, name: adminRow?.name || user.name };
   const orgs = listUserOrgs(user.email);
   const orgId = req.orgAuth?.ok ? req.orgAuth.orgId : (orgs.length === 1 ? orgs[0]!.orgId : null);
-  res.json({ user, orgId, orgs });
+  res.json({ user: freshUser, orgId, orgs });
 });
 
 /** GET /api/auth/profile — institutional faculty / HOD profile */

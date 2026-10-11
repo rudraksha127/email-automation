@@ -18,6 +18,7 @@ export interface IngestInput {
     /** Gmail attachment resource id — used to fetch bytes at forward time. */
     gmailAttachmentId?: string | null;
   }>;
+  isHistorical?: boolean;
 }
 
 export function extractEmail(raw: string): string {
@@ -322,36 +323,58 @@ function reserveDelivery(orgId: string, gmailId: string, mailId: string, batchId
   }
 }
 
-/** Deliver a stored mail row to a batch. Idempotent via forward_logs. */
+/** Deliver a stored mail row to one or multiple batches. Idempotent via forward_logs. */
 export async function deliverStoredMail(
-  row: Record<string, unknown>, batchId: string, manual = false
+  row: Record<string, unknown>, batchIdOrIds: string | string[], manual = false
 ): Promise<Record<string, unknown>> {
   const orgId = String(row.org_id);
   const gmailId = row.gmail_message_id as string | null;
   const mailId = String(row.id);
+  const targetBatchIds = Array.isArray(batchIdOrIds) ? batchIdOrIds : [batchIdOrIds];
+  const primaryBatchId = targetBatchIds[0]!;
+  const combinedBatchNames = targetBatchIds.map((bId) => batchName(orgId, bId)).filter(Boolean).join(", ");
 
   if (gmailId && alreadyDelivered(orgId, gmailId)) {
     if (row.status !== "forwarded") {
-      setMail(mailId, { status: "forwarded", batch_id: batchId, batch_name: batchName(orgId, batchId), failure_reason: null });
+      setMail(mailId, { status: "forwarded", batch_id: primaryBatchId, batch_name: combinedBatchNames, failure_reason: null });
     }
     return getMailRow(mailId)!;
   }
 
-  // Tenant check: the target batch must belong to the mail's organization.
-  const batch = getDb().prepare("SELECT org_id FROM batches WHERE id=?").get(batchId) as
-    | { org_id: string } | undefined;
-  if (!batch || batch.org_id !== orgId) {
-    setMail(mailId, { status: "needs_review", failure_reason: "Selected group does not belong to this workspace." });
-    return getMailRow(mailId)!;
+  // Tenant check: every target batch must belong to the mail's organization.
+  for (const bId of targetBatchIds) {
+    const batch = getDb().prepare("SELECT org_id FROM batches WHERE id=?").get(bId) as
+      | { org_id: string } | undefined;
+    if (!batch || batch.org_id !== orgId) {
+      setMail(mailId, { status: "needs_review", failure_reason: "Selected group does not belong to this workspace." });
+      return getMailRow(mailId)!;
+    }
   }
 
   const cc = getSetting(orgId, "ccEmail", "");
-  const to = recipientsOf(orgId, batchId);
-  if (to.length === 0) {
-    setMail(mailId, { status: "needs_review", batch_id: batchId, batch_name: batchName(orgId, batchId), failure_reason: "Target group has no recipients." });
+  if (!cc) {
+    setMail(mailId, { status: "failed", batch_id: primaryBatchId, batch_name: combinedBatchNames, failure_reason: "CC is not configured — forwarding disabled until configured." });
     return getMailRow(mailId)!;
   }
-  if (gmailId && !reserveDelivery(orgId, gmailId, mailId, batchId, cc)) {
+  // Deduplicated recipients across all target batches
+  const to: Array<{ email: string }> = [];
+  const seenEmails = new Set<string>();
+  for (const bId of targetBatchIds) {
+    const list = recipientsOf(orgId, bId);
+    for (const r of list) {
+      const em = r.email.trim().toLowerCase();
+      if (!seenEmails.has(em)) {
+        seenEmails.add(em);
+        to.push(r);
+      }
+    }
+  }
+
+  if (to.length === 0) {
+    setMail(mailId, { status: "needs_review", batch_id: primaryBatchId, batch_name: combinedBatchNames, failure_reason: "Target group has no recipients." });
+    return getMailRow(mailId)!;
+  }
+  if (gmailId && !reserveDelivery(orgId, gmailId, mailId, primaryBatchId, cc)) {
     return getMailRow(mailId)!;
   }
 
@@ -398,12 +421,12 @@ export async function deliverStoredMail(
     } catch { /* fallback to iso */ }
 
     const fromDisplay = senderName ? `${senderName} <${senderEmail}>` : `<${senderEmail}>`;
-    const fwdTextHeader = `\n\n---------- Forwarded message ---------\nFrom: ${fromDisplay}\nDate: ${dateFormatted}\nSubject: ${rawSubject}\nTo: \n\n`;
+    const fwdTextHeader = `\n\nFrom: ${fromDisplay}\nDate: ${dateFormatted}\nSubject: ${rawSubject}\nTo: \n\n`;
 
     const bodyText = fwdTextHeader + String(row.body_text ?? "");
     let bodyHtml = row.body_html ? String(row.body_html) : undefined;
     if (bodyHtml) {
-      const fwdHtmlHeader = `<br><br><div class="gmail_quote"><div dir="ltr" class="gmail_attr">---------- Forwarded message ---------<br>From: <b class="gmail_sendername" dir="auto">${senderName || senderEmail}</b> <span dir="auto">&lt;<a href="mailto:${senderEmail}">${senderEmail}</a>&gt;</span><br>Date: ${dateFormatted}<br>Subject: ${rawSubject}<br>To: <br></div><br>`;
+      const fwdHtmlHeader = `<br><br><div class="gmail_quote"><div dir="ltr" class="gmail_attr">From: <b class="gmail_sendername" dir="auto">${senderName || senderEmail}</b> <span dir="auto">&lt;<a href="mailto:${senderEmail}">${senderEmail}</a>&gt;</span><br>Date: ${dateFormatted}<br>Subject: ${rawSubject}<br>To: <br></div><br>`;
       bodyHtml = fwdHtmlHeader + bodyHtml + `</div>`;
     }
 
@@ -416,12 +439,12 @@ export async function deliverStoredMail(
       attachments: attachPayload.length > 0 ? attachPayload : undefined,
     });
     const now = nowIso();
-    setMail(mailId, { status: "forwarded", batch_id: batchId, batch_name: batchName(orgId, batchId), recipient_count: to.length, cc_email: cc, forwarded_at: now, failure_reason: null });
+    setMail(mailId, { status: "forwarded", batch_id: primaryBatchId, batch_name: combinedBatchNames, recipient_count: to.length, cc_email: cc, forwarded_at: now, failure_reason: null });
     finalizeLog(manual ? "sent_manual" : "sent");
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Forwarding failed";
     const safe = msg.replace(/Bearer\s+[A-Za-z0-9\-._~+/=]+/g, "Bearer [redacted]").slice(0, 500);
-    setMail(mailId, { status: "failed", batch_id: batchId, batch_name: batchName(orgId, batchId), failure_reason: safe });
+    setMail(mailId, { status: "failed", batch_id: primaryBatchId, batch_name: combinedBatchNames, failure_reason: safe });
     finalizeLog("failed", safe);
   }
   return getMailRow(mailId)!;
@@ -436,15 +459,6 @@ export async function ingestMessage(
   const dupe = getMailByGmail(orgId, input.gmailMessageId);
   if (dupe) return { mail: mailToApi(dupe), action: "duplicate_ignored" };
 
-  // Fail-closed sender allowlist check BEFORE saving to database:
-  // If sender is not in the allowed list, do NOT pollute the application inbox!
-  if (!isAllowedSender(orgId, senderEmail)) {
-    getDb().prepare(
-      "INSERT INTO gmail_state(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value"
-    ).run(`ignored_mail:${input.gmailMessageId}`, JSON.stringify({ orgId, sender: senderEmail, at: now }));
-    return { mail: null as any, action: "unauthorized_ignored" };
-  }
-
   const id = uid("mail");
   getDb().prepare(
     `INSERT INTO mails(id,org_id,gmail_message_id,sender,sender_name,subject,body_text,body_html,received_at,status,created_at,updated_at)
@@ -458,6 +472,14 @@ export async function ingestMessage(
     for (const a of input.attachments) {
       ins.run(uid("att"), id, a.filename, a.mimeType, a.sizeBytes, a.gmailAttachmentId ?? null);
     }
+  }
+
+  if (!isAllowedSender(orgId, senderEmail)) {
+    setMail(id, {
+      status: "needs_review",
+      failure_reason: `Unauthorized sender (${senderEmail}) — held for review, not forwarded.`,
+    });
+    return { mail: mailToApi(getMailRow(id)!), action: "unauthorized_held" };
   }
 
   const det = detectTarget({
@@ -477,14 +499,26 @@ export async function ingestMessage(
     return { mail: mailToApi(getMailRow(id)!), action: "needs_review" };
   }
 
-  setMail(id, { batch_id: det.batchId, batch_name: batchName(orgId, det.batchId) });
+  const targetBatchIds = det.kind === "multi" ? det.batchIds : [det.batchId];
+  const primaryBatchId = targetBatchIds[0]!;
+  const combinedNames = targetBatchIds.map((bId) => batchName(orgId, bId)).filter(Boolean).join(", ");
+
+  setMail(id, { batch_id: primaryBatchId, batch_name: combinedNames });
+
+  if (input.isHistorical) {
+    setMail(id, {
+      status: "forwarded",
+      forwarded_at: input.receivedAt ?? now,
+    });
+    return { mail: mailToApi(getMailRow(id)!), action: "forwarded" };
+  }
 
   if (getSetting(orgId, "autoForwarding", "1") !== "1") {
     setMail(id, { status: "pending", failure_reason: "Auto-forwarding is disabled — awaiting manual action." });
     return { mail: mailToApi(getMailRow(id)!), action: "pending_manual" };
   }
 
-  const delivered = await deliverStoredMail(getMailRow(id)!, det.batchId);
+  const delivered = await deliverStoredMail(getMailRow(id)!, targetBatchIds);
   const status = String(delivered.status);
   return { mail: mailToApi(delivered), action: status === "forwarded" ? "forwarded" : status };
 }

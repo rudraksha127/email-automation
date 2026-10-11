@@ -9,6 +9,8 @@ export class ApiMailsService implements MailsService {
     if (filters.status && filters.status !== "all") params.set("status", filters.status);
     if (filters.batchId && filters.batchId !== "all") params.set("batchId", filters.batchId);
     if (filters.search) params.set("search", filters.search);
+    if (filters.date) params.set("date", filters.date);
+    if (filters.year && filters.year !== "all") params.set("year", filters.year);
     if (filters.limit) params.set("limit", filters.limit.toString());
     if (filters.offset) params.set("offset", filters.offset.toString());
     const qs = params.toString();

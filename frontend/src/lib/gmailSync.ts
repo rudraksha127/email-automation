@@ -85,7 +85,7 @@ function extractBody(payload: Record<string, unknown>): {
   return { text, html: htmlText, attachments };
 }
 
-export async function syncGmailInbox(orgId: string, limit = 25): Promise<{
+export async function syncGmailInbox(orgId: string, limit = 25, historical = false): Promise<{
   checked: number;
   ingested: number;
   forwarded: number;
@@ -105,15 +105,15 @@ export async function syncGmailInbox(orgId: string, limit = 25): Promise<{
     .map((s) => s.sender_email.trim().toLowerCase())
     .filter(Boolean);
 
-  // When allowed senders are configured, query Gmail ONLY for messages from those senders!
-  let queryStr = "newer_than:30d";
+  const fetchLimit = historical ? Math.max(limit, 100) : limit;
+  let queryStr = historical ? "newer_than:365d" : "newer_than:30d";
   if (allowedSenders.length > 0) {
     const fromFilter = allowedSenders.map((s) => `from:${s}`).join(" OR ");
-    queryStr = `(${fromFilter}) newer_than:30d`;
+    queryStr = historical ? `(${fromFilter})` : `(${fromFilter}) newer_than:30d`;
   }
   const q = encodeURIComponent(queryStr);
   const listRes = await fetchWithRetry(
-    `https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${q}&maxResults=${limit}`,
+    `https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${q}&maxResults=${fetchLimit}`,
     { headers: { Authorization: `Bearer ${token}` } }
   );
   if (!listRes.ok) {
@@ -161,6 +161,7 @@ export async function syncGmailInbox(orgId: string, limit = 25): Promise<{
         ? new Date(Number(full.internalDate)).toISOString()
         : nowIso();
 
+      const isHistorical = historical || (Date.now() - new Date(receivedAt).getTime() > 3 * 86400_000);
       const { action } = await ingestMessage(orgId, {
         gmailMessageId: full.id,
         sender: from || "unknown",
@@ -170,6 +171,7 @@ export async function syncGmailInbox(orgId: string, limit = 25): Promise<{
         bodyHtml: html ? html.slice(0, 200000) : undefined,
         receivedAt,
         attachments,
+        isHistorical,
       });
 
       if (action === "unauthorized_ignored") {
@@ -182,7 +184,7 @@ export async function syncGmailInbox(orgId: string, limit = 25): Promise<{
     } catch (e) {
       out.errors.push(`Message ${gid}: ${e instanceof Error ? e.message : "failed"}`.slice(0, 300));
     }
-    if (out.checked >= limit) break;
+    if (out.checked >= fetchLimit) break;
   }
 
   try {

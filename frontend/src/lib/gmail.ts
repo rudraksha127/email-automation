@@ -105,7 +105,12 @@ export function saveTokens(
   const d = getDb();
   const prev = d.prepare("SELECT refresh_token FROM gmail_tokens WHERE org_id=?").get(orgId) as
     | { refresh_token: string | null } | undefined;
-  const rt = refresh ?? prev?.refresh_token ?? null;
+
+  // Encrypt new plaintext refresh token if provided; otherwise reuse existing encrypted token as-is.
+  const encryptedRefresh = refresh
+    ? encryptToken(refresh)
+    : (prev?.refresh_token ?? null);
+
   d.prepare(
     `INSERT INTO gmail_tokens(org_id,account_email,access_token,refresh_token,expiry_ms,updated_at)
      VALUES(?,?,?,?,?,?)
@@ -114,7 +119,7 @@ export function saveTokens(
        expiry_ms=excluded.expiry_ms, updated_at=excluded.updated_at`
   ).run(
     orgId, accountEmail.toLowerCase(),
-    encryptToken(access), rt ? encryptToken(rt) : null,
+    encryptToken(access), encryptedRefresh,
     Date.now() + expiresIn * 1000, nowIso()
   );
   d.prepare(

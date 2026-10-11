@@ -23,6 +23,8 @@ router.get("/", requireWorkspace(false), (req, res) => {
   const status = req.query.status as string | undefined;
   const batchId = req.query.batchId as string | undefined;
   const search = typeof req.query.search === "string" ? req.query.search.trim() : undefined;
+  const date = typeof req.query.date === "string" ? req.query.date.trim() : undefined;
+  const year = typeof req.query.year === "string" ? req.query.year.trim() : undefined;
   const limitParam = Number(req.query.limit);
   const offsetParam = Number(req.query.offset);
   const limit = Number.isFinite(limitParam) && limitParam > 0 ? Math.min(limitParam, 500) : 500;
@@ -42,23 +44,35 @@ router.get("/", requireWorkspace(false), (req, res) => {
     where.push("batch_id = ?");
     args.push(batchId);
   }
+  if (date) {
+    where.push("received_at LIKE ?");
+    args.push(`${date}%`);
+  }
+  if (year && year !== "all") {
+    where.push("(batch_name LIKE ? OR subject LIKE ? OR body_text LIKE ?)");
+    args.push(`%${year}%`, `%${year}%`, `%${year}%`);
+  }
   if (search) {
-    where.push("(subject LIKE ? OR sender LIKE ?)");
-    args.push(`%${search}%`, `%${search}%`);
+    where.push("(subject LIKE ? OR sender LIKE ? OR batch_name LIKE ?)");
+    args.push(`%${search}%`, `%${search}%`, `%${search}%`);
   }
   const sql =
-    "SELECT id,sender,subject,received_at,batch_id,batch_name,status FROM mails WHERE " +
+    "SELECT id,sender,sender_name,subject,received_at,batch_id,batch_name,status,recipient_count,forwarded_at,failure_reason FROM mails WHERE " +
     where.join(" AND ") +
     " ORDER BY received_at DESC LIMIT ? OFFSET ?";
   const rows = (getDb().prepare(sql).all as any)(...args, limit, offset) as Array<Record<string, unknown>>;
   res.json(rows.map((r) => ({
     id: String(r.id),
     sender: String(r.sender),
+    senderName: (r.sender_name as string | null) ?? null,
     subject: String(r.subject),
     receivedAt: String(r.received_at),
     batchId: (r.batch_id as string | null) ?? null,
     batchName: (r.batch_name as string | null) ?? null,
     status: r.status as MailStatus,
+    recipientCount: typeof r.recipient_count === "number" ? r.recipient_count : null,
+    forwardedAt: (r.forwarded_at as string | null) ?? null,
+    failureReason: (r.failure_reason as string | null) ?? null,
   })));
 });
 

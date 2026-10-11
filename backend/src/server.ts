@@ -25,6 +25,14 @@ if (typeof process.loadEnvFile === "function") {
   }
 }
 
+// Global process error guards to ensure zero-downtime reliability
+process.on("unhandledRejection", (reason) => {
+  console.error("[process] unhandled rejection:", reason);
+});
+process.on("uncaughtException", (error) => {
+  console.error("[process] uncaught exception:", error);
+});
+
 import healthRouter from "./routes/health";
 import authRouter from "./routes/auth";
 import gmailRouter from "./routes/gmail";

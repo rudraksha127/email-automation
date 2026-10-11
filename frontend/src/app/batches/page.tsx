@@ -15,6 +15,7 @@ import {
   TrashIcon,
   ChevronRightIcon,
   UploadIcon,
+  DownloadIcon,
 } from "@/components/icons";
 import { useAsync } from "@/hooks/useAsync";
 import { batchesService } from "@/services";
@@ -145,8 +146,18 @@ export default function BatchesPage() {
         <div className="flex shrink-0 gap-2">
           <Button
             variant="secondary"
+            onClick={downloadBulkBatchesTemplate}
+            className="shrink-0"
+            title="Download Excel/CSV sample format"
+          >
+            <DownloadIcon className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Download Format</span>
+          </Button>
+          <Button
+            variant="secondary"
             onClick={() => bulkFileRef.current?.click()}
             className="shrink-0"
+            title="Bulk upload batches from CSV/Excel"
           >
             <UploadIcon className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Bulk Upload</span>

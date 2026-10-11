@@ -101,6 +101,8 @@ export interface MailListFilters {
   status: MailStatus | "all";
   batchId: string | "all";
   search: string;
+  date?: string;
+  year?: string;
   limit?: number;
   offset?: number;
 }

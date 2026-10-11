@@ -14,13 +14,14 @@ import {
   EditIcon,
   TrashIcon,
   UploadIcon,
+  DownloadIcon,
   UserIcon,
 } from "@/components/icons";
 import { useAsync } from "@/hooks/useAsync";
 import { batchesService, recipientsService } from "@/services";
 import { avatarInitial } from "@/utils/format";
 import { validateRecipientForm } from "@/utils/validation";
-import { parseRecipientsCsv } from "@/utils/csv";
+import { parseRecipientsCsv, downloadRecipientsTemplate } from "@/utils/csv";
 import type { Recipient, CsvImportResult } from "@/types";
 
 export default function BatchDetailsPage({ params }: { params: Promise<{ id: string }> }) {
@@ -179,9 +180,21 @@ export default function BatchDetailsPage({ params }: { params: Promise<{ id: str
           subtitle={`${batch.data.recipientCount} recipients${batch.data.description ? ` • ${batch.data.description}` : ""}`}
         />
         <div className="flex shrink-0 gap-2">
-          <Button variant="secondary" onClick={() => fileInputRef.current?.click()}>
+          <Button
+            variant="secondary"
+            onClick={downloadRecipientsTemplate}
+            title="Download Sample CSV Format"
+          >
+            <DownloadIcon className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Download Format</span>
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => fileInputRef.current?.click()}
+            title="Upload CSV file with recipients"
+          >
             <UploadIcon className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">CSV</span>
+            <span className="hidden sm:inline">Upload CSV</span>
           </Button>
           <Button onClick={openAdd}>
             <PlusIcon className="h-3.5 w-3.5" strokeWidth={2.5} />
