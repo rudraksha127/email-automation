@@ -5,6 +5,29 @@ Latest entries first. Append new entries below the heading — keep the format c
 
 ---
 
+## 2026-10-11 — Sidebar user identity block + logout button (AppShell)
+
+### Request
+- A new signed-in-user block in the desktop sidebar: user's own name and role (e.g. **Prof. Kapil Sahu / Placement Coordinator**) instead of any hardcoded identity, with a Logout button beside it (reference design shared).
+
+### Implementation (`frontend/src/components/AppShell.tsx`)
+- New `UserCard` component at the bottom of the desktop sidebar rail:
+  - **Name:** straight from the session (`admins.name`) — no hardcoded defaults; seeded placeholder falls back to the email.
+  - **Role:** workspace role derived live (`Administrator`/`Member`).
+  - **Logout:** rose-tinted round icon button (`LogoutIcon`) beside the identity; calls `logout()` then redirects to `/login`.
+  - Renders nothing on the server (client-only via `useIsClient`) to avoid hydration mismatch; testids `sidebar-user-card` / `sidebar-logout` for automation.
+
+### Verification (live browser + suite)
+- Sidebar card showed **Prof. Kapil Sahu / Administrator** after the profile PATCH — dynamic identity confirmed (replaced hardcoded "Prof. (Dr.) Prashant Lakkadwala" display path).
+- Clicking the sidebar Logout redirected to `/login` immediately.
+- Typecheck 0 errors; `api.test.ts` 16/16 pass.
+- Committed & pushed.
+
+### Note
+- The mobile view still uses the bottom tab bar (no sidebar); logout remains reachable via Profile page on mobile.
+
+---
+
 ## 2026-10-11 — Full QA loop (master prompt): BUG-001 CORS critical found & fixed; production build green
 
 ### What ran

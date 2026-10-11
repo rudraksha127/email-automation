@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import { paths } from "@/routes/paths";
 import { useAuth } from "@/hooks/AuthContext";
@@ -12,6 +13,7 @@ import {
   InboxIcon,
   SettingsIcon,
   UserIcon,
+  LogoutIcon,
 } from "@/components/icons";
 import { useSyncExternalStore } from "react";
 
@@ -95,6 +97,8 @@ export function AppHeader() {
 /** Mobile bottom tab bar + a compact sidebar rail on desktop (lg+). */
 export function AppNav() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, logout, orgs, orgId } = useAuth();
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`);
@@ -173,7 +177,56 @@ export function AppNav() {
             );
           })}
         </ul>
+
+        {/* Signed-in user card with logout — mirrors the profile identity. */}
+        <UserCard onLogout={() => void logout().then(() => router.replace(paths.login))} />
       </nav>
     </>
+  );
+}
+
+/** Sidebar footer: signed-in identity (name, role, workspace) + logout button. */
+function UserCard({ onLogout }: { onLogout: () => void }) {
+  const mounted = useIsClient();
+  const { user, orgs, orgId } = useAuth();
+
+  if (!mounted) return null;
+
+  const name =
+    user?.name && user.name !== "Department Admin"
+      ? user.name
+      : user?.email || "Signed in";
+  const role = orgs.find((o) => o.orgId === orgId)?.role;
+  const roleLabel = role === "admin" ? "Administrator" : role === "member" ? "Member" : "";
+
+  return (
+    <div
+      className="mt-4 rounded-2xl border border-slate-100 bg-slate-50/90 px-3 py-3 shadow-xs"
+      data-testid="sidebar-user-card"
+      aria-label="Signed in user"
+    >
+      <div className="flex items-center justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[11px] font-black uppercase tracking-wide text-brand-700">
+            {name}
+          </p>
+          {roleLabel ? (
+            <p className="mt-0.5 truncate text-[10px] font-semibold text-slate-500">
+              {roleLabel}
+            </p>
+          ) : null}
+        </div>
+        <button
+          type="button"
+          onClick={onLogout}
+          title="Sign out"
+          aria-label="Logout"
+          data-testid="sidebar-logout"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-600 transition-colors hover:bg-rose-100"
+        >
+          <LogoutIcon className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
   );
 }
