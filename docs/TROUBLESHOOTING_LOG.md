@@ -5,6 +5,29 @@ Latest entries first. Append new entries below the heading — keep the format c
 
 ---
 
+## 2026-10-11 — Bulk upload for Batches (CSV template download + import)
+
+### Request
+- On the Batches page: download a template (Excel/CSV format), fill it with batch data, upload it back, and have the batches created automatically.
+
+### Implementation
+1. **Template download** — `downloadBulkBatchesTemplate()` in `frontend/src/utils/csv.ts` downloads `bulk-batches-template.csv` with header `Batch Name,Description,Student Name,Email` and 3 example rows. Opens directly in Excel.
+2. **Parser** — `parseBulkBatchesCsv()` validates batch names (≤80 chars), student emails, per-batch duplicate emails; collects all invalid rows with row numbers and reasons instead of failing the whole file.
+3. **Upload UI** — "Bulk Upload" button (Variant secondary) next to Add Batch on `frontend/src/app/batches/page.tsx`. File → parsed preview modal: valid-row count, invalid-row warnings, unique-batch count, first 20 rows; Import button posts only valid rows.
+4. **API** — `POST /api/batches/import` on the **Express backend** (`backend/src/routes/batches.ts`, registered before `/:id` routes): creates missing batches, reuses existing ones by case-insensitive name, adds recipients deduped per batch, skips invalid rows, caps at 5000 rows/audit-logged. Same route also exists in `frontend/src/app/api/batches/import/route.ts` (Next.js API, fallback for non-proxy deployments) and mock service.
+5. **Service layer** — `batchesService.bulkImport(rows)` added to interface, Api and Mock implementations.
+
+### Verification (live, localhost:3001 Express)
+- typecheck: backend 0 errors, frontend 0 errors; api+services tests 2/2 files pass.
+- Import of 5-row test CSV → `{batchesCreated:2, batchesReused:0, recipientsAdded:3, invalidRows:1}` (invalid email row skipped).
+- Re-import same file → `{batchesCreated:0, batchesReused:2, recipientsAdded:0}` — idempotent dedupe works.
+- QA test batches cleaned up after verification.
+
+### Note
+- Format chosen is CSV (not .xlsx) intentionally: zero new dependencies, Excel opens/saves CSV natively, and the project already had CSV import infrastructure. If true .xlsx support is later needed, a SheetJS-based parser would be added.
+
+---
+
 ## 2026-10-11 — Long-lived sessions (PWA no daily password) + Gmail connection stays after logout
 
 ### Request

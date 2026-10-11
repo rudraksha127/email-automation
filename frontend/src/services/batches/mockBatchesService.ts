@@ -61,4 +61,58 @@ export class MockBatchesService implements BatchesService {
     mockDb.batches.splice(index, 1);
     delete mockDb.recipients[id];
   }
+
+  async bulkImport(
+    rows: Array<{ "Batch Name": string; Description?: string; "Student Name"?: string; Email?: string }>
+  ): Promise<{ batchesCreated: number; batchesReused: number; recipientsAdded: number; invalidRows: number }> {
+    await delay(600);
+    const stats = { batchesCreated: 0, batchesReused: 0, recipientsAdded: 0, invalidRows: 0 };
+    const batchIdByName = new Map<string, string>();
+    for (const row of rows) {
+      const batchName = String(row["Batch Name"] ?? "").trim();
+      if (!batchName || batchName.length > 80) {
+        stats.invalidRows += 1;
+        continue;
+      }
+      const nameKey = batchName.toLowerCase();
+      let batchId = batchIdByName.get(nameKey);
+      if (!batchId) {
+        const existing = mockDb.batches.find((b) => b.name.toLowerCase() === nameKey);
+        if (existing) {
+          batchId = existing.id;
+          stats.batchesReused += 1;
+        } else {
+          batchId = `b${Date.now().toString(36)}${stats.batchesCreated}`;
+          mockDb.batches.push({
+            id: batchId,
+            name: batchName,
+            description: row.Description?.trim() || null,
+            recipientCount: 0,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          });
+          mockDb.recipients[batchId] = [];
+          stats.batchesCreated += 1;
+        }
+        batchIdByName.set(nameKey, batchId);
+      }
+      const studentName = String(row["Student Name"] ?? "").trim();
+      const email = String(row.Email ?? "").trim().toLowerCase();
+      if (!studentName || !email) continue;
+      const list = mockDb.recipients[batchId] ?? [];
+      if (list.some((r) => r.email.toLowerCase() === email)) continue;
+      list.push({
+        id: `r${Date.now().toString(36)}${stats.recipientsAdded}`,
+        batchId,
+        name: studentName,
+        email,
+        createdAt: new Date().toISOString(),
+      });
+      mockDb.recipients[batchId] = list;
+      const batch = mockDb.batches.find((b) => b.id === batchId);
+      if (batch) batch.recipientCount = list.length;
+      stats.recipientsAdded += 1;
+    }
+    return stats;
+  }
 }

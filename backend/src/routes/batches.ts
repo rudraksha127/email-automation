@@ -77,6 +77,100 @@ router.post("/", requireWorkspace(true), (req, res) => {
   });
 });
 
+/** POST /api/batches/import — bulk-create batches (+ recipients) from CSV rows.
+ * Must be registered BEFORE /:id routes so "import" is not treated as an id. */
+router.post("/import", requireWorkspace(true), (req, res) => {
+  const auth = req.orgAuth!;
+  if (!auth.ok) {
+    res.status(auth.status).json({ error: auth.message });
+    return;
+  }
+  const rows = Array.isArray(req.body?.rows) ? req.body.rows : null;
+  if (!rows || rows.length === 0) {
+    res.status(400).json({ error: "rows array is required" });
+    return;
+  }
+  if (rows.length > 5000) {
+    res.status(400).json({ error: "Maximum 5000 rows per import" });
+    return;
+  }
+
+  const d = getDb();
+  const now = nowIso();
+  const stats = { batchesCreated: 0, batchesReused: 0, recipientsAdded: 0, invalidRows: 0 };
+
+  const batchIdByName = new Map<string, string>();
+  const emailsByBatch = new Map<string, Set<string>>();
+  const insertBatch = d.prepare(
+    "INSERT INTO batches(id,org_id,name,description,created_at,updated_at) VALUES(?,?,?,?,?,?)"
+  );
+  const insertRecipient = d.prepare(
+    "INSERT INTO recipients(id,batch_id,org_id,name,email,created_at) VALUES(?,?,?,?,?,?)"
+  );
+
+  function emailsFor(batchId: string): Set<string> {
+    let set = emailsByBatch.get(batchId);
+    if (!set) {
+      set = new Set(
+        (d.prepare("SELECT lower(email) AS e FROM recipients WHERE batch_id=?").all(batchId) as
+          Array<{ e: string }>).map((r) => r.e)
+      );
+      emailsByBatch.set(batchId, set);
+    }
+    return set;
+  }
+
+  for (const raw of rows) {
+    const batchName = String(raw?.["Batch Name"] ?? raw?.batchName ?? "").trim();
+    const description = String(raw?.["Description"] ?? raw?.description ?? "").trim();
+    const studentName = String(raw?.["Student Name"] ?? raw?.studentName ?? "").trim();
+    const email = String(raw?.["Email"] ?? raw?.email ?? "").trim().toLowerCase();
+
+    if (!batchName || batchName.length > 80) {
+      stats.invalidRows += 1;
+      continue;
+    }
+    if ((studentName || email) && !isValidEmail(email)) {
+      stats.invalidRows += 1;
+      continue;
+    }
+
+    const nameKey = batchName.toLowerCase();
+    let batchId = batchIdByName.get(nameKey);
+    if (!batchId) {
+      const existing = d.prepare(
+        "SELECT id FROM batches WHERE org_id=? AND lower(name)=lower(?)"
+      ).get(auth.orgId, batchName) as { id: string } | undefined;
+      if (existing) {
+        batchId = existing.id;
+        stats.batchesReused += 1;
+      } else {
+        batchId = uid("b");
+        insertBatch.run(batchId, auth.orgId, batchName, description || null, now, now);
+        stats.batchesCreated += 1;
+      }
+      batchIdByName.set(nameKey, batchId);
+    }
+
+    if (studentName && email && isValidEmail(email)) {
+      const emails = emailsFor(batchId);
+      if (!emails.has(email)) {
+        insertRecipient.run(uid("r"), batchId, auth.orgId, studentName, email, now);
+        emails.add(email);
+        stats.recipientsAdded += 1;
+      }
+    }
+  }
+
+  audit(
+    auth.orgId,
+    auth.email,
+    "groups.bulk_imported",
+    `${stats.batchesCreated} created, ${stats.recipientsAdded} recipients imported`
+  );
+  res.status(201).json(stats);
+});
+
 /** GET /api/batches/:id */
 router.get("/:id", requireWorkspace(false), (req, res) => {
   const auth = req.orgAuth!;

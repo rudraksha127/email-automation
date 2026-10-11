@@ -1,6 +1,6 @@
 import { http } from "../http";
 import type { Batch } from "@/types";
-import type { BatchesService } from "./batchesService";
+import type { BatchesService, BulkImportResult } from "./batchesService";
 
 export class ApiBatchesService implements BatchesService {
   list(): Promise<Batch[]> {
@@ -17,5 +17,8 @@ export class ApiBatchesService implements BatchesService {
   }
   remove(id: string): Promise<void> {
     return http.delete<void>(`/api/batches/${id}`);
+  }
+  bulkImport(rows: Array<{ "Batch Name": string; Description?: string; "Student Name"?: string; Email?: string }>): Promise<BulkImportResult> {
+    return http.post<BulkImportResult>("/api/batches/import", { rows });
   }
 }

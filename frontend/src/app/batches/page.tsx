@@ -1,8 +1,7 @@
 "use client";
 
-
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { paths } from "@/routes/paths";
 import { PageHeading, AppLayout } from "@/components/layout";
 import { EmptyState, LoadingState, ErrorState } from "@/components/ui/EmptyState";
@@ -15,11 +14,18 @@ import {
   EditIcon,
   TrashIcon,
   ChevronRightIcon,
+  UploadIcon,
 } from "@/components/icons";
 import { useAsync } from "@/hooks/useAsync";
 import { batchesService } from "@/services";
+import type { BulkImportResult } from "@/services/batches/batchesService";
 import { formatRecipientCount } from "@/utils/format";
 import { validateBatchForm } from "@/utils/validation";
+import {
+  parseBulkBatchesCsv,
+  downloadBulkBatchesTemplate,
+  type BulkBatchRow,
+} from "@/utils/csv";
 import type { Batch } from "@/types";
 
 export default function BatchesPage() {
@@ -35,6 +41,43 @@ export default function BatchesPage() {
 
   const [deleting, setDeleting] = useState<Batch | null>(null);
   const [deletingBusy, setDeletingBusy] = useState(false);
+
+  // Bulk upload state: file → parsed preview → confirm → result
+  const bulkFileRef = useRef<HTMLInputElement>(null);
+  const [bulkPreview, setBulkPreview] = useState<{
+    rows: BulkBatchRow[];
+    invalid: Array<{ row: number; reason: string }>;
+  } | null>(null);
+  const [bulkImporting, setBulkImporting] = useState(false);
+  const [bulkResult, setBulkResult] = useState<BulkImportResult | null>(null);
+
+  function handleBulkFile(file: File) {
+    setBulkResult(null);
+    void file.text().then((text) => {
+      const firstLine = text.split(/\r?\n/, 1)[0] ?? "";
+      const headers = firstLine.split(",").map((h) => h.trim().replace(/"/g, ""));
+      const parsed = parseBulkBatchesCsv(text, headers);
+      setBulkResult(null);
+      setBulkPreview(parsed);
+    });
+  }
+
+  async function confirmBulkImport() {
+    if (!bulkPreview || bulkPreview.rows.length === 0) return;
+    setBulkImporting(true);
+    try {
+      const result = await batchesService.bulkImport(bulkPreview.rows);
+      setBulkPreview(null);
+      setBulkResult(result);
+      batches.reload();
+    } catch (err) {
+      setBulkResult(null);
+      setApiError(err instanceof Error ? err.message : "Bulk upload failed.");
+      setBulkPreview(null);
+    } finally {
+      setBulkImporting(false);
+    }
+  }
 
   function openAdd() {
     setEditing(null);
@@ -99,11 +142,48 @@ export default function BatchesPage() {
     <AppLayout>
       <div className="flex items-start justify-between">
         <PageHeading title="Batches" subtitle="Manage batch recipients" />
-        <Button onClick={openAdd} className="shrink-0">
-          <PlusIcon className="h-3.5 w-3.5" strokeWidth={2.5} />
-          Add Batch
-        </Button>
+        <div className="flex shrink-0 gap-2">
+          <Button
+            variant="secondary"
+            onClick={() => bulkFileRef.current?.click()}
+            className="shrink-0"
+          >
+            <UploadIcon className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Bulk Upload</span>
+          </Button>
+          <Button onClick={openAdd} className="shrink-0">
+            <PlusIcon className="h-3.5 w-3.5" strokeWidth={2.5} />
+            Add Batch
+          </Button>
+        </div>
       </div>
+
+      <input
+        ref={bulkFileRef}
+        type="file"
+        accept=".csv,text/csv,.xls,.xlsx"
+        className="hidden"
+        aria-label="Upload batches CSV"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) handleBulkFile(file);
+          e.target.value = "";
+        }}
+      />
+
+      {bulkResult ? (
+        <div
+          role="status"
+          className="mb-3 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-2.5 text-xs font-medium text-emerald-700"
+        >
+          <p className="font-semibold">Bulk upload complete</p>
+          <p className="mt-0.5">
+            {bulkResult.batchesCreated} batch(es) created • {bulkResult.batchesReused} existing
+            reused • {bulkResult.recipientsAdded} recipients imported
+            {bulkResult.invalidRows > 0 ? ` • ${bulkResult.invalidRows} invalid rows skipped` : ""}
+          </p>
+        </div>
+      ) : null}
 
       {apiError ? (
         <p
@@ -248,6 +328,92 @@ export default function BatchesPage() {
             />
           </div>
         </form>
+      </Modal>
+
+      {/* Bulk upload preview modal */}
+      <Modal
+        open={!!bulkPreview}
+        onClose={() => setBulkPreview(null)}
+        title="Bulk Upload Preview"
+      >
+        {bulkPreview && bulkPreview.invalid.length > 0 && bulkPreview.rows.length === 0 ? (
+          <div className="space-y-3 text-xs">
+            <p className="font-semibold text-rose-700">
+              No valid rows found — please fix the file and try again.
+            </p>
+            <div className="max-h-40 overflow-y-auto rounded-lg bg-rose-50 p-2.5 text-rose-700">
+              {bulkPreview.invalid.slice(0, 10).map((r) => (
+                <p key={`${r.row}-${r.reason}`}>
+                  • Row {r.row}: {r.reason}
+                </p>
+              ))}
+            </div>
+            <div className="flex justify-between gap-2 pt-2">
+              <Button variant="ghost" onClick={downloadBulkBatchesTemplate}>
+                Download Template
+              </Button>
+              <Button variant="secondary" onClick={() => setBulkPreview(null)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        ) : bulkPreview ? (
+          <div className="space-y-3 text-xs">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-700">
+                {bulkPreview.rows.length} valid rows
+              </span>
+              {bulkPreview.invalid.length > 0 && (
+                <span className="rounded-full bg-amber-50 px-2.5 py-1 font-semibold text-amber-700">
+                  {bulkPreview.invalid.length} invalid (will be skipped)
+                </span>
+              )}
+              <span className="rounded-full bg-blue-50 px-2.5 py-1 font-semibold text-blue-700">
+                {new Set(bulkPreview.rows.map((r) => r["Batch Name"].toLowerCase())).size} batches
+              </span>
+            </div>
+            {bulkPreview.invalid.length > 0 && (
+              <div className="max-h-28 overflow-y-auto rounded-lg bg-amber-50 p-2.5 text-amber-700">
+                {bulkPreview.invalid.slice(0, 8).map((r) => (
+                  <p key={`${r.row}-${r.reason}`}>
+                    • Row {r.row}: {r.reason}
+                  </p>
+                ))}
+              </div>
+            )}
+            <div className="max-h-40 overflow-y-auto rounded-lg border border-slate-200 divide-y divide-slate-100">
+              {bulkPreview.rows.slice(0, 20).map((r, i) => (
+                <div key={i} className="grid grid-cols-[1fr_1fr_1.5fr] gap-2 px-2.5 py-1.5">
+                  <span className="font-semibold text-slate-800">{r["Batch Name"]}</span>
+                  <span className="text-slate-700">{r["Student Name"] || "—"}</span>
+                  <span className="truncate text-slate-500">{r.Email || "batch only"}</span>
+                </div>
+              ))}
+              {bulkPreview.rows.length > 20 && (
+                <p className="px-2.5 py-1.5 text-slate-400">
+                  …and {bulkPreview.rows.length - 20} more rows
+                </p>
+              )}
+            </div>
+            <div className="flex justify-between gap-2 pt-2">
+              <Button variant="ghost" onClick={downloadBulkBatchesTemplate}>
+                Template
+              </Button>
+              <div className="flex gap-2">
+                <Button variant="secondary" onClick={() => setBulkPreview(null)}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={confirmBulkImport}
+                  disabled={bulkPreview.rows.length === 0}
+                  loading={bulkImporting}
+                >
+                  Import {bulkPreview.rows.length} Rows
+                </Button>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </Modal>
 
       {/* Delete confirmation — destructive action needs an explicit confirm */}
