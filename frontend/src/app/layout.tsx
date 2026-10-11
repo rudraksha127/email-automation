@@ -47,7 +47,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`h-full antialiased ${jakarta.variable}`}>
-      <body className="min-h-full bg-slate-50 text-slate-800 font-sans">
+      <body className="min-h-full bg-surface-lowest text-slate-800 font-sans">
         <ServiceWorkerRegister />
         <AuthProvider>
           <MailNotificationListener />
