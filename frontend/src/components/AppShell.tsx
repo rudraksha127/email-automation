@@ -233,7 +233,7 @@ export function AppNav({
                 <p className="mt-0.5 truncate text-[11px] font-medium text-slate-700" title={displayRole}>
                   {displayRole}
                 </p>
-                <p className="mt-0.5 truncate text-center text-[11px] font-medium text-slate-500" title={displayDept}>
+                <p className="mt-0.5 truncate text-left text-[11px] font-medium text-slate-500" title={displayDept}>
                   • {displayDept}
                 </p>
               </Link>
@@ -374,7 +374,7 @@ function UserCard({ onLogout }: { onLogout: () => void }) {
         <p className="mt-0.5 truncate text-[11px] font-medium text-slate-700" title={displayRole}>
           {displayRole}
         </p>
-        <p className="mt-0.5 truncate text-center text-[11px] font-medium text-slate-500" title={displayDept}>
+        <p className="mt-0.5 truncate text-left text-[11px] font-medium text-slate-500" title={displayDept}>
           • {displayDept}
         </p>
       </Link>
