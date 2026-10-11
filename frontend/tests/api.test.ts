@@ -36,6 +36,7 @@ type LogoutRoute = typeof import("@/app/api/auth/logout/route");
 type ChangePwRoute = typeof import("@/app/api/auth/change-password/route");
 type ProfileRoute = typeof import("@/app/api/auth/profile/route");
 type BatchesRoute = typeof import("@/app/api/batches/route");
+type BatchesImportRoute = typeof import("@/app/api/batches/import/route");
 type BatchRoute = typeof import("@/app/api/batches/[id]/route");
 type RecipientsRoute = typeof import("@/app/api/batches/[id]/recipients/route");
 type RecipientRoute = typeof import("@/app/api/batches/[id]/recipients/[rid]/route");
@@ -51,6 +52,7 @@ let logout: LogoutRoute;
 let changePw: ChangePwRoute;
 let profileRoute: ProfileRoute;
 let batches: BatchesRoute;
+let batchesImport: BatchesImportRoute;
 let batch: BatchRoute;
 let recipients: RecipientsRoute;
 let recipient: RecipientRoute;
@@ -70,6 +72,7 @@ beforeAll(async () => {
   changePw = await import("@/app/api/auth/change-password/route");
   profileRoute = await import("@/app/api/auth/profile/route");
   batches = await import("@/app/api/batches/route");
+  batchesImport = await import("@/app/api/batches/import/route");
   batch = await import("@/app/api/batches/[id]/route");
   recipients = await import("@/app/api/batches/[id]/recipients/route");
   recipient = await import("@/app/api/batches/[id]/recipients/[rid]/route");
@@ -300,6 +303,53 @@ describe("batch CRUD", () => {
     expect(
       (await batch.GET(req(`/api/batches/${b.id}`), { params: Promise.resolve({ id: b.id }) })).status
     ).toBe(404);
+  });
+
+  it("bulk import creates batches, dedupes recipients and re-imports idempotently", async () => {
+    await loginAs();
+    const rows = [
+      { "Batch Name": "Bulk A", Description: "d", "Student Name": "R1", Email: "r1@x.com" },
+      { "Batch Name": "Bulk A", Description: "d", "Student Name": "R2", Email: "r2@x.com" },
+      { "Batch Name": "Bulk B", Description: "", "Student Name": "R3", Email: "r3@x.com" },
+      { "Batch Name": "Bulk A", Description: "d", "Student Name": "Dup", Email: "R1@X.com" }, // dup, different case
+      { "Batch Name": "", Description: "", "Student Name": "No", Email: "no@x.com" }, // no batch name
+    ];
+    const first = await batchesImport.POST(req("/api/batches/import", { rows }));
+    expect(first.status).toBe(201);
+    expect(await first.json()).toEqual({
+      batchesCreated: 2,
+      batchesReused: 0,
+      recipientsAdded: 3,
+      invalidRows: 1,
+    });
+
+    // Same rows again: everything already exists → nothing new.
+    const second = await batchesImport.POST(req("/api/batches/import", { rows }));
+    expect(second.status).toBe(201);
+    expect(await second.json()).toEqual({
+      batchesCreated: 0,
+      batchesReused: 2,
+      recipientsAdded: 0,
+      invalidRows: 1,
+    });
+
+    // Cleanup: empty then remove the two imported batches.
+    const list = (await (await batches.GET()).json()) as Array<{ id: string; name: string }>;
+    for (const target of list.filter((b) => b.name.startsWith("Bulk "))) {
+      const rlist = (await (await recipients.GET(req(`/api/batches/${target.id}/recipients`), {
+        params: Promise.resolve({ id: target.id }),
+      })).json()) as Array<{ id: string }>;
+      for (const r of rlist) {
+        await recipient.DELETE(req(`/api/batches/${target.id}/recipients/${r.id}`), {
+          params: Promise.resolve({ id: target.id, rid: r.id }),
+        });
+      }
+      expect(
+        (await batch.DELETE(req(`/api/batches/${target.id}`), {
+          params: Promise.resolve({ id: target.id }),
+        })).status
+      ).toBe(200);
+    }
   });
 });
 
