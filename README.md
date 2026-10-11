@@ -46,7 +46,7 @@ email-automation/
 │   ├── src/app/            Next.js App Router (Dashboard, Mails, Batches, History, Profile, Settings)
 │   ├── src/components/     Accessible, responsive UI component library
 │   ├── src/services/       Client API services with offline and mock resilience
-│   └── tests/              Vitest unit and integration test suites (108 tests)
+│   └── tests/              Vitest unit and integration test suites (109 tests)
 │
 ├── backend/                ➔ Render — Express.js 4 + TypeScript 5
 │   ├── src/server.ts       REST API entrypoint & continuous background Gmail poller
@@ -108,7 +108,7 @@ npm run dev:backend    # http://localhost:3001
 This repository follows strict quality and reliability standards enforced by automated test suites:
 
 ```bash
-# Run the complete test suite (108 Vitest unit & integration tests)
+# Run the complete test suite (109 Vitest unit & integration tests)
 npm test
 
 # Run strict TypeScript typecheck across frontend and backend

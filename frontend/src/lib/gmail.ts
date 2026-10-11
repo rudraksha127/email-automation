@@ -238,7 +238,7 @@ export function connectionInfo(orgId: string, currentUserEmail?: string): {
     : undefined;
 
   const envAccount = isDefaultOrg
-    ? (process.env.GMAIL_TARGET_EMAIL || "rudraksha240036@acropolis.in").trim().toLowerCase()
+    ? (process.env.GMAIL_TARGET_EMAIL || "placementit@acropolis.in").trim().toLowerCase()
     : null;
 
   const userEmail = currentUserEmail?.trim().toLowerCase();
