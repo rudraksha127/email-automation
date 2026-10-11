@@ -26,6 +26,7 @@ import { paths } from "@/routes/paths";
 import { authService } from "@/services";
 import { http } from "@/services/http";
 import { validateChangePassword } from "@/utils/validation";
+import { getUserInitials } from "@/utils/format";
 import { DeveloperModal } from "@/components/DeveloperModal";
 import type { ProfileResponse } from "@/app/api/auth/profile/route";
 
@@ -270,16 +271,8 @@ export default function ProfilePage() {
     }
   }
 
-  // Derive initials from the user's own name; fall back to the email initial.
-  const displayName = profile.name || profile.email;
-  const initials =
-    displayName
-      .replace(/Prof\.|\(Dr\.\)|Dr\./gi, "")
-      .trim()
-      .split(/\s+/)
-      .slice(0, 2)
-      .map((w) => w[0]?.toUpperCase() || "")
-      .join("") || "U";
+  // Derive 2-letter initials from the user's name (e.g. "KS", "PL")
+  const initials = getUserInitials(profile.name, profile.email);
 
   if (profileState.loading && !profileState.data) {
     return (

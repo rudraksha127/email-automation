@@ -19,6 +19,7 @@ import {
   XIcon,
 } from "@/components/icons";
 import { useSyncExternalStore } from "react";
+import { getUserInitials } from "@/utils/format";
 
 const emptySubscribe = () => () => {};
 function useIsClient() {
@@ -39,22 +40,8 @@ export function AppHeader({ onOpenMobileMenu }: { onOpenMobileMenu?: () => void 
   const { user, orgs, orgId, switchWorkspace } = useAuth();
   const mounted = useIsClient();
 
-  // Compute initials accurately from the user's display name or email.
-  // E.g., "Kapil Sahu" -> "KS", "Prof. (Dr.) Prashant Lakkadwala" -> "PL"
-  const displayName =
-    user?.name && user.name !== "Department Admin"
-      ? user.name
-      : (user?.email ?? "");
-
-  const initials =
-    displayName
-      .replace(/Prof\.|\(Dr\.\)|Dr\./gi, "")
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((w) => w[0]?.toUpperCase() || "")
-      .join("") || (user?.email?.[0] ?? "A").toUpperCase();
+  // Dynamic 2-letter initials based on real user name (e.g. "Kapil Sahu" -> "KS", "Prof. (Dr.) Prashant Lakkadwala" -> "PL")
+  const initials = getUserInitials(user?.name, user?.email);
 
   function handleSwitch(nextOrgId: string) {
     if (nextOrgId === paths.workspace) {

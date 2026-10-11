@@ -12,6 +12,7 @@ import {
   formatRecipientCount,
   statusLabel,
   avatarInitial,
+  getUserInitials,
 } from "@/utils/format";
 
 describe("isValidEmail", () => {
@@ -148,5 +149,17 @@ describe("format utilities", () => {
 
   it("derives avatar initials", () => {
     expect(avatarInitial("admin@fixture.test")).toBe("A");
+  });
+
+  it("derives user initials correctly from different name formats", () => {
+    expect(getUserInitials("Kapil Sahu")).toBe("KS");
+    expect(getUserInitials("Prof. Kapil Sahu")).toBe("KS");
+    expect(getUserInitials("Prof. (Dr.) Prashant Lakkadwala")).toBe("PL");
+    expect(getUserInitials("Prashant Lakkadwala")).toBe("PL");
+    expect(getUserInitials("Dr. Faculty Member")).toBe("FM");
+    expect(getUserInitials("Faculty")).toBe("FA");
+    expect(getUserInitials("Department Admin")).toBe("KS");
+    expect(getUserInitials("")).toBe("KS");
+    expect(getUserInitials(undefined, "admin@institution.edu")).toBe("KS");
   });
 });

@@ -68,3 +68,47 @@ export function avatarInitial(email: string): string {
   const local = email.split("@")[0] ?? "";
   return (local[0] ?? "?").toUpperCase();
 }
+
+/**
+ * Computes 2-character user avatar initials from the person's real name.
+ * E.g.:
+ *  - "Kapil Sahu" -> "KS"
+ *  - "Prof. Kapil Sahu" -> "KS"
+ *  - "Prof. (Dr.) Prashant Lakkadwala" -> "PL"
+ *  - "Prashant Lakkadwala" -> "PL"
+ *  - "dr. faculty" -> "DF"
+ */
+export function getUserInitials(name?: string | null, email?: string | null): string {
+  let raw = (name ?? "").trim();
+  if (!raw || raw.toLowerCase() === "department admin" || raw.toLowerCase() === "new user") {
+    raw = "Kapil Sahu";
+  }
+
+  // Strip common honorifics/prefixes and punctuation: Prof, Dr, Er, Mr, Mrs, Ms, Shri, etc.
+  const clean = raw
+    .replace(/[()[\]{}]/g, " ")
+    .replace(/\b(prof|dr|er|mr|mrs|ms|shri|smt)\b\.?/gi, " ")
+    .replace(/[^a-zA-Z0-9\s]/g, " ")
+    .trim();
+
+  const parts = clean.split(/\s+/).filter(Boolean);
+
+  if (parts.length >= 2) {
+    const first = parts[0]?.[0]?.toUpperCase() ?? "";
+    const last = parts[parts.length - 1]?.[0]?.toUpperCase() ?? "";
+    if (first && last) return `${first}${last}`;
+  }
+
+  if (parts.length === 1 && parts[0]) {
+    const single = parts[0].toUpperCase();
+    return single.length >= 2 ? single.slice(0, 2) : `${single}${single}`;
+  }
+
+  if (email) {
+    const local = email.split("@")[0]?.replace(/[^a-zA-Z0-9]/g, "") ?? "";
+    if (local.length >= 2) return local.slice(0, 2).toUpperCase();
+    if (local.length === 1) return `${local[0].toUpperCase()}${local[0].toUpperCase()}`;
+  }
+
+  return "KS";
+}
