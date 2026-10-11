@@ -1,10 +1,11 @@
 @import "tailwindcss";
 
 /*
- * Design tokens — aligned with the institutional Plus Jakarta Sans typography
- * and formatting system from hod-web reference.
+ * Design tokens — Transfer from reference HOD Web (Material 3 Institutional Design Language).
+ * Source of truth: DESIGN_DNA.md
  */
 @theme {
+  /* Brand primary & interaction colors */
   --color-brand-50: #eff6ff;
   --color-brand-100: #dbeafe;
   --color-brand-200: #bfdbfe;
@@ -13,11 +14,59 @@
   --color-brand-700: #1d4ed8;
   --color-brand-800: #1e40af;
 
+  /* Material 3 Surface hierarchy */
+  --color-surface: #faf8ff;
+  --color-surface-dim: #d2d9f4;
+  --color-surface-bright: #faf8ff;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f2f3ff;
+  --color-surface-container: #eaedff;
+  --color-surface-container-high: #e2e7ff;
+  --color-surface-container-highest: #dae2fd;
+
+  /* Material 3 Text & Line contrast */
+  --color-on-surface: #131b2e;
+  --color-on-surface-variant: #414754;
+  --color-outline: #727785;
+  --color-outline-variant: #c1c6d6;
+  --color-inverse-surface: #283044;
+  --color-inverse-on-surface: #eef0ff;
+
+  /* Material 3 Semantic roles */
+  --color-primary: #005bbf;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #1a73e8;
+  --color-on-primary-container: #ffffff;
+  --color-primary-fixed: #d8e2ff;
+  --color-on-primary-fixed: #001a41;
+
+  --color-secondary: #076d2e;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #9cf7a7;
+  --color-on-secondary-container: #147434;
+
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+
+  /* Custom shadows from reference */
+  --shadow-card: 0 1px 8px rgba(0, 0, 0, 0.04);
+  --shadow-dialog: 0 8px 30px rgba(19, 27, 46, 0.18);
+
+  /* Plus Jakarta Sans typography */
   --font-sans: var(--font-jakarta), "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 @layer base {
+  :root {
+    --sat: env(safe-area-inset-top, 0px);
+    --sar: env(safe-area-inset-right, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+  }
+
   html {
     min-height: 100%;
     min-height: 100dvh;
@@ -27,11 +76,12 @@
   }
 
   body {
-    background-color: var(--color-slate-50);
-    color: var(--color-slate-800);
+    background-color: var(--color-surface);
+    color: var(--color-on-surface);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior-y: none;
   }
 
   /* Prevent 300ms touch delay on buttons and links */
@@ -52,17 +102,37 @@
   input:-webkit-autofill:active {
     -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
     box-shadow: 0 0 0 1000px #ffffff inset !important;
-    -webkit-text-fill-color: #0f172a !important;
-    caret-color: #0f172a !important;
+    -webkit-text-fill-color: #131b2e !important;
+    caret-color: #131b2e !important;
     border-radius: inherit !important;
     transition:
       background-color 999999s step-end 0s,
       color 999999s step-end 0s;
   }
 
+  input:autofill,
+  input:autofill:hover,
+  input:autofill:focus {
+    box-shadow: 0 0 0 1000px #ffffff inset !important;
+    caret-color: #131b2e !important;
+    border-radius: inherit !important;
+    transition:
+      background-color 999999s step-end 0s,
+      color 999999s step-end 0s;
+  }
+
+  /* Hide autofill icon that collides with toggles */
+  input::-webkit-contacts-auto-fill-button {
+    visibility: hidden;
+    display: none !important;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+  }
+
   /* Visible focus states for keyboard navigation (accessibility) */
   :focus-visible {
-    outline: 2px solid var(--color-brand-600);
+    outline: 2px solid var(--color-primary);
     outline-offset: 2px;
   }
 
@@ -73,7 +143,7 @@
   }
   ::-webkit-scrollbar-thumb {
     border-radius: 9999px;
-    background-color: #cbd5e1;
+    background-color: var(--color-surface-container-high);
   }
   ::-webkit-scrollbar-track {
     background: transparent;
@@ -87,5 +157,37 @@
   }
   .no-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Minimal entrance animations matching reference */
+  .animate-in {
+    animation-name: tw-enter;
+    animation-duration: 200ms;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    animation-fill-mode: both;
+  }
+  .fade-in {
+    --tw-enter-opacity: 0;
+  }
+  .zoom-in-95 {
+    --tw-enter-scale: 0.95;
+  }
+  .slide-in-from-bottom-2 {
+    --tw-enter-translate-y: 0.5rem;
+  }
+}
+
+@keyframes tw-enter {
+  0% {
+    opacity: var(--tw-enter-opacity, 1);
+    transform: translate3d(0, var(--tw-enter-translate-y, 0), 0) scale3d(
+      var(--tw-enter-scale, 1),
+      var(--tw-enter-scale, 1),
+      1
+    );
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
   }
 }
