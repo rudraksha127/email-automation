@@ -5,7 +5,9 @@ import {
 
 export const COOKIE = "ma_session";
 export const SESSION_COOKIE = COOKIE;
-export const TTL_MS = 7 * 24 * 3600_000;
+// 30-day sessions with rolling expiry (slid forward by middleware/auth.ts on
+// every authenticated request) so the mobile PWA stays signed in.
+export const TTL_MS = 30 * 24 * 3600_000;
 
 export interface SessionUser {
   email: string;

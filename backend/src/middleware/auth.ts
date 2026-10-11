@@ -2,7 +2,11 @@ import type { Request, Response, NextFunction } from "express";
 import { getDb, listUserOrgs, membershipOf, type Membership } from "../lib/db";
 
 export const SESSION_COOKIE = "ma_session";
-const TTL_MS = 7 * 24 * 3600_000;
+// 30 days so mobile PWA users aren't forced to re-enter their password daily.
+// Each authenticated request also slides the expiry forward (rolling session),
+// so a regularly-used device effectively stays signed in.
+const TTL_MS = 30 * 24 * 3600_000;
+const SESSION_TTL_SEC = TTL_MS / 1000;
 
 export interface SessionUser {
   email: string;
@@ -71,6 +75,19 @@ export function resolveSession(req: Request): { user: SessionUser | null; orgId:
       /* noop */
     }
     return { user: null, orgId: null, token };
+  }
+
+  // Rolling session: every authenticated request slides the expiry forward.
+  try {
+    d.prepare(
+      "UPDATE sessions SET expires_at=? WHERE token=? AND expires_at < ?"
+    ).run(
+      new Date(Date.now() + TTL_MS).toISOString(),
+      token,
+      new Date(Date.now() + TTL_MS - 3600_000).toISOString() // only rewrite when >1h gained
+    );
+  } catch {
+    /* sliding expiry is best-effort; the session remains valid */
   }
 
   return {

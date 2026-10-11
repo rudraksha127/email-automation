@@ -5,6 +5,32 @@ Latest entries first. Append new entries below the heading — keep the format c
 
 ---
 
+## 2026-10-11 — Long-lived sessions (PWA no daily password) + Gmail connection stays after logout
+
+### Request
+- Once Gmail is connected, it should NOT disconnect on logout/re-login.
+- Once the PWA is installed on mobile and the user signs in once, it should never ask for the password daily — save the session and open directly.
+
+### Findings
+- **Gmail connection was already workspace-level** (`gmail_tokens` keyed by `org_id`, not by session). Logout only deletes the session row — tokens persist. Verified `GET /api/gmail/connection` reflects the org's connected mailbox regardless of who is signed in. No change needed.
+
+### Changes (session lifetime)
+1. **`backend/src/middleware/auth.ts`** — session TTL 7d → **30 days**, plus **rolling expiry**: every authenticated request slides `expires_at` forward (rewrite throttled to once per hour of gained time) so an actively used device effectively never logs out.
+2. **`backend/src/lib/auth.ts`** — `TTL_MS` 30d for newly created sessions.
+3. **`backend/src/routes/auth.ts`** — `setSessionCookie` `maxAge` 30d (matches server TTL).
+4. **`frontend/src/lib/auth.ts`** — mirrored 30d TTL + cookie maxAge for the frontend-rendered session cookie.
+
+### Verification (live, after backend restart)
+- Login `Set-Cookie: ma_session=…; Max-Age=2592000` (30 days) ✅
+- `GET /api/auth/session` 200 ✅
+- Backend typecheck: 0 errors; frontend typecheck: 0 errors; `tests/api.test.ts` 15/15 ✅
+
+### Notes
+- Users still in an old 7-day session keep it until it expires, then get a 30-day one on next login.
+- Security tradeoff documented: 30-day httpOnly rotating-hex sessions are acceptable for this internal pilot; logout still immediately kills the session server-side.
+
+---
+
 ## 2026-10-11 — Portal generalized for Prof. Kapil Sahu (Placement Coordinator) + first-login self-setup
 
 ### Request

@@ -5,7 +5,7 @@ import {
 } from "./db";
 
 const COOKIE = "ma_session";
-const TTL_MS = 7 * 24 * 3600_000;
+const TTL_MS = 30 * 24 * 3600_000; // matches backend TTL — PWA stays signed in
 
 export interface SessionUser {
   email: string;
@@ -47,7 +47,7 @@ export async function createSession(email: string): Promise<string> {
     new Date(now.getTime() + TTL_MS).toISOString()
   );
   (await cookies()).set(COOKIE, token, {
-    httpOnly: true, sameSite: "lax", path: "/", maxAge: 7 * 24 * 3600,
+    httpOnly: true, sameSite: "lax", path: "/", maxAge: 30 * 24 * 3600,
     secure: process.env.NODE_ENV === "production",
   });
   return token;

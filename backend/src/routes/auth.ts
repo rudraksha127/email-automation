@@ -25,11 +25,13 @@ import { requireAuth, requireWorkspace } from "../middleware/auth";
 const router = Router();
 
 export function setSessionCookie(res: any, token: string): void {
+  // Match the 30-day server-side session TTL — the PWA cookie outlives
+  // render idle periods and doesn't ask for the password daily.
   res.cookie(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     path: "/",
-    maxAge: 7 * 24 * 3600 * 1000,
+    maxAge: 30 * 24 * 3600 * 1000,
     secure: process.env.NODE_ENV === "production",
   });
 }
