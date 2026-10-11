@@ -53,7 +53,7 @@ export function Modal({ open, onClose, title, children, footer }: ModalProps) {
         type="button"
         aria-label="Close dialog"
         onClick={onClose}
-        className="absolute inset-0 bg-slate-900/40"
+        className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs"
       />
       <div
         ref={panelRef}
@@ -61,15 +61,15 @@ export function Modal({ open, onClose, title, children, footer }: ModalProps) {
         aria-modal="true"
         aria-label={title}
         tabIndex={-1}
-        className="relative flex max-h-[90vh] w-full flex-col rounded-t-2xl bg-white shadow-xl outline-none sm:max-w-md sm:rounded-2xl"
+        className="relative flex max-h-[90vh] w-full flex-col rounded-t-2xl bg-white shadow-dialog border border-outline-variant/40 animate-in fade-in zoom-in-95 outline-none sm:max-w-md sm:rounded-2xl"
       >
         <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3.5">
-          <h2 className="text-sm font-bold text-slate-900">{title}</h2>
+          <h2 className="text-sm font-bold text-on-surface">{title}</h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+            className="rounded-xl p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
           >
             <XIcon className="h-4 w-4" />
           </button>

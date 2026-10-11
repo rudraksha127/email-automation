@@ -39,8 +39,8 @@ export const Input = forwardRef<HTMLInputElement, TextFieldProps>(function Input
         className={cn(
           "relative flex items-center rounded-xl border bg-white shadow-xs transition-all",
           error
-            ? "border-rose-400 ring-2 ring-rose-400/10"
-            : "border-slate-200/90 focus-within:border-brand-600 focus-within:ring-2 focus-within:ring-brand-500/15"
+            ? "border-error ring-2 ring-error/10"
+            : "border-slate-200/90 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15"
         )}
       >
         {icon ? (

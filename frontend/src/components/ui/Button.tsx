@@ -4,12 +4,13 @@ type Variant = "primary" | "secondary" | "ghost" | "danger";
 
 const VARIANTS: Record<Variant, string> = {
   primary:
-    "bg-brand-600 text-white shadow-md shadow-brand-600/25 hover:bg-brand-700 active:bg-brand-800 focus-visible:outline-brand-600",
+    "bg-primary text-on-primary shadow-xs hover:bg-[#004eaa] active:bg-[#004394] focus-visible:outline-primary",
   secondary:
-    "border border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100 active:bg-slate-200 focus-visible:outline-slate-400",
-  ghost: "bg-brand-50 text-brand-700 hover:bg-brand-100 active:bg-brand-100 focus-visible:outline-brand-500",
+    "border border-slate-200/80 bg-surface-container-low text-on-surface hover:bg-surface-container active:bg-surface-container-high focus-visible:outline-outline",
+  ghost:
+    "bg-primary-fixed text-on-primary-fixed hover:bg-primary-fixed/80 active:bg-primary-fixed/90 focus-visible:outline-primary",
   danger:
-    "border border-rose-300 bg-white text-rose-600 hover:bg-rose-50 active:bg-rose-100 focus-visible:outline-rose-400",
+    "border border-error/20 bg-error-container text-on-error-container hover:bg-error-container/80 active:bg-error-container/90 focus-visible:outline-error",
 };
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {

@@ -3,12 +3,12 @@ import { cn } from "@/utils/cn";
 import { statusLabel } from "@/utils/format";
 import type { MailStatus } from "@/types";
 
-/** Pill container for small metadata/status text — matches the approved mockups. */
+/** Pill container for small metadata/status text — matches the approved reference. */
 export function Pill({ className, children }: { className?: string; children: ReactNode }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-0.5 text-[10px] font-semibold",
+        "inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide",
         className
       )}
     >
@@ -18,10 +18,10 @@ export function Pill({ className, children }: { className?: string; children: Re
 }
 
 const STATUS_PILL_STYLES: Record<MailStatus, string> = {
-  pending: "bg-brand-50 text-brand-700",
-  forwarded: "bg-emerald-50 text-emerald-700",
-  needs_review: "bg-amber-50 text-amber-700",
-  failed: "bg-rose-50 text-rose-700",
+  pending: "bg-primary-fixed text-on-primary-fixed",
+  forwarded: "bg-secondary-container text-on-secondary-container",
+  needs_review: "bg-amber-100 text-amber-900",
+  failed: "bg-error-container text-on-error-container",
 };
 
 /** Small, meaningful status badge for mail processing states. */
@@ -37,7 +37,7 @@ export function BatchChip({ label, className }: { label?: string | null; classNa
   return (
     <Pill
       className={cn(
-        "rounded-md border border-slate-200/70 bg-slate-50 font-semibold text-slate-600",
+        "rounded-lg border border-slate-200/80 bg-surface-container-low font-semibold text-on-surface-variant",
         className
       )}
     >
