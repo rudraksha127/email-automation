@@ -9,9 +9,9 @@ export async function POST(req: Request): Promise<Response> {
   const auth = await requireOrg();
   if (!auth.ok) return err(auth.message, auth.status);
 
-  let body: any = {};
+  let body: Record<string, unknown> = {};
   try {
-    body = await req.json();
+    body = (await req.json()) as Record<string, unknown>;
   } catch {
     return err("Invalid JSON body", 400);
   }

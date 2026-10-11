@@ -9,18 +9,20 @@ import { useEffect } from "react";
  */
 export function ServiceWorkerRegister() {
   useEffect(() => {
-    if (process.env.NODE_ENV !== "production") return;
-    if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
-    navigator.serviceWorker.register("/sw.js").catch(() => {
-      /* installability is best-effort — never break the app over it */
-    });
+    if (typeof window === "undefined") return;
 
-    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "default") {
+    if ("Notification" in window && Notification.permission === "default") {
       const handleUserInteraction = () => {
         Notification.requestPermission().catch(() => {});
         window.removeEventListener("click", handleUserInteraction);
       };
       window.addEventListener("click", handleUserInteraction, { once: true });
+    }
+
+    if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(() => {
+        /* installability is best-effort — never break the app over it */
+      });
     }
   }, []);
 

@@ -6,6 +6,7 @@ import { AuthProvider } from "@/hooks/AuthContext";
 import { AuthGuard, GuestGuard } from "@/routes/guards";
 import { LoadingState } from "@/components/ui/EmptyState";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
+import { MailNotificationListener } from "@/components/MailNotificationListener";
 
 /** Desktop Stitch reference font (mobile falls back to the system stack). */
 const inter = Inter({
@@ -48,6 +49,7 @@ export default function RootLayout({
       <body className="min-h-full bg-slate-50 text-slate-800">
         <ServiceWorkerRegister />
         <AuthProvider>
+          <MailNotificationListener />
           {/* Suspense boundary: guards use usePathname(), which streams in during prerender. */}
           <Suspense fallback={<LoadingState label="Loading…" />}>
             <GuestGuard>

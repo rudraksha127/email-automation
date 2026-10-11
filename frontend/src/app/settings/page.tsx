@@ -18,6 +18,7 @@ import {
   AlertCircleIcon,
   ChevronRightIcon,
   ShieldIcon,
+  BellIcon,
 } from "@/components/icons";
 import { useAsync } from "@/hooks/useAsync";
 import { useAuth } from "@/hooks/AuthContext";
@@ -120,6 +121,47 @@ function SettingsInner() {
       });
     } finally {
       setIngesting(false);
+    }
+  }
+
+  // Real-Time PWA Notification State
+  const [notifState, setNotifState] = useState<string>(() => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      return Notification.permission;
+    }
+    return "unsupported";
+  });
+
+  async function handleEnableNotifications() {
+    if (typeof window === "undefined" || !("Notification" in window)) {
+      alert("Browser notifications are not supported in this environment.");
+      return;
+    }
+    try {
+      const permission = await Notification.requestPermission();
+      setNotifState(permission);
+      if (permission === "granted") {
+        new Notification("📧 Email Automation Alerts Active", {
+          body: "You will now receive instant push alerts on this device when emails arrive!",
+          icon: "/icons/icon-192.png",
+        });
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function handleTestNotification() {
+    if (typeof window === "undefined" || !("Notification" in window)) return;
+    if (Notification.permission === "granted") {
+      new Notification("📬 Test Alert: Campus Placement Drive 2026", {
+        body: "Official email received from Training & Placement Cell — Forwarded to 2026 Batch",
+        icon: "/icons/icon-192.png",
+      });
+      setSyncMsg({ ok: true, text: "Test push notification dispatched to your screen!" });
+      setTimeout(() => setSyncMsg(null), 3500);
+    } else {
+      void handleEnableNotifications();
     }
   }
 
@@ -332,7 +374,7 @@ function SettingsInner() {
 
   return (
     <AppLayout>
-      <div className="mx-auto max-w-3xl space-y-5 pb-8">
+      <div className="mx-auto max-w-3xl space-y-5 pb-28">
         <PageHeading
           title="Automation Settings"
           subtitle="Configure department forwarding rules and mailbox connections"
@@ -498,7 +540,7 @@ function SettingsInner() {
               </Button>
 
               <Button
-                variant="outline"
+                variant="secondary"
                 type="button"
                 onClick={() => setManualModalOpen(true)}
                 className="text-xs border-slate-200 text-slate-700 hover:bg-slate-50"
@@ -547,6 +589,60 @@ function SettingsInner() {
               {syncMsg.text}
             </div>
           )}
+        </div>
+
+        {/* Card: Real-Time PWA & Web Push Notifications */}
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                <BellIcon className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-slate-900">PWA & Mobile Push Notifications</h2>
+                <p className="text-[11px] text-slate-500">
+                  Instant real-time alerts on Mobile and Web whenever incoming official emails arrive.
+                </p>
+              </div>
+            </div>
+
+            <div>
+              {notifState === "granted" ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  Alerts Enabled
+                </span>
+              ) : notifState === "denied" ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-2.5 py-0.5 text-[11px] font-semibold text-rose-700">
+                  <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                  Blocked in Browser
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-700">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                  Permission Needed
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-[11px] text-slate-500">
+              When 24/7 background automation ingests and screens an official email, your device rings with a chime and displays an instant push alert.
+            </p>
+
+            <div className="flex items-center gap-2 shrink-0">
+              {notifState === "granted" ? (
+                <Button variant="secondary" onClick={handleTestNotification} className="text-xs">
+                  Send Test Alert
+                </Button>
+              ) : (
+                <Button variant="primary" onClick={handleEnableNotifications} className="text-xs">
+                  Enable Notifications
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Card 3: Authorized Senders (Interactive Allowlist) */}
