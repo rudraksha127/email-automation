@@ -1,0 +1,129 @@
+{
+  "filePath": "C:\\Users\\lucky\\email-automation\\frontend\\src\\app\\settings\\page.tsx",
+  "extractedAt": "2026-10-11T19:40:00.144Z",
+  "texts": [
+    "(",
+    ")",
+    "Active workspace identity within the multi-tenant departmental database",
+    "Add Sender",
+    "Added as CC on all outgoing automated forwards for departmental audit and archiving.",
+    "Advanced Rules & Audit Logs",
+    "Alerts Enabled",
+    "Authorized Senders Allowlist",
+    "Automated matching of incoming emails to student batches",
+    "Blocked in Browser",
+    "CC email updated successfully",
+    "Cancel",
+    "Connect Gmail",
+    "Connected (Live OAuth)",
+    "Custom Keyword Rules (",
+    "Department CC Email Address",
+    "Disconnect",
+    "Enable Notifications",
+    "Forwarding Engine",
+    "Gmail Mailbox Integration",
+    "Gmail connection could not be completed:",
+    "Gmail mailbox connected successfully! Automatic polling is active.",
+    "Go to Profile",
+    "Instant real-time alerts on Mobile and Web whenever incoming official emails arrive.",
+    "Institutional Profile & Account Settings",
+    "Keyword overrides, custom routing patterns, and security audit history",
+    "Keywords:",
+    "Manage passwords, active sessions, and faculty permissions in the Profile page",
+    "Manual / Offline Ready",
+    "New Rule",
+    "No audit events recorded yet.",
+    "No authorized senders configured. (Fail-closed: all incoming emails will be held for review)",
+    "No custom keyword rules. Built-in batch detection (2027, 2028) is active.",
+    "Only incoming emails from these addresses are eligible for automatic forwarding. All others are safely held for review.",
+    "PWA & Mobile Push Notifications",
+    "Permission Needed",
+    "Recent System Audit Events",
+    "Reconnect",
+    "Rule Name",
+    "Save CC",
+    "Save Name",
+    "Save Rule",
+    "Select target batch",
+    "Send Test Alert",
+    "Sender Filter (optional)",
+    "Subject Keywords (comma separated)",
+    "Sync Inbox Now",
+    "Target Student Batch",
+    "Target mailbox:",
+    "When 24/7 background automation ingests and screens an official email, your device rings with a chime and displays an instant push alert.",
+    "Workspace Details",
+    "Workspace name updated",
+    "authorized",
+    "recipients)",
+    "×",
+    "→ Target:"
+  ],
+  "domContracts": {
+    "ids": [
+      "cc-input"
+    ],
+    "names": [],
+    "dataTestIds": [],
+    "ariaAttributes": [],
+    "roles": [
+      "switch"
+    ],
+    "placeholders": [
+      "Add new authorized email (e.g. luckyudiya@gmail.com)",
+      "Workspace name",
+      "e.g. 2027, campus drive",
+      "e.g. Placement Mail Routing",
+      "e.g. tpo@acropolis.in",
+      "it@acropolis.in"
+    ],
+    "htmlFors": [
+      "cc-input"
+    ],
+    "buttonTexts": [
+      "Save CC",
+      "Sync Inbox Now",
+      "Disconnect",
+      "Send Test Alert",
+      "Enable Notifications",
+      "handleRemoveSender(sender)} disabled={savingSenders} title=\"Remove sender\" className=\"ml-1 text-slate-400 hover:text-rose-600 focus:outline-none\" > ×",
+      "Add Sender",
+      "Save Name",
+      "setShowAdvanced(!showAdvanced)} className=\"flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-slate-50/80\" > Advanced Rules & Audit Logs Keyword overrides, custom routing patterns, and security audit history {showAdvanced ? \"Hide\" : \"Show\"}",
+      "setRuleOpen(true)}> New Rule",
+      "handleDeleteRule(r.id)} className=\"text-slate-400 hover:text-rose-600\" >",
+      "setRuleOpen(false)}> Cancel",
+      "Save Rule"
+    ],
+    "headings": [
+      {
+        "tag": "h2",
+        "text": "Forwarding Engine"
+      },
+      {
+        "tag": "h2",
+        "text": "Gmail Mailbox Integration"
+      },
+      {
+        "tag": "h2",
+        "text": "PWA & Mobile Push Notifications"
+      },
+      {
+        "tag": "h2",
+        "text": "Authorized Senders Allowlist"
+      },
+      {
+        "tag": "h2",
+        "text": "Workspace Details"
+      },
+      {
+        "tag": "h3",
+        "text": "Custom Keyword Rules ({rules.data?.length ?? 0})"
+      },
+      {
+        "tag": "h3",
+        "text": "Recent System Audit Events"
+      }
+    ]
+  }
+}

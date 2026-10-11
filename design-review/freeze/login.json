@@ -1,0 +1,70 @@
+{
+  "filePath": "C:\\Users\\lucky\\email-automation\\frontend\\src\\app\\login\\page.tsx",
+  "extractedAt": "2026-10-11T19:40:00.096Z",
+  "texts": [
+    "Academic Session",
+    "Acropolis Institute of Technology and Research Indore",
+    "Department of Information Technology",
+    "Developed by Student of IT Department",
+    "IT Department",
+    "Login to continue",
+    "Mail Automation",
+    "Privacy Policy",
+    "Remember me",
+    "Retry",
+    "Secure Portal",
+    "Secure institutional network",
+    "Sign In",
+    "Sign in failed",
+    "Terms of Service",
+    "•"
+  ],
+  "domContracts": {
+    "ids": [
+      "email",
+      "password"
+    ],
+    "names": [
+      "email",
+      "password"
+    ],
+    "dataTestIds": [],
+    "ariaAttributes": [
+      {
+        "attr": "aria-label",
+        "value": "Department"
+      },
+      {
+        "attr": "aria-hidden",
+        "value": "true"
+      },
+      {
+        "attr": "aria-label",
+        "value": "Sign in"
+      }
+    ],
+    "roles": [
+      "alert"
+    ],
+    "placeholders": [
+      "Enter your email address",
+      "Enter your password"
+    ],
+    "htmlFors": [],
+    "buttonTexts": [
+      "void handleSubmit(e)} className=\"shrink-0 rounded-lg bg-rose-100 px-2.5 py-1 text-[11px] font-bold text-rose-800 hover:bg-rose-200 transition-colors cursor-pointer\" > Retry",
+      "Sign In",
+      "setShowDevModal(true)} className=\"inline-flex h-8 items-center rounded-lg bg-slate-200/60 px-3 text-xs font-medium text-slate-600 hover:bg-slate-200 hover:text-slate-800 transition-colors cursor-pointer\" > Developed by Student of IT Department"
+    ],
+    "headings": [
+      {
+        "tag": "h1",
+        "text": "IT Department"
+      },
+      {
+        "tag": "h2",
+        "text": "Login to continue"
+      }
+    ]
+  }
+}

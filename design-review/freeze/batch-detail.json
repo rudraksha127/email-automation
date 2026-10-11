@@ -1,0 +1,75 @@
+{
+  "filePath": "C:\\Users\\lucky\\email-automation\\frontend\\src\\app\\batches\\[id]\\page.tsx",
+  "extractedAt": "2026-10-11T19:40:00.132Z",
+  "texts": [
+    "(",
+    ") from",
+    ":",
+    "?",
+    "Add Recipient",
+    "Back to Batches",
+    "Cancel",
+    "Download Format",
+    "Duplicates (will be skipped)",
+    "Email Address",
+    "Import",
+    "Invalid rows (will be skipped)",
+    "Recipients",
+    "Remove",
+    "Row",
+    "Student Name",
+    "Upload CSV",
+    "Valid rows (first 10)",
+    "duplicates",
+    "invalid",
+    "valid",
+    "—"
+  ],
+  "domContracts": {
+    "ids": [
+      "r-email",
+      "r-name",
+      "recipient-form"
+    ],
+    "names": [],
+    "dataTestIds": [],
+    "ariaAttributes": [
+      {
+        "attr": "aria-label",
+        "value": "Upload recipients CSV"
+      },
+      {
+        "attr": "aria-label",
+        "value": "Search recipients"
+      }
+    ],
+    "roles": [
+      "alert",
+      "status"
+    ],
+    "placeholders": [
+      "Search by name or email",
+      "e.g. Aarav Sharma",
+      "student@example.com"
+    ],
+    "htmlFors": [
+      "r-email",
+      "r-name"
+    ],
+    "buttonTexts": [
+      "Download Format",
+      "fileInputRef.current?.click()} title=\"Upload CSV file with recipients\" > Upload CSV",
+      "Add Recipient",
+      "fileInputRef.current?.click()}> Upload CSV",
+      "openEdit(r)} aria-label={`Edit ${r.name}`} className=\"rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-50 hover:text-brand-600\" >",
+      "setDeleting(r)} aria-label={`Remove ${r.name}`} className=\"rounded-lg p-2 text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600\" >",
+      "setFormOpen(false)}> Cancel",
+      "{editing ? \"Save Changes\" : \"Add Recipient\"}",
+      "setDeleting(null)}> Cancel",
+      "Remove",
+      "setImportPreview(null)}> Cancel",
+      "Import {importPreview?.validRows.length ?? 0} Recipients"
+    ],
+    "headings": []
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "filePath": "C:\\Users\\lucky\\email-automation\\frontend\\src\\app\\history\\page.tsx",
+  "extractedAt": "2026-10-11T19:40:00.136Z",
+  "texts": [
+    "(",
+    ")",
+    "All Batches",
+    "All Years",
+    "Batch",
+    "Clear Filter",
+    "Clear Filters",
+    "Date Filter",
+    "Filtered by",
+    "From:",
+    "Graduation Year",
+    "No batch assigned",
+    "Reason:",
+    "Reset all filters",
+    "Search",
+    "Section / Batch",
+    "Select Date",
+    "Showing",
+    "Status",
+    "Sync Inbox History",
+    "Today",
+    "View Details",
+    "Yesterday",
+    "criteria",
+    "email record(s)",
+    "student",
+    "✕"
+  ],
+  "domContracts": {
+    "ids": [],
+    "names": [],
+    "dataTestIds": [],
+    "ariaAttributes": [],
+    "roles": [
+      "button"
+    ],
+    "placeholders": [
+      "Subject or sender…"
+    ],
+    "htmlFors": [],
+    "buttonTexts": [
+      "Sync Inbox History",
+      "{ const today = new Date().toISOString().slice(0, 10); setSelectedDate(today); setCalendarOpen(false); }} className=\"rounded-lg bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-200\" > Today",
+      "{ const d = new Date(); d.setDate(d.getDate() - 1); setSelectedDate(d.toISOString().slice(0, 10)); setCalendarOpen(false); }} className=\"rounded-lg bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-200\" > Yesterday",
+      "{ setSelectedDate(\"\"); setCalendarOpen(false); }} className=\"rounded-lg bg-rose-50 px-2 py-1 text-[11px] font-semibold text-rose-700 hover:bg-rose-100\" > Clear Filter",
+      "Reset all filters",
+      "Clear Filters"
+    ],
+    "headings": [
+      {
+        "tag": "h3",
+        "text": "{m.subject || \"(No Subject)\"}"
+      }
+    ]
+  }
+}

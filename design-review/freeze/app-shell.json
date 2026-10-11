@@ -1,0 +1,71 @@
+{
+  "filePath": "C:\\Users\\lucky\\email-automation\\frontend\\src\\components\\AppShell.tsx",
+  "extractedAt": "2026-10-11T19:40:00.164Z",
+  "texts": [
+    "IT Department",
+    "Logout",
+    "Mail Automation",
+    "SIMPLE DATA. BETTER INSIGHTS.",
+    "•",
+    "＋ Create workspace…"
+  ],
+  "domContracts": {
+    "ids": [],
+    "names": [],
+    "dataTestIds": [
+      "sidebar-logout",
+      "sidebar-user-card"
+    ],
+    "ariaAttributes": [
+      {
+        "attr": "aria-label",
+        "value": "Open mobile navigation"
+      },
+      {
+        "attr": "aria-label",
+        "value": "Active workspace"
+      },
+      {
+        "attr": "aria-label",
+        "value": "Open Profile"
+      },
+      {
+        "attr": "aria-hidden",
+        "value": "true"
+      },
+      {
+        "attr": "aria-label",
+        "value": "Close navigation"
+      },
+      {
+        "attr": "aria-label",
+        "value": "Primary"
+      },
+      {
+        "attr": "aria-label",
+        "value": "Primary"
+      },
+      {
+        "attr": "aria-label",
+        "value": "Signed in user"
+      },
+      {
+        "attr": "aria-label",
+        "value": "Logout"
+      }
+    ],
+    "roles": [],
+    "placeholders": [],
+    "htmlFors": [],
+    "buttonTexts": [
+      "{ onCloseMobile?.(); void logout().then(() => router.replace(paths.login)); }} className=\"flex w-full items-center gap-3 rounded-xl px-2 py-2.5 text-sm font-bold text-rose-600 transition-colors hover:bg-rose-50\" > Logout",
+      "Logout"
+    ],
+    "headings": [
+      {
+        "tag": "h2",
+        "text": "IT Department"
+      }
+    ]
+  }
+}

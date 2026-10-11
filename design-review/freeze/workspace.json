@@ -1,0 +1,61 @@
+{
+  "filePath": "C:\\Users\\lucky\\email-automation\\frontend\\src\\app\\workspace\\page.tsx",
+  "extractedAt": "2026-10-11T19:40:00.155Z",
+  "texts": [
+    ")",
+    ".",
+    "Choose a Workspace",
+    "Create Workspace",
+    "Create a Workspace",
+    "IT Department",
+    "Mail Automation",
+    "Select the workspace to manage, or create a new one. Signed in as",
+    "Sign out (",
+    "You are not a member of any workspace yet. Create your first workspace below, or ask an administrator to invite you to theirs."
+  ],
+  "domContracts": {
+    "ids": [
+      "workspace-name"
+    ],
+    "names": [
+      "workspace-name"
+    ],
+    "dataTestIds": [],
+    "ariaAttributes": [
+      {
+        "attr": "aria-label",
+        "value": "Department"
+      },
+      {
+        "attr": "aria-label",
+        "value": "Workspaces"
+      },
+      {
+        "attr": "aria-label",
+        "value": "Create workspace"
+      }
+    ],
+    "roles": [
+      "alert"
+    ],
+    "placeholders": [
+      "e.g. Placement Cell"
+    ],
+    "htmlFors": [],
+    "buttonTexts": [
+      "void pick(o.orgId)} disabled={busy !== null} className={`flex w-full items-center justify-between rounded-2xl border p-3.5 text-left shadow-sm transition-colors ${ busy === o.orgId ? \"border-brand-500 bg-brand-50\" : \"border-slate-200/90 bg-white hover:border-brand-200\" }`} > {o.name} {o.role} {o.orgId === orgId ? \" · active\" : \"\"}",
+      "Create Workspace",
+      "void logout().then(() => router.replace(paths.login))} className=\"mx-auto block text-xs font-semibold text-slate-500 hover:text-slate-700\" > Sign out ({user.email})"
+    ],
+    "headings": [
+      {
+        "tag": "h1",
+        "text": "Choose a Workspace"
+      },
+      {
+        "tag": "h2",
+        "text": "Create a Workspace"
+      }
+    ]
+  }
+}

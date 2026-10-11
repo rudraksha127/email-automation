@@ -1,0 +1,86 @@
+{
+  "filePath": "C:\\Users\\lucky\\email-automation\\frontend\\src\\app\\batches\\page.tsx",
+  "extractedAt": "2026-10-11T19:40:00.126Z",
+  "texts": [
+    "(optional)",
+    ":",
+    "? Its recipient list will also be removed. This action cannot be undone.",
+    "Add Batch",
+    "Are you sure you want to delete",
+    "Batch Name",
+    "Bulk Upload",
+    "Bulk upload complete",
+    "Cancel",
+    "Close",
+    "Delete",
+    "Delete Batch",
+    "Description",
+    "Download Format",
+    "Download Template",
+    "Edit",
+    "Import",
+    "No valid rows found — please fix the file and try again.",
+    "Rows",
+    "Template",
+    "View Recipients",
+    "batch(es) created •",
+    "batches",
+    "existing reused •",
+    "invalid (will be skipped)",
+    "more rows",
+    "recipients imported",
+    "valid rows",
+    "•",
+    "• Row",
+    "…and"
+  ],
+  "domContracts": {
+    "ids": [
+      "batch-desc",
+      "batch-form",
+      "batch-name"
+    ],
+    "names": [],
+    "dataTestIds": [],
+    "ariaAttributes": [
+      {
+        "attr": "aria-label",
+        "value": "Upload batches CSV"
+      }
+    ],
+    "roles": [
+      "alert",
+      "status"
+    ],
+    "placeholders": [
+      "e.g. Batch 2026",
+      "e.g. IT Department – Final Year"
+    ],
+    "htmlFors": [
+      "batch-desc",
+      "batch-name"
+    ],
+    "buttonTexts": [
+      "Download Format",
+      "bulkFileRef.current?.click()} className=\"shrink-0\" title=\"Bulk upload batches from CSV/Excel\" > Bulk Upload",
+      "Add Batch",
+      "openEdit(batch)} className=\"inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200/50 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-100\" > Edit",
+      "setDeleting(batch)} className=\"mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold text-rose-600 transition-colors hover:bg-rose-50\" > Delete Batch",
+      "setFormOpen(false)}> Cancel",
+      "{editing ? \"Save Changes\" : \"Create Batch\"}",
+      "Download Template",
+      "setBulkPreview(null)}> Close",
+      "Template",
+      "setBulkPreview(null)}> Cancel",
+      "Import {bulkPreview.rows.length} Rows",
+      "setDeleting(null)}> Cancel",
+      "Delete"
+    ],
+    "headings": [
+      {
+        "tag": "h3",
+        "text": "{batch.name}"
+      }
+    ]
+  }
+}

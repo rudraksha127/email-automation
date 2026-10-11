@@ -1,0 +1,42 @@
+{
+  "filePath": "C:\\Users\\lucky\\email-automation\\frontend\\src\\app\\mails\\page.tsx",
+  "extractedAt": "2026-10-11T19:40:00.107Z",
+  "texts": [
+    "Actions",
+    "Group",
+    "Received",
+    "Review",
+    "Sender",
+    "Status",
+    "Subject &amp; Excerpt"
+  ],
+  "domContracts": {
+    "ids": [],
+    "names": [],
+    "dataTestIds": [],
+    "ariaAttributes": [
+      {
+        "attr": "aria-label",
+        "value": "Status filters"
+      },
+      {
+        "attr": "aria-label",
+        "value": "Toggle search"
+      },
+      {
+        "attr": "aria-label",
+        "value": "Search mails"
+      }
+    ],
+    "roles": [],
+    "placeholders": [
+      "Search by sender or subject"
+    ],
+    "htmlFors": [],
+    "buttonTexts": [
+      "setStatus(f.value)} aria-pressed={status === f.value} className={cn( \"whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-medium transition active:scale-95\", status === f.value ? \"bg-brand-600 text-white shadow-sm\" : \"bg-slate-200 text-slate-700 hover:bg-slate-300\" )} > {f.label}",
+      "{ setShowSearch((s) => !s); if (showSearch) setSearch(\"\"); }} className=\"flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-600 transition hover:bg-slate-200/60\" >"
+    ],
+    "headings": []
+  }
+}

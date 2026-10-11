@@ -1,0 +1,71 @@
+{
+  "filePath": "C:\\Users\\lucky\\email-automation\\frontend\\src\\app\\mails\\[id]\\page.tsx",
+  "extractedAt": "2026-10-11T19:40:00.113Z",
+  "texts": [
+    "(",
+    "Attachments",
+    "Back to Mails",
+    "CC",
+    "Cancel",
+    "Confirm Forward",
+    "Detected Batch",
+    "Forwarded At",
+    "Forwarded to",
+    "Forwarding to",
+    "Mail forwarded successfully",
+    "Mark Not Relevant",
+    "Not Relevant",
+    "Recipients",
+    "Retry Forwarding",
+    "Select Batch &amp; Forward",
+    "Status",
+    "This mail could not be assigned automatically. Choose the correct batch, review the recipient count, then confirm.",
+    "This mail will be taken out of the review queue and kept in history as not relevant. You can still retry forwarding it later.",
+    "recipients",
+    "recipients)",
+    "→"
+  ],
+  "domContracts": {
+    "ids": [],
+    "names": [
+      "target-batch"
+    ],
+    "dataTestIds": [],
+    "ariaAttributes": [
+      {
+        "attr": "aria-label",
+        "value": "Attachments"
+      },
+      {
+        "attr": "aria-label",
+        "value": "Batches"
+      }
+    ],
+    "roles": [
+      "alert",
+      "radiogroup",
+      "status"
+    ],
+    "placeholders": [],
+    "htmlFors": [],
+    "buttonTexts": [
+      "setSelectingBatch(true)} fullWidth> Select Batch &amp; Forward",
+      "{ setRejectError(null); setConfirmReject(true); }} fullWidth > Not Relevant",
+      "Retry Forwarding",
+      "{ setSelectingBatch(false); setActionError(null); }} > Cancel",
+      "Confirm Forward",
+      "{ setConfirmReject(false); setRejectError(null); }} > Cancel",
+      "Mark Not Relevant"
+    ],
+    "headings": [
+      {
+        "tag": "h1",
+        "text": "{data.subject}"
+      },
+      {
+        "tag": "h2",
+        "text": "Attachments"
+      }
+    ]
+  }
+}

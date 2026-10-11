@@ -1,0 +1,69 @@
+{
+  "filePath": "C:\\Users\\lucky\\email-automation\\frontend\\src\\app\\terms\\page.tsx",
+  "extractedAt": "2026-10-11T19:40:00.158Z",
+  "texts": [
+    "&larr; Back to Login",
+    "1. Acceptance of Terms",
+    "2. Description of Service",
+    "3. User Responsibilities",
+    "4. Limitation of Liability",
+    "5. Service Availability",
+    "6. Termination",
+    "7. Changes to Terms",
+    "By accessing or using our Email Automation platform, you agree to be bound by these Terms of Service. If you disagree with any part of the terms, you may not access or use the service.",
+    "In no event shall the platform, its developers, or its affiliates be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the service.",
+    "Last Updated: October 10, 2026",
+    "Our platform provides automated email routing, forwarding, and processing services. It connects to your Gmail account via OAuth to perform actions on your behalf based on the configurations and rules you set up within the application.",
+    "Terms of Service",
+    "We may terminate or suspend your access to the service immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms. Upon termination, your right to use the service will cease immediately.",
+    "We reserve the right to modify or replace these Terms at any time. We will try to provide at least 30 days&apos; notice prior to any new terms taking effect. What constitutes a material change will be determined at our sole discretion.",
+    "We strive to ensure maximum uptime, but we do not guarantee that the service will be uninterrupted, secure, or free from errors. We reserve the right to modify, suspend, or discontinue the service at any time without prior notice.",
+    "You agree not to use the service for any illegal or unauthorized purpose, including sending spam, phishing emails, or malicious content.",
+    "You are responsible for maintaining the security of your account and the OAuth authorizations you grant.",
+    "You must ensure that your use of the service complies with all applicable laws and the Google API Terms of Service."
+  ],
+  "domContracts": {
+    "ids": [],
+    "names": [],
+    "dataTestIds": [],
+    "ariaAttributes": [],
+    "roles": [],
+    "placeholders": [],
+    "htmlFors": [],
+    "buttonTexts": [],
+    "headings": [
+      {
+        "tag": "h1",
+        "text": "Terms of Service"
+      },
+      {
+        "tag": "h2",
+        "text": "1. Acceptance of Terms"
+      },
+      {
+        "tag": "h2",
+        "text": "2. Description of Service"
+      },
+      {
+        "tag": "h2",
+        "text": "3. User Responsibilities"
+      },
+      {
+        "tag": "h2",
+        "text": "4. Limitation of Liability"
+      },
+      {
+        "tag": "h2",
+        "text": "5. Service Availability"
+      },
+      {
+        "tag": "h2",
+        "text": "6. Termination"
+      },
+      {
+        "tag": "h2",
+        "text": "7. Changes to Terms"
+      }
+    ]
+  }
+}

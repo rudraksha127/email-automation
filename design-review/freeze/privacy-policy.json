@@ -1,0 +1,78 @@
+{
+  "filePath": "C:\\Users\\lucky\\email-automation\\frontend\\src\\app\\privacy-policy\\page.tsx",
+  "extractedAt": "2026-10-11T19:40:00.156Z",
+  "texts": [
+    "&larr; Back to Login",
+    ", including the Limited Use requirements. We do not use your Google data for any purpose other than providing the email automation features you explicitly configure.",
+    "1. Introduction",
+    "2. Information We Collect",
+    "3. How We Use Your Information",
+    "4. Google API Services User Data Policy",
+    "5. Data Security",
+    "6. Your Rights and Choices",
+    "7. Contact Us",
+    "Account Information:",
+    "Analyze usage trends to improve the product experience.",
+    "Authenticate your identity and maintain your session.",
+    "Email Data:",
+    "Facilitate the core automation features, such as reading, forwarding, and sending emails via your connected Gmail account.",
+    "Google API Services User Data Policy",
+    "If you have any questions about this Privacy Policy, please contact the platform administrator or support team.",
+    "Information about emails you choose to automate or process using our platform, stored temporarily or persistently based on your automation workflows.",
+    "Last Updated: October 10, 2026",
+    "OAuth Tokens:",
+    "Our application&apos;s use and transfer of information received from Google APIs to any other app will adhere to the",
+    "Privacy Policy",
+    "Securely encrypted access and refresh tokens to interact with your Gmail account on your behalf.",
+    "We implement industry-standard security measures to protect your personal information. OAuth tokens are encrypted at rest using strong cryptographic algorithms. However, no method of transmission over the Internet or electronic storage is 100% secure, and we cannot guarantee absolute security.",
+    "We use the information we collect primarily to provide, maintain, and improve our services. Specifically, we use your data to:",
+    "Welcome to our Email Automation platform. We respect your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our service, especially concerning your connection to Google services.",
+    "When you use our service, we may collect the following types of information:",
+    "You have the right to access, update, or delete your personal information. You can revoke our application&apos;s access to your Google account at any time through your Google Account Security settings. Doing so will immediately stop all email automation activities associated with your account.",
+    "Your email address and basic profile information when you register or sign in via Google."
+  ],
+  "domContracts": {
+    "ids": [],
+    "names": [],
+    "dataTestIds": [],
+    "ariaAttributes": [],
+    "roles": [],
+    "placeholders": [],
+    "htmlFors": [],
+    "buttonTexts": [],
+    "headings": [
+      {
+        "tag": "h1",
+        "text": "Privacy Policy"
+      },
+      {
+        "tag": "h2",
+        "text": "1. Introduction"
+      },
+      {
+        "tag": "h2",
+        "text": "2. Information We Collect"
+      },
+      {
+        "tag": "h2",
+        "text": "3. How We Use Your Information"
+      },
+      {
+        "tag": "h2",
+        "text": "4. Google API Services User Data Policy"
+      },
+      {
+        "tag": "h2",
+        "text": "5. Data Security"
+      },
+      {
+        "tag": "h2",
+        "text": "6. Your Rights and Choices"
+      },
+      {
+        "tag": "h2",
+        "text": "7. Contact Us"
+      }
+    ]
+  }
+}

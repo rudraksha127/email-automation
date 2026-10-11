@@ -1,0 +1,33 @@
+{
+  "filePath": "C:\\Users\\lucky\\email-automation\\frontend\\src\\app\\dashboard\\page.tsx",
+  "extractedAt": "2026-10-11T19:40:00.102Z",
+  "texts": [
+    "Recent Emails",
+    "View All"
+  ],
+  "domContracts": {
+    "ids": [],
+    "names": [],
+    "dataTestIds": [],
+    "ariaAttributes": [
+      {
+        "attr": "aria-label",
+        "value": "Summary"
+      },
+      {
+        "attr": "aria-label",
+        "value": "Recent emails"
+      }
+    ],
+    "roles": [],
+    "placeholders": [],
+    "htmlFors": [],
+    "buttonTexts": [],
+    "headings": [
+      {
+        "tag": "h2",
+        "text": "Recent Emails"
+      }
+    ]
+  }
+}

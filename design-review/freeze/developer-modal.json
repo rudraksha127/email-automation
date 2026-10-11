@@ -1,0 +1,42 @@
+{
+  "filePath": "C:\\Users\\lucky\\email-automation\\frontend\\src\\components\\DeveloperModal.tsx",
+  "extractedAt": "2026-10-11T19:40:00.160Z",
+  "texts": [
+    "Close",
+    "Developer Information",
+    "Facing an issue or found a bug? Write to the developer:",
+    "Guided By",
+    "Technical Support"
+  ],
+  "domContracts": {
+    "ids": [
+      "developer-info-title"
+    ],
+    "names": [],
+    "dataTestIds": [],
+    "ariaAttributes": [
+      {
+        "attr": "aria-modal",
+        "value": "true"
+      },
+      {
+        "attr": "aria-labelledby",
+        "value": "developer-info-title"
+      }
+    ],
+    "roles": [
+      "dialog"
+    ],
+    "placeholders": [],
+    "htmlFors": [],
+    "buttonTexts": [
+      "Close"
+    ],
+    "headings": [
+      {
+        "tag": "h2",
+        "text": "Developer Information"
+      }
+    ]
+  }
+}
