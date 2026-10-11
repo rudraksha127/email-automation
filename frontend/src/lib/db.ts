@@ -497,10 +497,10 @@ function seed(d: DatabaseSync): void {
     }
   }
 
-  const ccEnv = (process.env.PILOT_CC_EMAIL || "rudraksha240036@acropolis.in").trim();
+  const ccEnv = (process.env.PILOT_CC_EMAIL || "placementit@acropolis.in").trim();
   if (!getSetting(DEFAULT_ORG_ID, "ccEmail") && ccEnv) setSetting(DEFAULT_ORG_ID, "ccEmail", ccEnv);
   if (!getSetting(DEFAULT_ORG_ID, "autoForwarding")) setSetting(DEFAULT_ORG_ID, "autoForwarding", "1");
-  const targetMailbox = (process.env.GMAIL_TARGET_EMAIL || "rudraksha240036@acropolis.in").trim().toLowerCase();
+  const targetMailbox = (process.env.GMAIL_TARGET_EMAIL || "placementit@acropolis.in").trim().toLowerCase();
   const userDisconnected = getSetting(DEFAULT_ORG_ID, "gmailDisconnectedByUser");
   if (userDisconnected !== "1") {
     setSetting(DEFAULT_ORG_ID, "gmailAccount", targetMailbox);

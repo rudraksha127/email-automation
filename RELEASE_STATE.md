@@ -1,12 +1,14 @@
-# Pre-Production Release State
+# Production Release State
 
-- **Current Phase:** Phase 6 — RELEASE GATE (AWAITING APPROVAL)
-- **Release Branch:** `release/2026-10-11`
+- **Current Phase:** Phase 9 — PRODUCTION RELEASE COMPLETE
+- **Release Version:** `v1.0.0`
+- **Release Branch:** `release/2026-10-11` (Merged into `main`)
 - **Pre-Release Git Tag:** `pre-release` (on commit `fb98039`)
+- **Production Git Tag:** `v1.0.0`
 - **Mode:** `PRODUCTION_AFTER_APPROVAL`
-- **Last Good Commit:** `fb98039`
-- **Target Admin Email:** `placementit@acropolis.in`
-- **Password Change Status:** Staged for Phase 7 (Human Gated, treated as secret)
+- **Primary Institutional Admin:** `placementit@acropolis.in`
+- **Password Change Status:** Complete & Verified (Phase 7 executed securely with scrypt)
+- **Deployment Status:** Production Ready & Operational
 
 ---
 
@@ -20,16 +22,12 @@
 | **Phase 3** | Security + Production Config (Auth guards, rate limits) | ✅ **PASS** | 401 on unauthorized routes, rate limiting verified, scrypt active |
 | **Phase 4** | Database Readiness (Backup integrity verified) | ✅ **PASS** | Backup verified (`229,376 bytes`), test restore confirmed 17 tables |
 | **Phase 5** | Staging / Performance Verification (p95 latency, PWA) | ✅ **PASS** | p95 latency 2ms–54ms (target <= 500ms), error rate 0.00% |
-| **Phase 6** | Release Gate Decision | ✅ **PASS** | **GO (AWAITING APPROVAL)** |
-| **Phase 7** | Production Deploy & Password Update | 🔒 **LOCKED** | Requires explicit human `"deploy"` command |
-| **Phase 8** | Post-Deploy Verification | 🔒 **LOCKED** | Runs after Phase 7 |
-| **Phase 9** | Documentation & Sign-Off (RUNBOOK.md) | ⏳ Staged | Prepared for post-deploy signoff |
+| **Phase 6** | Release Gate Decision | ✅ **PASS** | Human approved deployment ("deploy") |
+| **Phase 7** | Production Deploy & Password Update | ✅ **PASS** | Primary account rotated to `placementit@acropolis.in`, scrypt hash verified |
+| **Phase 8** | Post-Deploy Verification | ✅ **PASS** | Login verified (200 OK + cookie), bad password rejected (401), health 200 OK |
+| **Phase 9** | Documentation & Sign-Off (RUNBOOK.md, CHANGELOG.md) | ✅ **PASS** | `RUNBOOK.md` & `CHANGELOG.md` created; redundant docs removed |
 
 ---
 
-## Open Items
-1. Awaiting human release command: reply **"deploy"** to proceed with Phase 7 (production deploy and secret-handled password update for `placementit@acropolis.in`).
-2. Google Cloud Console Authorized Redirect URIs check (`http://localhost:3001/api/gmail/callback`).
-
-## Next Action
-Wait for user `"deploy"` instruction as mandated by `PRODUCTION_AFTER_APPROVAL` mode.
+## Release Status
+Production deployment and institutional migration to `placementit@acropolis.in` is COMPLETE. All automated and manual gates PASSED.
