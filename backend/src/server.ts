@@ -44,8 +44,7 @@ import dashboardRouter from "./routes/dashboard";
 import organizationsRouter from "./routes/organizations";
 import auditRouter from "./routes/audit";
 import { authMiddleware } from "./middleware/auth";
-import { listConnectedOrgs } from "./lib/db";
-import { syncGmailInbox } from "./lib/gmailSync";
+import { startBackgroundPoller, stopBackgroundPoller } from "./lib/poller";
 
 const app = express();
 
@@ -122,37 +121,20 @@ app.get("/", (_req, res) => {
   res.json({ service: "mail-automation-api", status: "ok" });
 });
 
-// Background Gmail Poller Worker
-if (process.env.PILOT_DISABLE_POLLER !== "true") {
-  const intervalMs = Math.max(15_000, Number(process.env.PILOT_SYNC_INTERVAL_MS ?? 60_000));
-  let running = false;
+// 24/7 Autonomous Background Mail Processing Worker
+startBackgroundPoller();
 
-  const tick = async (): Promise<void> => {
-    if (running) return;
-    running = true;
-    try {
-      const orgIds = listConnectedOrgs();
-      for (const orgId of orgIds) {
-        try {
-          const result = await syncGmailInbox(orgId, 10);
-          if (result.errors.length > 0) {
-            console.warn(`[mail-sync] org=${orgId} ${result.errors.length} error(s):`, result.errors.slice(0, 3));
-          }
-        } catch (e) {
-          console.warn(`[mail-sync] org=${orgId} failed:`, e instanceof Error ? e.message : e);
-        }
-      }
-    } catch (e) {
-      console.warn("[mail-sync] cycle failed:", e instanceof Error ? e.message : e);
-    } finally {
-      running = false;
-    }
-  };
-
-  setTimeout(() => void tick(), 10_000);
-  setInterval(() => void tick(), intervalMs);
-  console.log(`[mail-sync] background Gmail poller started (interval: ${intervalMs / 1000}s)`);
-}
+// Graceful shutdown handling for zero-downtime restarts
+process.on("SIGTERM", () => {
+  console.log("[server] SIGTERM received — stopping background poller gracefully");
+  stopBackgroundPoller();
+  process.exit(0);
+});
+process.on("SIGINT", () => {
+  console.log("[server] SIGINT received — stopping background poller gracefully");
+  stopBackgroundPoller();
+  process.exit(0);
+});
 
 const PORT = Number(process.env.PORT || 3001);
 app.listen(PORT, () => {

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { getDb } from "../lib/db";
 import { gmailConfig } from "../lib/gmail";
 import { isSupabaseConfigured } from "../lib/supabase";
+import { getPollerStats } from "../lib/poller";
 
 const router = Router();
 
@@ -38,6 +39,7 @@ router.get("/", (req, res) => {
     ...(databaseError ? { databaseError } : {}),
     gmailConfigured,
     supabaseConfigured: isSupabaseConfigured(),
+    poller: getPollerStats(),
     timestamp: new Date().toISOString(),
   });
 });

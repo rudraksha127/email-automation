@@ -14,6 +14,7 @@ import {
 import { tokenEncryptionReady } from "../lib/crypto";
 import { syncGmailInbox } from "../lib/gmailSync";
 import { ingestMessage } from "../lib/pipeline";
+import { runPollerTick } from "../lib/poller";
 import {
   getDb,
   hashPassword,
@@ -147,6 +148,8 @@ router.get("/callback", async (req, res) => {
     }
     saveTokens(orgId, account, tokens.access_token, tokens.refresh_token, tokens.expires_in ?? 3600);
     audit(orgId, account, "gmail.oauth_callback", `connected ${account}`);
+    // Immediately kick off background mail processing so initial mails sync without delay
+    void runPollerTick();
     res.redirect(302, `${frontendBase}/settings?gmailConnected=1`);
   } catch (e) {
     const safe = e instanceof Error ? e.message.slice(0, 200) : "OAuth connection failed";
